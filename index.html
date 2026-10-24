@@ -2805,8 +2805,8 @@
         let conductionTubes3D = [];
         let labelAnchors3D = [];
 
-        let camTheta = 0.15;
-        let camPhi = 0.12;
+        let camTheta = 0;
+        let camPhi = 0.08;
         let camRadius = 9.6;
 
         function createDeformedOrganGeometry(radius, scaleX, scaleY, scaleZ, tapperBottom = 0, curveX = 0) {
@@ -3206,8 +3206,8 @@
 
         function reset3DView() {
             camRadius = 9.6;
-            camTheta = 0.15;
-            camPhi = 0.12;
+            camTheta = 0;
+            camPhi = 0.08;
             updateCameraPosition();
             renderThreeJSHeart();
         }
@@ -3655,13 +3655,14 @@
             ecgCtx.textAlign = 'right';
             ecgCtx.textBaseline = 'middle';
             ecgCtx.fillText('mV', voltageAxisX - 4, baselineY - mVHeight * 1.08 - 7);
-            [1, 0.5, 0, -0.5, -1].forEach(mv => {
+            [1, 0.5, 0.2, 0, -0.2, -0.5, -1].forEach(mv => {
                 const tickY = baselineY - mv * mVHeight;
                 ecgCtx.beginPath();
                 ecgCtx.moveTo(voltageAxisX - 4, tickY);
                 ecgCtx.lineTo(voltageAxisX, tickY);
                 ecgCtx.stroke();
-                const label = mv > 0 ? `+${mv.toFixed(1)}` : mv.toFixed(1);
+                const tickText = Math.abs(mv) === 0.2 ? mv.toFixed(2) : mv.toFixed(1);
+                const label = mv > 0 ? `+${tickText}` : tickText;
                 ecgCtx.fillText(label, voltageAxisX - 7, tickY);
             });
             ecgCtx.restore();
@@ -3686,7 +3687,10 @@
             ecgCtx.lineWidth = 3.0;
             ecgCtx.shadowColor = '#38bdf8';
             ecgCtx.shadowBlur = 10;
-            for (let t = 0; t <= scanTime; t += 2) {
+            // On phones, keep the complete ECG trace stationary so the learner can
+            // watch the time cursor track the cardiac cycle without the waveform growing/resetting.
+            const activeTraceEnd = window.matchMedia('(max-width: 767px)').matches ? totalMsSpan : scanTime;
+            for (let t = 0; t <= activeTraceEnd; t += 2) {
                 const x = leftPad + t * pxPerMs;
                 const v = computeLeadVoltage(t, currentScenario, selectedLeadName);
                 const y = baselineY - v * mVHeight;
@@ -4260,13 +4264,10 @@
 
             if (key === 'stemi_ant') {
                 selectedLeadName = 'V3';
-                set3DView(0.15, 0.12);
             } else if (key === 'stemi_inf') {
                 selectedLeadName = 'II';
-                set3DView(-0.15, -0.68);
             } else if (key === 'stemi_lat') {
                 selectedLeadName = 'V6';
-                set3DView(0.85, 0.15);
             } else if (key === 'lvh' || key === 'lbbb') {
                 selectedLeadName = 'V6';
             }
@@ -5799,6 +5800,29 @@
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run,{once:true}); else run();
   window.addEventListener('load',run,{once:true});
   window.addEventListener('resize',placeHeartLegend,{passive:true});
+})();
+</script>
+
+
+
+<style id="clinix-zoom-toolbar-position-fix">
+  #heart3d-container > [data-3d-control] { position:static!important; inset:auto!important; }
+  #heart3d-container > [data-3d-control] button { flex:0 0 auto!important; }
+</style>
+<script id="clinix-zoom-toolbar-position-fix-js">
+(function(){
+  function moveHeartZoomToolbar(){
+    const heart=document.getElementById('heart3d-container');
+    if(!heart || !heart.parentElement) return;
+    const toolbar=heart.querySelector(':scope > [data-3d-control]');
+    if(!toolbar || toolbar.dataset.toolbarMoved==='true') return;
+    toolbar.className='flex items-center justify-end gap-1 mb-2';
+    toolbar.dataset.toolbarMoved='true';
+    heart.parentElement.insertBefore(toolbar, heart);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',moveHeartZoomToolbar,{once:true});
+  else moveHeartZoomToolbar();
+  window.addEventListener('load',moveHeartZoomToolbar,{once:true});
 })();
 </script>
 
