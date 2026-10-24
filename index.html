@@ -1910,6 +1910,20 @@
         };
 
         function getPhaseIndex(t) {
+            if (currentScenario === 'avb2_2' || currentScenario === 'avb_highgrade') {
+                const absT = continuousCycleCount * 800 + t;
+                const pIndex = Math.floor((absT - 115) / 800);
+                const pStart = 115 + pIndex * 800;
+                const age = absT - pStart;
+                const cycleIndex = ((pIndex % 3) + 3) % 3;
+                const conducted = currentScenario === 'avb2_2' ? cycleIndex !== 2 : cycleIndex === 0;
+                if (age >= 0 && age < 60) return 0;
+                if (age >= 60 && age < 130) return 1;
+                if (conducted && age >= 130 && age < 195) return 2;
+                if (conducted && age >= 195 && age < 340) return 3;
+                if (conducted && age >= 340 && age < 440) return 4;
+                return 5;
+            }
             // Rhythm-aware phase labels: do not report a sinus P wave when none is present.
             if (['afib','vfib','vt','tdp','svt','aflutter'].includes(currentScenario)) {
                 if (currentScenario === 'vfib') return 2; // disorganized ventricular activity; normal calipers do not apply
@@ -2315,6 +2329,60 @@
                     ]
                 }
             },
+            avb2_2: {
+                cat: 'avblocks', hr: 50, stripDefault: true,
+                ar: {
+                    name: 'حصار أذيني بطيني درجة ثانية — موبتز II (Mobitz II)',
+                    summary: 'حصار توصيلي متقطع غالباً تحت العقدة AV: تسقط موجة P فجأة دون مركب QRS، بينما تبقى فترة PR متقاربة وثابتة في الضربات الموصّلة. المثال التعليمي يعرض نمط 3:2؛ لا يمكن تصنيف حصار 2:1 وحده على أنه موبتز I أو II.',
+                    phases: [
+                        'تستمر العقدة الجيبية بإطلاق موجات P منتظمة؛ وتبدأ إزالة استقطاب الأذينين بصورة مستقلة عن حدوث الحجب البطيني.',
+                        'في الضربات الموصّلة تبقى فترة PR ثابتة تقريباً، بخلاف Mobitz I الذي يطول فيه PR تدريجياً قبل الحجب.',
+                        'تُحجب موجة P بشكل مفاجئ في إحدى الدورات فلا يظهر بعدها مركب QRS؛ هذا المثال يوضح ضربتين موصلتين ثم ضربة محجوبة (3:2).',
+                        'لا يحدث انقباض بطيني مرتبط بموجة P المحجوبة؛ أما الضربات الموصّلة فتتبعها استجابة ميكانيكية.',
+                        'تظهر موجة T بعد إزالة الاستقطاب البطيني في الضربات الموصّلة؛ لا توجد T بطينية طبيعية مرتبطة بضربة محجوبة لا يصاحبها QRS.',
+                        'تستمر موجات P بوتيرة منتظمة خلال الوقفة؛ وقد يتطور Mobitz II إلى حصار كامل، لذلك يتطلب تقييماً سريرياً عاجلاً.'
+                    ]
+                },
+                en: {
+                    name: 'Second-Degree AV Block — Mobitz II',
+                    summary: 'Intermittent conduction failure, often infranodal: a P wave suddenly fails to conduct without a QRS, while PR intervals on conducted beats remain essentially constant. This teaching example shows 3:2 conduction; a 2:1 pattern alone cannot be classified as Mobitz I or II.',
+                    phases: [
+                        'The sinus node continues to produce regular P waves; atrial depolarization continues despite intermittent ventricular block.',
+                        'PR remains essentially constant on conducted beats, unlike Mobitz I where PR progressively lengthens before the dropped beat.',
+                        'A P wave suddenly fails to conduct and is not followed by a QRS. This example shows two conducted beats followed by one blocked beat (3:2).',
+                        'No ventricular contraction follows the blocked P wave; conducted beats retain a mechanical response.',
+                        'A T wave follows ventricular depolarization on conducted beats; a blocked P wave without QRS has no normally associated ventricular T wave.',
+                        'P waves continue regularly through the pause. Mobitz II can progress to complete block and requires urgent clinical assessment.'
+                    ]
+                }
+            },
+            avb_highgrade: {
+                cat: 'avblocks', hr: 25, stripDefault: true,
+                ar: {
+                    name: 'حصار أذيني بطيني عالي الدرجة (High-Grade AV Block)',
+                    summary: 'حصار من الدرجة الثانية تُحجب فيه موجتا P متتاليتان أو أكثر مع بقاء بعض التوصيل الأذيني البطيني. هذا المثال يستخدم نسبة توصيل 3:1: ثلاث موجات P مقابل مركب QRS واحد؛ وهو ليس حصاراً كاملاً ما دام بعض التوصيل موجوداً.',
+                    phases: [
+                        'تنتج العقدة الجيبية موجات P منتظمة بمعدل أذيني مستقل نسبياً عن المعدل البطيني البطيء.',
+                        'تصل النبضات الأذينية إلى جهاز التوصيل، لكن معظمها يُحجب؛ تبقى فترة PR قابلة للتحديد فقط في موجة P التي توصلت فعلاً.',
+                        'في النموذج 3:1 تُحجب موجتا P متتاليتان، ثم تتبع موجة P الثالثةَ مركبُ QRS؛ لذلك لا ينبغي تفسير كل موجة P على أنها تنشيط بطيني.',
+                        'تقل الانقباضات البطينية بشدة بسبب انخفاض عدد النبضات الموصّلة، وقد يضعف النتاج القلبي بحسب الحالة السريرية.',
+                        'تظهر موجة T بعد مركب QRS الموصّل في هذا الرسم التمثيلي؛ لا تُرسم استجابة بطينية لكل موجة P محجوبة.',
+                        'قد يتدهور الحصار عالي الدرجة إلى حصار كامل أو يسبب إغماءً وعدم استقرار دموي؛ يتطلب تقييماً عاجلاً ومراقبة متخصصة.'
+                    ]
+                },
+                en: {
+                    name: 'High-Grade AV Block',
+                    summary: 'Advanced second-degree AV block with two or more consecutive nonconducted P waves while some AV conduction remains. This teaching example uses 3:1 conduction: three P waves for each QRS; it is not complete heart block while conduction persists.',
+                    phases: [
+                        'The sinus node produces regular P waves at an atrial rate largely independent of the slow ventricular rate.',
+                        'Atrial impulses reach the conduction system but most are blocked; PR can be assessed only for a P wave that actually conducts.',
+                        'In this 3:1 example, two consecutive P waves are blocked and the third conducts to a QRS. Not every P wave represents ventricular activation.',
+                        'Ventricular contractions are markedly reduced because few atrial impulses conduct, potentially lowering cardiac output.',
+                        'A T wave follows the conducted QRS in this illustrative tracing; blocked P waves do not each trigger a ventricular response.',
+                        'High-grade block may progress to complete block or cause syncope/hemodynamic instability; urgent assessment and specialist monitoring are required.'
+                    ]
+                }
+            },
             avb3: {
                 cat: 'avblocks', hr: 38, stripDefault: true,
                 ar: {
@@ -2711,6 +2779,20 @@
                 primaryText: { ar: 'تطاول تدريجي في PR ثم موجة P غير موصلة إلى QRS.', en: 'Progressive PR lengthening followed by a non-conducted P wave.' },
                 secondaryText: { ar: 'قد يظهر تسلسل التوصيل والحجب إذا كانت موجات P واضحة.', en: 'Conduction/block pattern may be visible when P waves are clear.' },
                 otherText: { ar: 'لا يوجد تغير إضافي محدد لهذا الاتجاه.', en: 'No additional lead-specific change is specified here.' }
+            },
+            avb2_2: {
+                primary: ['II','V1'], secondary: ['I','III','aVR','aVL','aVF','V2','V3','V4','V5','V6'],
+                summary: { ar: 'Mobitz II: موجات P منتظمة مع سقوط مفاجئ لـQRS وثبات PR في الضربات الموصّلة؛ المثال 3:2.', en: 'Mobitz II: regular P waves, sudden dropped QRS, and constant PR on conducted beats; 3:2 example.' },
+                primaryText: { ar: 'ابحث عن PR ثابت في الضربات الموصّلة وموجة P غير متبوعة بـQRS.', en: 'Look for fixed PR on conducted beats and a P wave not followed by QRS.' },
+                secondaryText: { ar: 'قد يساعد عرض أكثر من دورة في تمييز النمط.', en: 'A multi-cycle strip helps identify the pattern.' },
+                otherText: { ar: 'لا يوجد تغير خاص بالاتجاه خارج نمط الحجب.', en: 'No additional lead-specific change beyond the conduction pattern.' }
+            },
+            avb_highgrade: {
+                primary: ['II','V1'], secondary: ['I','III','aVR','aVL','aVF','V2','V3','V4','V5','V6'],
+                summary: { ar: 'حصار عالي الدرجة: موجتا P متتاليتان أو أكثر بلا QRS مع بقاء بعض التوصيل؛ المثال 3:1.', en: 'High-grade block: two or more consecutive P waves without QRS while some conduction remains; 3:1 example.' },
+                primaryText: { ar: 'تميّز موجات P المحجوبة عن موجة P التي تليها QRS.', en: 'Distinguish blocked P waves from the P wave that conducts to QRS.' },
+                secondaryText: { ar: 'معدل البطين أبطأ بكثير من المعدل الأذيني.', en: 'Ventricular rate is substantially slower than the atrial rate.' },
+                otherText: { ar: 'لا يوجد تغير إضافي محدد لهذا الاتجاه.', en: 'No additional lead-specific change is specified for this lead.' }
             },
             avb3: {
                 primary: 'all', secondary: [],
@@ -3460,6 +3542,22 @@
             const beatIdx = Math.floor(absMs / 800);
             const t = ((absMs % 800) + 800) % 800;
 
+            // AV block teaching strips: regular atrial P waves with intermittent non-conduction.
+            // Mobitz II is illustrated as 3:2 (two conducted beats, then one dropped P).
+            // High-grade block is illustrated as 3:1 (two consecutive blocked P waves, then one conducted beat).
+            if (scenario === 'avb2_2' || scenario === 'avb_highgrade') {
+                const conducted = scenario === 'avb2_2' ? (beatIdx % 3 !== 2) : (beatIdx % 3 === 0);
+                const pWave = leadId === 'V1'
+                    ? gPulse(t, 105, 17, 0.19 * 0.78) - gPulse(t, 130, 19, 0.19 * 0.52)
+                    : gPulse(t, 115, 21, 0.19) * pProj;
+                if (!conducted) return pWave;
+                const prOffset = 130; // fixed PR on conducted beats in this simplified teaching model
+                const qrsT = t - 245;
+                const qrs = (gPulse(qrsT, 0, 10, 1.12) - gPulse(qrsT, 20, 9, 0.25)) * proj;
+                const tw = gPulse(t, 510, 42, 0.30) * proj;
+                return pWave + qrs + tw;
+            }
+
             if (scenario === 'afib') {
                 // Educational AF pattern: fibrillatory baseline, irregular R-R intervals, and a T wave after each QRS.
                 // The timing sequence repeats only after 1.6 s: intervals are 435, 295, 350 and 520 ms.
@@ -3647,7 +3745,7 @@
             const rightPad = 14;
             const plotW = w - leftPad - rightPad;
 
-            const totalMsSpan = stripMode ? (currentScenario === 'avb2_1' ? 2400 : 1600) : 800; // Wenckebach needs three cycles to show progressive PR then a dropped QRS
+            const totalMsSpan = stripMode ? (['avb2_1','avb2_2','avb_highgrade'].includes(currentScenario) ? 2400 : 1600) : 800; // Wenckebach needs three cycles to show progressive PR then a dropped QRS
             const pxPerMs = plotW / totalMsSpan;
             // The trace window follows the current cycle; in strip mode offset the cursor into the 1600 ms strip.
             const scanTime = stripMode ? ((continuousCycleCount % (totalMsSpan / 800)) * 800 + currentTime) : currentTime;
@@ -3675,7 +3773,8 @@
             const bnd = phaseBounds[activePIdx];
             if (bnd) {
                 ecgCtx.fillStyle = bnd[2];
-                ecgCtx.fillRect(leftPad + bnd[0] * pxPerMs, 6, (bnd[1] - bnd[0]) * pxPerMs, h - 24);
+                const phaseCycleOffset = stripMode ? Math.floor(scanTime / 800) * 800 : 0;
+                ecgCtx.fillRect(leftPad + (phaseCycleOffset + bnd[0]) * pxPerMs, 6, (bnd[1] - bnd[0]) * pxPerMs, h - 24);
             }
 
             // 1. Small Millimeter Squares (0.04s horizontally, 0.1mV vertically)
@@ -3786,7 +3885,7 @@
             // 5. Wave Peak Labels & Calipers
             const rhythmWithoutStandardCalipers = ['afib', 'vfib', 'vt', 'tdp', 'aflutter', 'svt'].includes(currentScenario);
             const caliperOffset = stripMode ? Math.floor(scanTime / 800) * 800 : 0;
-            const droppedStripBeat = stripMode && currentScenario === 'avb2_1' && Math.floor(scanTime / 800) % 3 === 2;
+            const droppedStripBeat = stripMode && ((currentScenario === 'avb2_1' || currentScenario === 'avb2_2') && Math.floor(scanTime / 800) % 3 === 2 || currentScenario === 'avb_highgrade' && Math.floor(scanTime / 800) % 3 !== 0);
             if (document.getElementById('toggle-calipers').checked && !rhythmWithoutStandardCalipers && !droppedStripBeat) {
                 const isAr = (currentLang === 'ar');
                 const pStart = ((currentScenario === 'avb1') ? 40 : 75) + caliperOffset;
@@ -3852,6 +3951,12 @@
             let effectiveT = t;
             const restV = (sc === 'hyperk') ? -78 : -90;
             if (sc === 'vfib') return -62 + 21*Math.sin((continuousCycleCount*800+t)*0.071) + 12*Math.sin((continuousCycleCount*800+t)*0.139);
+            if (sc === 'avb2_2' || sc === 'avb_highgrade') {
+                const absT = continuousCycleCount * 800 + t;
+                const beat = Math.floor(absT / 800);
+                const conducted = sc === 'avb2_2' ? (beat % 3 !== 2) : (beat % 3 === 0);
+                if (!conducted) return restV;
+            }
             if ((sc === 'avb2_1' && continuousCycleCount % 3 === 2) || (sc === 'avb3' && continuousCycleCount % 2 === 1)) return restV;
             const absT = continuousCycleCount*800 + t;
             if (['afib','svt','vt','tdp','aflutter'].includes(sc)) {
@@ -3884,6 +3989,11 @@
 
         function getMechanicalTension(t, sc) {
             if (sc === 'pea' || sc === 'vfib') return 0;
+            if (sc === 'avb2_2' || sc === 'avb_highgrade') {
+                const beat = Math.floor((continuousCycleCount * 800 + t) / 800);
+                const conducted = sc === 'avb2_2' ? (beat % 3 !== 2) : (beat % 3 === 0);
+                if (!conducted) return 0;
+            }
             if (sc === 'avb2_1' && (continuousCycleCount % 3 === 2)) return 0;
             if (sc === 'avb3' && (continuousCycleCount % 2 === 1)) return 0;
             if (['afib','svt','vt','tdp','aflutter'].includes(sc)) {
@@ -3911,7 +4021,7 @@
             const memThick = 34;
 
             let t = currentTime;
-            const droppedVentricularBeat = (currentScenario === 'avb2_1' && continuousCycleCount % 3 === 2) || (currentScenario === 'avb3' && continuousCycleCount % 2 === 1);
+            const droppedVentricularBeat = (currentScenario === 'avb2_1' && continuousCycleCount % 3 === 2) || (currentScenario === 'avb3' && continuousCycleCount % 2 === 1) || (currentScenario === 'avb2_2' && continuousCycleCount % 3 === 2) || (currentScenario === 'avb_highgrade' && continuousCycleCount % 3 !== 0);
             const vfib = currentScenario === 'vfib';
             if (['afib','svt','vt','tdp','aflutter'].includes(currentScenario) && !vfib) {
                 const absT=continuousCycleCount*800+currentTime;
@@ -4152,6 +4262,8 @@
             twelveCtx.clearRect(0, 0, w, h);
 
             const cols = w < 520 ? 2 : (w < 850 ? 3 : 4);
+            const leadStripSpan = ['avb2_2','avb_highgrade'].includes(currentScenario) ? 2400 : 800;
+            const leadCursorTime = leadStripSpan === 2400 ? ((continuousCycleCount % 3) * 800 + currentTime) : currentTime;
             const rows = Math.ceil(LEADS_12.length / cols);
             const cellW = w / cols;
             const cellH = h / rows;
@@ -4198,16 +4310,16 @@
 
                 const padX = 8;
                 const plotCW = cellW - padX * 2;
-                for (let ms = 0; ms <= 800; ms += 6) {
-                    const px = x0 + padX + (ms / 800) * plotCW;
+                for (let ms = 0; ms <= leadStripSpan; ms += 6) {
+                    const px = x0 + padX + (ms / leadStripSpan) * plotCW;
                     const v = computeLeadVoltage(ms, currentScenario, lead.id);
                     const py = Math.max(y0 + 6, Math.min(y0 + cellH - 6, baseY - v * scaleMV));
                     if (ms === 0) twelveCtx.moveTo(px, py); else twelveCtx.lineTo(px, py);
                 }
                 twelveCtx.stroke();
 
-                const curPx = x0 + padX + (currentTime / 800) * plotCW;
-                const curV = computeLeadVoltage(currentTime, currentScenario, lead.id);
+                const curPx = x0 + padX + (leadCursorTime / leadStripSpan) * plotCW;
+                const curV = computeLeadVoltage(leadCursorTime, currentScenario, lead.id);
                 const curPy = Math.max(y0 + 6, Math.min(y0 + cellH - 6, baseY - curV * scaleMV));
                 twelveCtx.fillStyle = '#facc15';
                 twelveCtx.beginPath(); twelveCtx.arc(curPx, curPy, 3.5, 0, Math.PI * 2); twelveCtx.fill();
@@ -4617,7 +4729,7 @@
             const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left - padL) / usableWidth));
             if (isPlaying) togglePlay();
             if (stripMode) {
-                const stripSpan = currentScenario === 'avb2_1' ? 2400 : 1600;
+                const stripSpan = ['avb2_1','avb2_2','avb_highgrade'].includes(currentScenario) ? 2400 : 1600;
                 const tot = ratio * stripSpan;
                 continuousCycleCount = Math.floor(tot / 800);
                 currentTime = tot % 800;
@@ -4996,6 +5108,16 @@
                         saCharging(E, 72);
                         if (stripDrop) atrialBlock(E, 72);
                         else { atria(E, 72, 150); conduct(E, 150, 215, 1, false); }
+                        break;
+                    case 'avb2_2':
+                        saCharging(E, 72);
+                        if (Math.floor(T / 800) % 3 === 2) atrialBlock(E, 72);
+                        else { atria(E, 72, 150); conduct(E, 150, 215, 1, false); }
+                        break;
+                    case 'avb_highgrade':
+                        saCharging(E, 72);
+                        if (Math.floor(T / 800) % 3 === 0) { atria(E, 72, 150); conduct(E, 150, 215, 1, false); }
+                        else atrialBlock(E, 72);
                         break;
                     case 'avb1':
                         saCharging(E, 40);
@@ -5395,6 +5517,10 @@
                             en: ['0.09s (normal)', '>0.28s (fixed prolongation)', '0.08s (narrow)', '0.0 mV (isoelectric line)', 'QT = 0.38s (~2 large squares)'] },
                 avb2_1:   { ar: ['0.09s (منتظمة)', 'تطول تدريجياً ثم تسقط نبضة', '0.08s (وتسقط في النبضة المحجوبة)', '0.0 mV (خط السواء)', 'غائبة في النبضة المحجوبة'],
                             en: ['0.09s (regular)', 'Progressively longer, then a dropped beat', '0.08s (absent on the blocked beat)', '0.0 mV (isoelectric line)', 'Absent on the blocked beat'] },
+                avb2_2:   { ar: ['0.09s (منتظمة)', 'ثابتة في الضربات الموصّلة', 'يسقط فجأة في النبضة المحجوبة', 'غالباً دون تغير نوعي', 'بعد QRS الموصّل فقط'],
+                            en: ['0.09 s (regular)', 'Fixed on conducted beats', 'Suddenly dropped on blocked beat', 'Usually no specific change', 'After conducted QRS only'] },
+                avb_highgrade: { ar: ['0.09s (منتظمة)', 'تُقاس فقط عند التوصيل', 'نسبة توصيل 3:1 في المثال', 'حسب الحالة', 'بعد QRS الموصّل فقط'],
+                                 en: ['0.09 s (regular)', 'Measurable only when conducted', '3:1 conduction in this example', 'Context dependent', 'After conducted QRS only'] },
                 avb3:     { ar: ['0.09s (منتظمة بمعدل الأذينين)', 'متغيرة (لا علاقة بين P وQRS)', 'عريض (نظم هروب بطيني)', 'ثانوية ومعاكسة لـ QRS', 'QT مطولة تبعاً لعرض QRS'],
                             en: ['0.09s (regular atrial rate)', 'Variable (no P-QRS relationship)', 'Wide (ventricular escape)', 'Secondary, opposite to QRS', 'QT prolonged with wide QRS'] },
                 lbbb:     { ar: ['0.09s (طبيعية)', '0.16s (طبيعية)', 'عريض >0.12s (شكل M)', 'انخفاض معاكس لـ QRS', 'QT مطولة تبعاً لعرض QRS'],
@@ -6045,6 +6171,8 @@ function updateDynamicECGMetrics(){
   tamponade:{p:'0.09 s',pr:'0.16 s',qrs:'0.08 s',st:ar?'غير نوعي':'Nonspecific',qt:ar?'غير نوعي':'Nonspecific'},
   avb1:{p:'0.09 s',pr:ar?'مطوّلة >0.20 s':'Prolonged >0.20 s',qrs:'0.08 s',st:'0.00 mV',qt:'0.38 s'},
   avb2_1:{p:'0.09 s',pr:ar?'تطاول تدريجي':'Progressively lengthening',qrs:ar?'يسقط كل ثالث مركب/حسب النمط':'Intermittently dropped',st:'0.00 mV',qt:'غير ثابت / Variable'},
+  avb2_2:{p:'0.09 s (regular)',pr:ar?'ثابتة في الضربات الموصّلة':'Fixed on conducted beats',qrs:ar?'يسقط بشكل متقطع':'Intermittently dropped',st:ar?'حسب الحالة':'Context dependent',qt:ar?'بعد الضربات الموصّلة':'After conducted beats'},
+  avb_highgrade:{p:ar?'منتظمة مع حجب متكرر':'Regular with repeated block',pr:ar?'تُقاس عند التوصيل فقط':'Measurable only when conducted',qrs:ar?'توصيل 3:1 في المثال':'3:1 conduction in example',st:ar?'حسب الحالة':'Context dependent',qt:ar?'بعد الضربات الموصّلة':'After conducted beats'},
   avb3:{p:ar?'موجودة؛ منفصلة':'Present; dissociated',pr:ar?'غير ثابت':'Not fixed',qrs:ar?'حسب إيقاع الهروب':'Escape rhythm dependent',st:'0.00 mV',qt:'غير ثابت / Variable'},
   afib:{p:ar?'غير واضحة/غائبة':'Absent/discrete P absent',pr:ar?'غير قابل للقياس':'Not measurable',qrs:ar?'حسب التوصيل':'Rate-dependent',st:ar?'حسب الحالة':'Context dependent',qt:'متغير / Variable'},
   aflutter:{p:ar?'موجات رفرفة':'Flutter waves',pr:ar?'غير قابل للقياس':'Not measurable',qrs:ar?'حسب التوصيل':'Rate-dependent',st:'حسب الحالة',qt:'متغير / Variable'},
@@ -6187,6 +6315,76 @@ function updateDynamicECGMetrics(){
  document.addEventListener('change',()=>{if(typeof window.updateLeadChangesPanel==='function')window.updateLeadChangesPanel();});
  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{refreshAfterViewShown();updateRhythmCalipers();});
  else {refreshAfterViewShown();updateRhythmCalipers();}
+})();
+</script>
+
+
+<style id="clinix-phase-explanation-position-final">
+/* Requested layout-only adjustment: place the phase key above, not over, the 3D heart. */
+#html-root #heart3d-color-legend {
+  position:relative!important; inset:auto!important; top:auto!important; right:auto!important; left:auto!important; bottom:auto!important;
+  width:100%!important; max-width:100%!important; box-sizing:border-box!important;
+  display:grid!important; grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:6px 12px!important; margin:0 0 8px!important; padding:8px 10px!important;
+  white-space:normal!important; overflow:visible!important; z-index:auto!important;
+  border-radius:10px!important;
+}
+#html-root #heart3d-color-legend > div {
+  min-width:0!important; display:flex!important; align-items:flex-start!important;
+  gap:6px!important; line-height:1.45!important; white-space:normal!important;
+  overflow-wrap:anywhere!important;
+}
+#html-root #heart3d-color-legend > div > span:last-child {
+  min-width:0!important; white-space:normal!important; overflow-wrap:anywhere!important;
+}
+/* Give the current rhythm name enough room to show its full text. */
+#html-root .sticky-master-timeline #active-scenario-pill {
+  flex:1 1 260px!important; width:auto!important; min-width:150px!important;
+  max-width:min(520px,48vw)!important; height:auto!important; min-height:30px!important;
+  display:inline-flex!important; align-items:center!important; justify-content:center!important;
+  white-space:normal!important; overflow:visible!important; text-overflow:clip!important;
+  overflow-wrap:anywhere!important; word-break:normal!important; line-height:1.45!important;
+  text-align:center!important; padding:6px 11px!important;
+}
+/* Expand the live phase explanation/badge without clipping or ellipsizing it. */
+#html-root .sticky-master-timeline #current-phase-badge {
+  flex:1 1 280px!important; width:auto!important; min-width:0!important; max-width:100%!important;
+  height:auto!important; min-height:28px!important; white-space:normal!important;
+  overflow:visible!important; text-overflow:clip!important; overflow-wrap:anywhere!important;
+  line-height:1.45!important; text-align:center!important; padding:5px 10px!important;
+}
+#html-root .sticky-master-timeline > div:first-child > div:nth-child(2) > div:first-child {
+  align-items:stretch!important; flex-wrap:wrap!important; row-gap:6px!important;
+}
+@media(max-width:767px) {
+  #html-root #heart3d-color-legend {
+    grid-template-columns:minmax(0,1fr)!important; gap:5px!important; padding:7px 9px!important;
+  }
+  #html-root .sticky-master-timeline > div:first-child > div:first-child > div:first-child {
+    flex-wrap:wrap!important; align-items:center!important;
+  }
+  #html-root .sticky-master-timeline #active-scenario-pill {
+    flex:1 1 100%!important; width:100%!important; max-width:100%!important; min-width:0!important;
+    justify-content:flex-start!important; text-align:start!important;
+  }
+  #html-root .sticky-master-timeline #current-phase-badge { flex-basis:100%!important; }
+}
+@media(min-width:768px) and (max-width:1023px) {
+  #html-root #heart3d-color-legend { grid-template-columns:repeat(2,minmax(0,1fr))!important; }
+  #html-root .sticky-master-timeline #active-scenario-pill { max-width:60vw!important; }
+}
+</style>
+<script id="clinix-phase-explanation-position-final-js">
+(function(){
+  function placePhaseLegend(){
+    const legend=document.getElementById('heart3d-color-legend');
+    const heart=document.getElementById('heart3d-container');
+    if(!legend||!heart||!heart.parentElement)return;
+    /* Move the existing legend intact; no wording or simulation logic is changed. */
+    if(legend.parentElement===heart) heart.parentElement.insertBefore(legend,heart);
+  }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',placePhaseLegend,{once:true});
+  else placePhaseLegend();
 })();
 </script>
 
