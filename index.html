@@ -1910,6 +1910,19 @@
         };
 
         function getPhaseIndex(t) {
+            // Rhythm-aware phase labels: do not report a sinus P wave when none is present.
+            if (['afib','vfib','vt','tdp','svt','aflutter'].includes(currentScenario)) {
+                if (currentScenario === 'vfib') return 2; // disorganized ventricular activity; normal calipers do not apply
+                const absT = continuousCycleCount * 800 + t;
+                const period = currentScenario === 'afib' ? 1600 : 800;
+                const offsets = currentScenario === 'afib' ? [155,590,885,1235] : currentScenario === 'svt' ? [245,625] : currentScenario === 'vt' ? [250,650] : currentScenario === 'aflutter' ? [225,625] : [120,520];
+                const base = Math.floor(absT / period) * period;
+                let age = Infinity;
+                for (const cb of [base-period,base,base+period]) for (const off of offsets) { const a=absT-(cb+off); if (a>=0 && a<age) age=a; }
+                if (age < 70) return 2;   // ventricular activation / broad QRS phase
+                if (age < 220) return 4;  // recovery / T-wave phase
+                return 5;                 // interval without a sinus-P label
+            }
             if (t >= 70 && t < 155) return 0;
             if (t >= 155 && t < 215) return 1;
             if (t >= 215 && t < 285) return 2;
@@ -2031,7 +2044,7 @@
             pea: {
                 cat: 'normal_elec', hr: 70,
                 ar: {
-                    name: 'فك الاقتران / نقص الكالسيوم (PEA)',
+                    name: 'النشاط الكهربائي بلا نبض / فك الاقتران الكهروميكانيكي (PEA)',
                     summary: 'النشاط الكهربائي بلا نبض (PEA): يثبت أن إزالة الاستقطاب حدث كهربائي يسبق الانقباض ولا يساويه! التخطيط الكهربائي سليم تماماً لكن القلب لا ينقبض ميكانيكياً بسبب غياب دخول الكالسيوم.',
                     phases: [
                         'في PEA: تنطلق الكهرباء طبيعياً من عقدة SA وترسم موجة P، لكن انقباض الأذينين الميكانيكي ضعيف جداً أو غائب.',
@@ -2805,7 +2818,7 @@
         let conductionTubes3D = [];
         let labelAnchors3D = [];
 
-        let camTheta = 0;
+        let camTheta = 0; // anterior view (+Z) is the initial/default camera
         let camPhi = 0.08;
         let camRadius = 9.6;
 
@@ -3448,10 +3461,22 @@
             const t = ((absMs % 800) + 800) % 800;
 
             if (scenario === 'afib') {
-                const fibrillatory = 0.055 * Math.sin(t * 0.091) + 0.038 * Math.cos(t * 0.157) + 0.022 * Math.sin(t * 0.223);
-                const qrsA = gPulse(t, 155, 10, 1.1) - gPulse(t, 174, 9, 0.24);
-                const qrsB = gPulse(t, 590, 10, 1.1) - gPulse(t, 609, 9, 0.24);
-                return (fibrillatory + qrsA + qrsB) * (grp === 'avr' ? -0.85 : (leadId === 'V1' ? -0.8 : 1));
+                // Educational AF pattern: fibrillatory baseline, irregular R-R intervals, and a T wave after each QRS.
+                // The timing sequence repeats only after 1.6 s: intervals are 435, 295, 350 and 520 ms.
+                const period = 1600;
+                const base = Math.floor(absMs / period) * period;
+                const offsets = [155, 590, 885, 1235];
+                let qrs = 0, tWave = 0;
+                for (const cycleBase of [base - period, base, base + period]) {
+                    for (const offset of offsets) {
+                        const bt = cycleBase + offset;
+                        qrs += gPulse(absMs, bt, 10, 1.05) - gPulse(absMs, bt + 18, 9, 0.24);
+                        tWave += gPulse(absMs, bt + 145, 34, 0.22);
+                    }
+                }
+                const fibrillatory = 0.055 * Math.sin(absMs * 0.091) + 0.038 * Math.cos(absMs * 0.157) + 0.022 * Math.sin(absMs * 0.223);
+                const polarity = grp === 'avr' ? -0.85 : (leadId === 'V1' ? -0.8 : 1);
+                return (fibrillatory + qrs + tWave) * polarity;
             }
             if (scenario === 'vfib') {
                 return (0.48 * Math.sin(t * 0.045) + 0.35 * Math.cos(t * 0.082) + 0.25 * Math.sin(t * 0.12)) * (proj >= 0 ? 1 : -1);
@@ -3471,10 +3496,14 @@
             if (scenario === 'afib') {
                 // AFib is returned above with an irregular R-R pattern.
             } else if (scenario === 'aflutter') {
-                const saw = 0.24 * (Math.sin(t * 0.039) + 0.45 * Math.sin(t * 0.078));
-                const qrsMask = (t >= 215 && t <= 295) ? 0.08 : 1;
+                const phase = ((t % 200) + 200) % 200 / 200;
+                const saw = 0.20 * (1 - 2 * phase) + 0.035 * Math.sin(phase * Math.PI * 2);
+                const qrsMask = (t >= 205 && t <= 288) || (t >= 605 && t <= 688) ? 0.18 : 1;
                 const inferiorPolarity = (grp === 'inf') ? -1 : 1;
                 v += saw * qrsMask * proj * inferiorPolarity;
+                v += (gPulse(t, 225, 12, 1.12) - gPulse(t, 247, 14, 0.32) + gPulse(t, 335, 34, 0.24)) * (grp === 'avr' ? -0.85 : (leadId === 'V1' ? -0.7 : 1));
+                v += (gPulse(t, 625, 12, 1.12) - gPulse(t, 647, 14, 0.32) + gPulse(t, 735, 34, 0.24)) * (grp === 'avr' ? -0.85 : (leadId === 'V1' ? -0.7 : 1));
+                return v;
             } else if (scenario === 'svt') {
                 // P buried
             } else if (scenario === 'avb1') {
@@ -3483,11 +3512,16 @@
                 const pAmp = (scenario === 'hyperk') ? 0.06 : 0.19;
                 if (scenario === 'avb3') {
                     // Atrial rhythm continues independently at roughly 140 bpm; its phase drifts against the slower ventricular escape rhythm.
-                    for (let n = -1; n <= Math.ceil(absMs / 430) + 1; n++) {
-                        v += gPulse(absMs, 115 + n * 430, 21, 0.19) * pProj;
+                    for (let n = -1; n <= Math.ceil(absMs / 750) + 1; n++) {
+                        v += gPulse(absMs, 115 + n * 750, 21, 0.19) * pProj;
                     }
                 } else {
-                    v += gPulse(t, 115, 21, pAmp) * pProj;
+                    if (leadId === 'V1') {
+                        // Normal V1 P wave is commonly biphasic: small positive then terminal negative.
+                        v += gPulse(t, 105, 17, pAmp * 0.78) - gPulse(t, 130, 19, pAmp * 0.52);
+                    } else {
+                        v += gPulse(t, 115, 21, pAmp) * pProj;
+                    }
                 }
             }
 
@@ -3508,7 +3542,7 @@
                 isReciprocalLead = (!isInfarctLead && grp === 'inf');
             } else if (scenario === 'stemi_inf') {
                 isInfarctLead = (grp === 'inf');
-                isReciprocalLead = (!isInfarctLead && (leadId === 'I' || leadId === 'aVL' || leadId === 'V1' || leadId === 'V2'));
+                isReciprocalLead = (!isInfarctLead && (leadId === 'I' || leadId === 'aVL'));
             } else if (scenario === 'stemi_lat') {
                 isInfarctLead = (grp === 'lat');
                 isReciprocalLead = (!isInfarctLead && grp === 'inf');
@@ -3525,10 +3559,10 @@
                 return v;
             }
             if (isReciprocalLead) {
-                v += gPulse(t, 245, 12, 0.95) * Math.sign(proj || 1);
-                if (t >= 260 && t <= 560) {
-                    v -= 0.35 * Math.exp(-Math.pow((t - 375) / 105, 2)) * Math.sign(proj || 1);
-                }
+                // Keep a plausible QRS/T while adding reciprocal ST depression; do not invert this by lead-angle sign.
+                v += -gPulse(t, 222, 7, 0.10) * proj + gPulse(t, 245, 12, 1.05) * proj - gPulse(t, 268, 9, 0.22) * proj;
+                if (t >= 270 && t <= 550) v -= 0.22 * Math.exp(-Math.pow((t - 390) / 112, 2));
+                v += gPulse(t, 510, 42, 0.22) * proj;
                 return v;
             }
 
@@ -3538,24 +3572,34 @@
                 return v;
             }
             if (scenario === 'lbbb') {
-                const dir = (['V1', 'V2', 'V3'].includes(leadId)) ? -1 : Math.sign(proj || 1);
-                v += gPulse(t, 235, 15, 0.92) * dir;
-                v += gPulse(t, 260, 11, -0.25) * dir;
-                v += gPulse(t, 288, 19, 1.05) * dir;
-                v += -gPulse(t, 510, 45, 0.32) * dir;
-                // Illustrative secondary ST-T discordance opposite the dominant QRS direction.
-                v += gPulse(t, 370, 82, -0.12 * dir);
+                const anteriorNegative = ['V1','V2','V3'].includes(leadId);
+                const lateralPositive = ['I','aVL','V5','V6'].includes(leadId);
+                const dir = anteriorNegative ? -1 : (lateralPositive ? 1 : (Math.sign(proj || 1) * 0.72));
+                if (anteriorNegative) {
+                    v += -gPulse(t, 258, 27, 1.12) - gPulse(t, 292, 22, 0.34); // broad QS/rS in V1-V3
+                } else if (lateralPositive) {
+                    v += gPulse(t, 238, 22, 0.82) + gPulse(t, 274, 20, 0.75) - gPulse(t, 309, 15, 0.16); // broad/notched R
+                } else {
+                    v += gPulse(t, 240, 23, 0.85) - gPulse(t, 281, 17, 0.30);
+                }
+                // Secondary ST-T discordance opposite the dominant QRS direction.
+                v += gPulse(t, 380, 82, -0.22 * dir);
+                v += gPulse(t, 515, 42, -0.27 * dir);
             } else if (scenario === 'lvh') {
                 if (leadId === 'V1' || leadId === 'V2') {
                     v += gPulse(t, 232, 9, 0.25) - gPulse(t, 255, 14, 1.55) + gPulse(t, 510, 42, 0.32);
                 } else {
-                    const tallR = (grp === 'lat') ? 2.22 : 1.35;
-                    v += -gPulse(t, 222, 7, 0.14) * proj;
+                    const isLateral = ['I','aVL','V5','V6'].includes(leadId);
+                    const isInferior = ['II','III','aVF'].includes(leadId);
+                    const tallR = isLateral ? 2.05 : (isInferior ? 1.05 : 1.20);
+                    v += -gPulse(t, 222, 7, 0.10) * proj;
                     v += gPulse(t, 245, 12, tallR) * proj;
-                    if (t >= 270 && t <= 580) {
-                        v -= 0.24 * Math.exp(-Math.pow((t - 420) / 95, 2)) * proj;
+                    if (isLateral) {
+                        if (t >= 270 && t <= 580) v -= 0.28 * Math.exp(-Math.pow((t - 420) / 95, 2)) * Math.sign(proj || 1);
+                        v -= gPulse(t, 510, 38, 0.38) * Math.sign(proj || 1);
+                    } else {
+                        v += gPulse(t, 510, 42, 0.26) * proj;
                     }
-                    v -= gPulse(t, 510, 38, 0.35) * proj;
                 }
             } else if (scenario === 'tamponade') {
                 const altScale = (beatIdx % 2 === 0) ? 0.68 : 0.30;
@@ -3577,7 +3621,7 @@
                     // Illustrative normal V1 rS morphology: small initial r, deep S.
                     v += gPulse(t, 238, 9, 0.28) - gPulse(t, 260, 13, 0.92) + gPulse(t, 510, 42, 0.06);
                 } else if (leadId === 'V2') {
-                    v += -gPulse(t, 222, 7, 0.08) + gPulse(t, 245, 12, 0.60) - gPulse(t, 268, 11, 0.60) + gPulse(t, 510, 42, 0.16);
+                    v += gPulse(t, 236, 8, 0.16) + gPulse(t, 248, 12, 0.68) - gPulse(t, 270, 11, 0.66) + gPulse(t, 510, 42, 0.16);
                 } else {
                     v += -gPulse(t, 222, 7, 0.14) * proj;
                     v += gPulse(t, 245, 12, 1.22) * proj;
@@ -3741,14 +3785,18 @@
 
             // 5. Wave Peak Labels & Calipers
             const rhythmWithoutStandardCalipers = ['afib', 'vfib', 'vt', 'tdp', 'aflutter', 'svt'].includes(currentScenario);
-            if (document.getElementById('toggle-calipers').checked && !rhythmWithoutStandardCalipers) {
+            const caliperOffset = stripMode ? Math.floor(scanTime / 800) * 800 : 0;
+            const droppedStripBeat = stripMode && currentScenario === 'avb2_1' && Math.floor(scanTime / 800) % 3 === 2;
+            if (document.getElementById('toggle-calipers').checked && !rhythmWithoutStandardCalipers && !droppedStripBeat) {
                 const isAr = (currentLang === 'ar');
-                const pStart = (currentScenario === 'avb1') ? 40 : 75;
-                drawBracket(ecgCtx, leftPad + pStart * pxPerMs, leftPad + 215 * pxPerMs, 22, isAr ? 'فترة PR' : 'PR Interval', '#fb923c');
-                drawBracket(ecgCtx, leftPad + 215 * pxPerMs, leftPad + (currentScenario === 'lbbb' ? 315 : 285) * pxPerMs, 38, 'QRS', '#38bdf8');
-                drawBracket(ecgCtx, leftPad + 215 * pxPerMs, leftPad + 565 * pxPerMs, h - 26, isAr ? 'فترة QT الكلية' : 'QT Interval', '#c084fc');
+                const pStart = ((currentScenario === 'avb1') ? 40 : 75) + caliperOffset;
+                const qrsStart = 215 + caliperOffset;
+                drawBracket(ecgCtx, leftPad + pStart * pxPerMs, leftPad + qrsStart * pxPerMs, 22, isAr ? 'فترة PR' : 'PR Interval', '#fb923c');
+                drawBracket(ecgCtx, leftPad + qrsStart * pxPerMs, leftPad + (currentScenario === 'lbbb' ? 315 : 285) * pxPerMs + caliperOffset, 38, 'QRS', '#38bdf8');
+                drawBracket(ecgCtx, leftPad + qrsStart * pxPerMs, leftPad + (565 + caliperOffset) * pxPerMs, h - 26, isAr ? 'فترة QT الكلية' : 'QT Interval', '#c084fc');
 
                 const labelWave = (ms, txt, col, dy) => {
+                    ms += caliperOffset;
                     const x = leftPad + ms * pxPerMs;
                     const v = computeLeadVoltage(ms, currentScenario, selectedLeadName);
                     const y = Math.max(16, Math.min(h - 24, baselineY - v * mVHeight + dy));
@@ -3801,13 +3849,27 @@
         // 6. BOTTOM PANELS: ANIMATED CELL MEMBRANE ION GATES + AP & SARCOMERE
         // =====================================================================
         function getActionPotential(t, sc) {
+            let effectiveT = t;
+            const restV = (sc === 'hyperk') ? -78 : -90;
+            if (sc === 'vfib') return -62 + 21*Math.sin((continuousCycleCount*800+t)*0.071) + 12*Math.sin((continuousCycleCount*800+t)*0.139);
+            if ((sc === 'avb2_1' && continuousCycleCount % 3 === 2) || (sc === 'avb3' && continuousCycleCount % 2 === 1)) return restV;
+            const absT = continuousCycleCount*800 + t;
+            if (['afib','svt','vt','tdp','aflutter'].includes(sc)) {
+                const period=sc==='afib'?1600:800, base=Math.floor(absT/period)*period;
+                const offsets=sc==='afib'?[155,590,885,1235]:sc==='svt'?[245,625]:sc==='vt'?[250,650]:sc==='aflutter'?[225,625]:[120,520];
+                let age=Infinity;
+                for(const cb of [base-period,base,base+period]) for(const off of offsets){const a=absT-(cb+off);if(a>=0&&a<age)age=a;}
+                if(age===Infinity||age>390) return restV;
+                effectiveT=218+age;
+            }
             const qrsStart = 218;
             const repolEnd = (sc === 'hyperk') ? 530 : (sc === 'hypok' ? 625 : 565);
-            const restV = (sc === 'hyperk') ? -78 : -90;
-            if ((sc === 'avb2_1' && continuousCycleCount % 3 === 2) || (sc === 'avb3' && continuousCycleCount % 2 === 1)) return restV;
+            if (sc === 'hyperk') { /* depolarization is slower with partial h-gate inactivation */ }
+            t = effectiveT;
             if (t < qrsStart) return restV;
-            if (t < qrsStart + 18) return restV + ((t - qrsStart) / 18) * (20 - restV);
-            if (t < qrsStart + 38) return 20 - ((t - (qrsStart + 18)) / 20) * 15;
+            const upstrokeMs = (sc === 'hyperk') ? 30 : 18;
+            if (t < qrsStart + upstrokeMs) return restV + ((t - qrsStart) / upstrokeMs) * (20 - restV);
+            if (t < qrsStart + upstrokeMs + 20) return 20 - ((t - (qrsStart + upstrokeMs)) / 20) * 15;
             if (t < 445) {
                 const p = (t - (qrsStart + 38)) / (445 - (qrsStart + 38));
                 return 5 - p * (sc === 'pea' ? 28 : 12);
@@ -3824,6 +3886,13 @@
             if (sc === 'pea' || sc === 'vfib') return 0;
             if (sc === 'avb2_1' && (continuousCycleCount % 3 === 2)) return 0;
             if (sc === 'avb3' && (continuousCycleCount % 2 === 1)) return 0;
+            if (['afib','svt','vt','tdp','aflutter'].includes(sc)) {
+                const absT=continuousCycleCount*800+t, period=1600, base=Math.floor(absT/period)*period;
+                const offsets=sc==='afib'?[155,590,885,1235]:sc==='svt'?[245,625]:sc==='vt'?[250,650]:sc==='aflutter'?[225,625]:[120,520];
+                let age=Infinity; for(const cb of [base-period,base,base+period]) for(const off of offsets){const a=absT-(cb+off);if(a>=0&&a<age)age=a;}
+                if(age<35||age>390||age===Infinity) return 0;
+                t=255+age;
+            }
             if (t < 255 || t > 635) return 0;
             const peakAmp = (sc === 'tamponade') ? 55 : 100;
             if (t <= 390) return peakAmp * Math.pow(Math.sin(((t - 255) / 135) * Math.PI / 2), 2);
@@ -3841,11 +3910,20 @@
             const memY = h * 0.36;
             const memThick = 34;
 
-            const t = currentTime;
+            let t = currentTime;
             const droppedVentricularBeat = (currentScenario === 'avb2_1' && continuousCycleCount % 3 === 2) || (currentScenario === 'avb3' && continuousCycleCount % 2 === 1);
-            const isPhase0 = !droppedVentricularBeat && (t >= 215 && t < 250);
-            const isPhase1 = !droppedVentricularBeat && (t >= 250 && t < 275);
-            const isPhase2 = !droppedVentricularBeat && (t >= 275 && t < 445);
+            const vfib = currentScenario === 'vfib';
+            if (['afib','svt','vt','tdp','aflutter'].includes(currentScenario) && !vfib) {
+                const absT=continuousCycleCount*800+currentTime;
+                const period=currentScenario==='afib'?1600:800;
+                const offsets=currentScenario==='afib'?[155,590,885,1235]:currentScenario==='svt'?[245,625]:currentScenario==='vt'?[250,650]:currentScenario==='aflutter'?[225,625]:[120,520];
+                const base=Math.floor(absT/period)*period; let age=Infinity;
+                for(const cb of [base-period,base,base+period]) for(const off of offsets){const a=absT-(cb+off);if(a>=0&&a<age)age=a;}
+                t=(age<=390)?218+age:0;
+            } else if (vfib) { t=0; }
+            const isPhase0 = !vfib && !droppedVentricularBeat && (t >= 215 && t < 250);
+            const isPhase1 = !vfib && !droppedVentricularBeat && (t >= 250 && t < 275);
+            const isPhase2 = !vfib && !droppedVentricularBeat && (t >= 275 && t < 445);
             const isPhase3 = !droppedVentricularBeat && (t >= 445 && t < 575);
             const isPhase4 = droppedVentricularBeat || (!isPhase0 && !isPhase1 && !isPhase2 && !isPhase3);
 
@@ -3871,7 +3949,7 @@
             gatesCtx.textAlign = 'left';
 
             const mOpen = isPhase0 || isPhase1 || isPhase2;
-            const hOpen = isPhase4 || isPhase0;
+            const hOpen = (currentScenario === 'hyperk' || currentScenario === 'vfib') ? false : (isPhase4 || isPhase0);
 
             gatesCtx.strokeStyle = '#facc15'; gatesCtx.lineWidth = 3.5;
             gatesCtx.beginPath();
@@ -3921,15 +3999,17 @@
             gatesCtx.strokeStyle = '#10b981'; gatesCtx.lineWidth = 2;
             gatesCtx.beginPath(); gatesCtx.roundRect(xCa - 65, srY, 130, 42, 10); gatesCtx.fill(); gatesCtx.stroke();
             gatesCtx.fillStyle = '#a7f3d0'; gatesCtx.font = 'bold 10px Cairo, Inter';
-            gatesCtx.fillText(isAr ? 'الشبكة الساركوبلازمية (SR + RyR2)' : 'Sarcoplasmic Reticulum (RyR2)', xCa - 58, srY + 18);
-            gatesCtx.fillText(caOpen ? (isAr ? 'إطلاق غزير للكالسيوم (CICR)!' : 'CICR Active: Ca2+ Burst!') : (isAr ? 'مخزن Ca2+ مغلق' : 'RyR2 Closed'), xCa - 45, srY + 34);
+            gatesCtx.textAlign='center'; gatesCtx.fillText(isAr ? 'الشبكة الساركوبلازمية (SR + RyR2)' : 'Sarcoplasmic Reticulum (RyR2)', xCa, srY + 18, Math.max(75,w*0.43)); gatesCtx.textAlign='left';
+            gatesCtx.textAlign='center'; gatesCtx.fillText(caOpen ? (isAr ? 'إطلاق غزير للكالسيوم (CICR)!' : 'CICR Active: Ca2+ Burst!') : (isAr ? 'مخزن Ca2+ مغلق' : 'RyR2 Closed'), xCa, srY + 34, Math.max(75,w*0.43)); gatesCtx.textAlign='left';
             if (caOpen) drawFlowingIons(gatesCtx, xCa, memY - 20, srY + 4, '#34d399');
 
             // 3. Potassium K+ Channels
             const kOpen = isPhase1 || isPhase3;
             drawChannelPore(gatesCtx, xK, memY, memThick, '#7e22ce', kOpen);
             gatesCtx.fillStyle = '#c084fc'; gatesCtx.font = 'bold 11px Cairo, Inter';
-            gatesCtx.fillText(isAr ? 'قنوات البوتاسيوم (K+ Efflux)' : 'K+ Channels (Repolarization)', xK - 55, memY - 12);
+            gatesCtx.textAlign = 'center';
+            gatesCtx.fillText(isAr ? (w < 460 ? 'قنوات K⁺' : 'قنوات البوتاسيوم (K+ Efflux)') : (w < 460 ? 'K⁺ channel' : 'K+ Channels (Repolarization)'), xK, memY - 12, Math.max(55,w*0.30));
+            gatesCtx.textAlign = 'left';
 
             gatesCtx.strokeStyle = '#c084fc'; gatesCtx.lineWidth = 3.5;
             gatesCtx.beginPath();
@@ -4071,7 +4151,8 @@
             const h = twelveCanvas.height / (window.devicePixelRatio || 1);
             twelveCtx.clearRect(0, 0, w, h);
 
-            const cols = 4, rows = 3;
+            const cols = w < 520 ? 2 : (w < 850 ? 3 : 4);
+            const rows = Math.ceil(LEADS_12.length / cols);
             const cellW = w / cols;
             const cellH = h / rows;
 
@@ -4092,7 +4173,7 @@
                 const x0 = c * cellW;
                 const y0 = r * cellH;
                 const baseY = y0 + cellH * 0.64;
-                const scaleMV = cellH * 0.24;
+                const scaleMV = cellH * (currentScenario === 'lvh' ? 0.19 : 0.24);
 
                 const leadStatus = getLeadImpactStatus(currentScenario, lead.id);
                 const baseCellColor = leadStatus === 'primary' ? '#f43f5e' : leadStatus === 'secondary' ? '#f59e0b' : 'rgba(148, 163, 184, 0.22)';
@@ -4135,9 +4216,11 @@
 
         twelveCanvas.addEventListener('pointerdown', e => {
             const rect = twelveCanvas.getBoundingClientRect();
-            const c = Math.floor(((e.clientX - rect.left) / rect.width) * 4);
-            const r = Math.floor(((e.clientY - rect.top) / rect.height) * 3);
-            const idx = r * 4 + c;
+            const cols = rect.width < 520 ? 2 : (rect.width < 850 ? 3 : 4);
+            const rows = Math.ceil(LEADS_12.length / cols);
+            const c = Math.min(cols-1, Math.floor(((e.clientX - rect.left) / rect.width) * cols));
+            const r = Math.min(rows-1, Math.floor(((e.clientY - rect.top) / rect.height) * rows));
+            const idx = r * cols + c;
             if (LEADS_12[idx]) {
                 selectedLeadName = LEADS_12[idx].id;
                 document.getElementById('live-lead-name').textContent = LEADS_12[idx].name;
@@ -4194,7 +4277,9 @@
                 bodyMapCtx.fillStyle = n.col;
                 bodyMapCtx.beginPath(); bodyMapCtx.arc(n.x, n.y, 7, 0, Math.PI * 2); bodyMapCtx.fill();
                 bodyMapCtx.fillStyle = '#e2e8f0'; bodyMapCtx.font = 'bold 10px monospace';
-                bodyMapCtx.fillText(n.id, n.x - 24, n.y - 10);
+                if (n.x > cx) { bodyMapCtx.textAlign='right'; bodyMapCtx.fillText(n.id, w-10, n.y-10, 110); }
+                else { bodyMapCtx.textAlign='left'; bodyMapCtx.fillText(n.id, 10, n.y-10, 110); }
+                bodyMapCtx.textAlign='left';
             });
 
             const vLeads = [
@@ -4216,9 +4301,9 @@
 
             const isAr = (currentLang === 'ar');
             bodyMapCtx.fillStyle = '#cbd5e1'; bodyMapCtx.font = 'bold 11px Cairo, Inter';
-            bodyMapCtx.fillText(isAr ? '• V1-V4: الجدار الأمامي والحاجز (شريان LAD)' : '• V1-V4: Anterior/Septal Wall (LAD)', 14, h - 42);
-            bodyMapCtx.fillText(isAr ? '• II, III, aVF: الجدار السفلي (شريان RCA)' : '• II, III, aVF: Inferior Wall (RCA)', 14, h - 25);
-            bodyMapCtx.fillText(isAr ? '• I, aVL, V5, V6: الجدار الجانبي (شريان LCx)' : '• I, aVL, V5, V6: Lateral Wall (LCx)', 14, h - 8);
+            bodyMapCtx.fillText(isAr ? '• V1-V4: الجدار الأمامي والحاجز (شريان LAD)' : '• V1-V4: Anterior/Septal Wall (LAD)', 14, h - 42, w - 28);
+            bodyMapCtx.fillText(isAr ? '• II, III, aVF: الجدار السفلي (شريان RCA)' : '• II, III, aVF: Inferior Wall (RCA)', 14, h - 25, w - 28);
+            bodyMapCtx.fillText(isAr ? '• I, aVL, V5, V6: الجدار الجانبي (شريان LCx)' : '• I, aVL, V5, V6: Lateral Wall (LCx)', 14, h - 8, w - 28);
         }
 
         // =====================================================================
@@ -4252,6 +4337,21 @@
             document.getElementById('active-pathology-pill').textContent = scObj.name;
             document.getElementById('path-phase-desc').textContent = scObj.phases[pIdx];
             document.getElementById('path-overall-summary').textContent = (isAr ? 'ملخص الحالة السريرية: ' : 'Clinical Summary: ') + scObj.summary;
+
+            if (currentScenario === 'vfib') {
+                const vfTitle = isAr ? 'الرجفان البطيني: نشاط كهربائي فوضوي' : 'Ventricular fibrillation: disorganized electrical activity';
+                const vfDesc = isAr
+                    ? 'لا توجد موجة P أو مركبات QRS أو موجات T منظمة يمكن تحديدها بثقة. النشاط البطيني فوضوي ولا ينتج عنه ضخ فعّال؛ لا تنطبق مساطر PR وQT القياسية هنا.'
+                    : 'There are no reliably organized P waves, QRS complexes, or T waves. Ventricular activity is chaotic and produces no effective output; standard PR and QT calipers do not apply.';
+                document.getElementById('current-phase-badge').textContent = vfTitle;
+                document.getElementById('ecg-active-segment-tag').textContent = vfTitle;
+                document.getElementById('phase-exp-main-title').textContent = vfTitle;
+                document.getElementById('norm-phase-desc').textContent = vfDesc;
+                document.getElementById('val-ion-norm').textContent = isAr ? 'تنشيط بطيني غير متزامن؛ لا يوجد جهد فعل بطيني منظم' : 'Unsynchronized ventricular activation; no organized ventricular action potential';
+                document.getElementById('val-ecg-norm').textContent = isAr ? 'موجات فوضوية دون QRS/T قابلة للتمييز' : 'Chaotic waveform without distinguishable organized QRS/T';
+                document.getElementById('path-phase-desc').textContent = vfDesc;
+                document.getElementById('path-overall-summary').textContent = isAr ? 'الرجفان البطيني حالة توقف قلب قابلة للصدمات؛ النموذج تعليمي ولا يمثل تخطيطاً تشخيصياً.' : 'Ventricular fibrillation is a shockable cardiac-arrest rhythm; this is an educational illustration, not a diagnostic ECG.';
+            }
 
             const condLabelsAr = [
                 'العقدة الجيبية (SA Node) ومسارات الأذينين',
@@ -6017,6 +6117,78 @@ function updateDynamicECGMetrics(){
  #html-root #theme-toggle-text {display:inline!important;visibility:visible!important;opacity:1!important;}
 }
 </style>
+
+
+<style id="clinix-audit-repair-layer">
+/* Canvas drawing text is always explicitly LTR; translated text stays in DOM, not canvas direction. */
+#html-root canvas { direction:ltr!important; }
+/* Make each ECG cell tall enough on phones when the 12-lead layout switches to 2 columns. */
+@media(max-width:519px){
+  #html-root #twelve-lead-col { height:560px!important; min-height:560px!important; }
+  #html-root #twelve-lead-col canvas { width:100%!important; height:100%!important; }
+}
+@media(min-width:520px) and (max-width:849px){
+  #html-root #twelve-lead-col { height:440px!important; min-height:440px!important; }
+}
+/* Ensure measurement values and the 3D status are available on phone, not hidden by utility classes. */
+#html-root .hidden:has(#meas-p), #html-root .hidden:has(#meas-pr),
+#html-root .hidden:has(#meas-qrs), #html-root .hidden:has(#meas-st), #html-root .hidden:has(#meas-qt) { display:grid!important; }
+#html-root #heart3d-statusbar { display:flex!important; flex-wrap:wrap!important; }
+/* Phase buttons and time title honor theme instead of retaining high-glare pale colors. */
+#html-root.dark .sticky-master-timeline button[id^="jmp-"] { background:#17263a!important;color:#dbeafe!important;border-color:#334155!important; }
+#html-root.dark .sticky-master-timeline button[id^="jmp-"].phase-btn-active { background:#075985!important;color:#fff!important; }
+@media(min-width:1024px){#html-root.dark .sticky-master-timeline #ui-time-title {color:#cbd5e1!important;}}
+/* Remove fixed-height clipping / nested scrolling from explanation cards on all screens. */
+#html-root #phase-explanation-board {height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;}
+#html-root #phase-explanation-board .grid,
+#html-root #phase-explanation-board .grid>div,
+#html-root #norm-phase-desc,#html-root #path-phase-desc,#html-root #path-overall-summary {
+ height:auto!important;min-height:0!important;max-height:none!important;overflow:visible!important;white-space:normal!important;overflow-wrap:anywhere!important;
+}
+/* Keep the heart overlays separated and keep the model touch-friendly. */
+#html-root #heart3d-container {position:relative;touch-action:pan-y!important;}
+#html-root #heart3d-container > div.absolute.bottom-2.left-2 {display:flex!important;flex-direction:column!important;gap:4px!important;}
+#html-root #heart3d-container > div.absolute.top-2.left-2 {z-index:30!important;}
+@media(max-width:639px){
+ #html-root .sticky-master-timeline {top:2px!important;padding:5px!important;}
+ #html-root .sticky-master-timeline > div:first-child > div:nth-child(3) {grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:2px!important;}
+ #html-root .sticky-master-timeline > div:first-child > div:nth-child(3)>button {min-height:27px!important;padding:2px!important;font-size:8px!important;white-space:normal!important;overflow-wrap:anywhere!important;}
+ #html-root #heart3d-container {height:260px!important;}
+ #html-root #theme-toggle-text {display:inline!important;visibility:visible!important;opacity:1!important;}
+}
+</style>
+<script id="clinix-audit-runtime-fixes">
+(function(){
+ const $=id=>document.getElementById(id);
+ function refreshAfterViewShown(){
+   if(typeof window.resizeAllCanvases==='function') window.resizeAllCanvases();
+   if(typeof window.drawAll2D==='function') window.drawAll2D();
+   if(typeof window.renderThreeJSHeart==='function') window.renderThreeJSHeart();
+ }
+ // Guarantee the main hub uses the same language state as the simulator.
+ const originalLaunch=window.launchModule;
+ if(typeof originalLaunch==='function') window.launchModule=function(mod){originalLaunch(mod);requestAnimationFrame(()=>requestAnimationFrame(refreshAfterViewShown));};
+ // Keep theme button text and phase/metric labels synchronized with the chosen language/theme.
+ document.addEventListener('click',function(e){
+   const b=e.target.closest('#theme-toggle-btn');
+   if(b) requestAnimationFrame(()=>{const r=$('html-root')||document.documentElement;const label=$('theme-toggle-text');if(label){const ar=(r.lang||'ar')==='ar';label.textContent=r.classList.contains('dark')?(ar?'الوضع الفاتح':'Light mode'):(ar?'الوضع الداكن':'Dark mode');}});
+ });
+ // Disable calibration labels for rhythms where P/PR/QRS measurements are not standardly interpretable.
+ function updateRhythmCalipers(){
+   const sc=(typeof currentScenario==='string')?currentScenario:'';
+   const irregular=['afib','vfib','vt','tdp','svt','aflutter'].includes(sc);
+   document.querySelectorAll('#caliper-pr, #caliper-qrs, #caliper-qt, .ecg-caliper, [data-caliper]').forEach(el=>{el.style.opacity=irregular?'0.25':'';el.style.pointerEvents=irregular?'none':'';});
+ }
+ const prevDraw=window.drawAll2D;
+ if(typeof prevDraw==='function') window.drawAll2D=function(){prevDraw();updateRhythmCalipers();};
+ // Avoid a duplicated author footer in the simulator; keep the hub footer available on the home screen.
+ const fs=document.querySelectorAll('#ecg-simulator-view footer'); if(fs.length>0) fs.forEach((el,i)=>{if(i>0)el.style.display='none';});
+ // Correct the scenario label/lead panel after selection changes.
+ document.addEventListener('change',()=>{if(typeof window.updateLeadChangesPanel==='function')window.updateLeadChangesPanel();});
+ if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>{refreshAfterViewShown();updateRhythmCalipers();});
+ else {refreshAfterViewShown();updateRhythmCalipers();}
+})();
+</script>
 
 </body>
 </html>
