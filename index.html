@@ -4970,10 +4970,17 @@
                 for (let i = 0; i < 24; i++) sparkPool.push({ halo: mkSprite(texGlow, 21), core: mkSprite(texGlow, 22) });
 
                 capEl = document.createElement('div');
-                capEl.style.cssText = 'position:absolute;top:48px;left:8px;z-index:10;max-width:calc(100% - 16px);padding:4px 8px;border-radius:8px;' +
+                capEl.id = 'heart3d-charge-caption';
+                /* Keep the spark/charge explanation in normal document flow beneath the anatomical-label options, never overlaying the heart. */
+                capEl.style.cssText = 'position:relative;display:block;top:auto;left:auto;right:auto;bottom:auto;z-index:1;width:100%;max-width:100%;box-sizing:border-box;margin:6px 0 8px;padding:6px 10px;border-radius:8px;' +
                     'background:rgba(2,6,23,0.86);border:1px solid rgba(250,204,21,0.45);color:#fde68a;font-size:10px;font-weight:700;' +
-                    'line-height:1.5;pointer-events:none;backdrop-filter:blur(6px);';
-                document.getElementById('heart3d-container').appendChild(capEl);
+                    'line-height:1.5;white-space:normal;overflow-wrap:anywhere;pointer-events:none;backdrop-filter:blur(6px);';
+                const labelHeading = document.getElementById('ui-3d-labels-heading');
+                const labelOptionsRow = labelHeading ? labelHeading.parentElement : null;
+                const heartContainer = document.getElementById('heart3d-container');
+                if (labelOptionsRow && labelOptionsRow.parentElement) labelOptionsRow.insertAdjacentElement('afterend', capEl);
+                else if (heartContainer && heartContainer.parentElement) heartContainer.parentElement.insertBefore(capEl, heartContainer);
+                else if (heartContainer) heartContainer.appendChild(capEl);
             }
 
             // ---------- event constructors ----------
@@ -6387,6 +6394,12 @@ function updateDynamicECGMetrics(){
   else placePhaseLegend();
 })();
 </script>
+
+
+<style id="clinix-spark-caption-under-labels-only">
+#heart3d-charge-caption { position:relative!important; inset:auto!important; display:block!important; width:100%!important; max-width:100%!important; margin:6px 0 8px!important; box-sizing:border-box!important; white-space:normal!important; overflow-wrap:anywhere!important; }
+@media (max-width:639px) { #heart3d-charge-caption { padding:6px 9px!important; font-size:10px!important; line-height:1.45!important; } }
+</style>
 
 </body>
 </html>
