@@ -1256,30 +1256,15 @@
                     </button>
                 </div>
             </div>
-        
-            <!-- Interactive URL Route Bar (/ECGStimulation) & GitHub Multi-Page Guide -->
-            <div id="clinix-route-bar" class="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
-                <div class="flex items-center gap-2 bg-slate-950/80 px-3 py-1 rounded-xl border border-sky-500/30 font-mono text-[11px] sm:text-xs">
-                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                    <span class="text-slate-400" id="ui-route-prefix">URL Route:</span>
-                    <span id="clinix-live-url-path" class="text-sky-300 font-extrabold dir-ltr" dir="ltr">clinixlab.github.io/</span>
-                </div>
-                <div class="flex flex-wrap items-center gap-1.5">
-                    <button type="button" onclick="openGitHubArchModal()" id="btn-github-arch" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 font-bold text-[11px] flex items-center gap-1.5 transition">
-                        <i class="fa-solid fa-code-branch"></i>
-                        <span id="ui-github-arch-btn">هيكلة وروابط GitHub (/ECGStimulation) وتصدير الملفات</span>
-                    </button>
-                </div>
-            </div>
 
         </header>
 
         <!-- VIEW 1: THE MAIN DASHBOARD HUB (CARDS GRID) -->
         <main id="main-hub-view" class="max-w-[1650px] mx-auto mb-6">
-            <div class="text-center my-6 sm:my-8">
+            <div class="hidden" aria-hidden="true"><div class="text-center my-6 sm:my-8">
                 <h2 id="ui-hub-heading" class="text-2xl sm:text-3xl font-black text-white mb-2">اختر القسم التعليمي أو المحاكي السريري</h2>
                 <p id="ui-hub-desc" class="text-sm text-slate-400 max-w-2xl mx-auto">تضم المنصة أدوات تفاعلية متقدمة تغطي تخطيط القلب، الفحص السريري، العناية الحرجة، وأدوية الطوارئ</p>
-            </div>
+            </div></div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                 <!-- CARD 1: ECG & Electrophysiology (ACTIVE & READY!) -->
@@ -1430,28 +1415,83 @@
 
             </div>
 
-            <!-- Clinical Categories & Pathology Buttons -->
-            <div class="w-full xl:w-auto flex flex-col gap-2">
-                <div class="flex flex-wrap items-center gap-1.5">
-                    <span id="ui-cat-label" class="text-xs font-bold text-sky-400 ml-1"><i class="fa-solid fa-stethoscope"></i> الفئة السريرية:</span>
-                    <button onclick="selectCategory('normal_elec')" id="cat-normal_elec" class="cat-btn active-cat-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 transition">
-                        1. الطبيعي والأملاح (Normal & Ions)
-                    </button>
-                    <button onclick="selectCategory('mi_struct')" id="cat-mi_struct" class="cat-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-300 transition">
-                        2. الجلطات والتضخم والاندحاس (STEMI / LVH / Tamponade)
-                    </button>
-                    <button onclick="selectCategory('avblocks')" id="cat-avblocks" class="cat-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-300 transition">
-                        3. حصار القلب والحزم (AV & Bundle Blocks)
-                    </button>
-                    <button onclick="selectCategory('acls')" id="cat-acls" class="cat-btn px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-800 border border-slate-700 text-slate-300 transition">
-                        4. لانظميات الطوارئ (ACLS Arrhythmias)
-                    </button>
+            <!-- Clinical Categories (Level 1) & Indented Sub-Branch Scenarios (Level 2) -->
+            <div class="w-full flex flex-col gap-2.5 mt-1">
+                <!-- LEVEL 1: MAIN CLINICAL CATEGORIES DECK -->
+                <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
+                        <span id="ui-cat-label" class="text-xs font-black text-sky-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-folder-tree"></i> الفئات السريرية الرئيسية (اختر الفئة لعرض أفرعها):
+                        </span>
+                        <button type="button" onclick="selectCategory('all')" id="cat-all" class="cat-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-slate-900 border border-slate-700 text-slate-300 flex items-center gap-1.5 transition">
+                            <i class="fa-solid fa-layer-group text-sky-400"></i>
+                            <span id="ui-cat-all-text">عرض كل الفئات والأفرع (34 حالة)</span>
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+                        <button onclick="selectCategory('normal_elec')" id="cat-normal_elec" data-cat-theme="emerald" class="cat-btn active-cat-btn cat-card-btn px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-900 border-2 border-emerald-500/40 text-right flex items-center justify-between gap-2 transition">
+                            <span class="flex items-center gap-2 min-w-0">
+                                <span class="w-6 h-6 rounded-lg bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 flex items-center justify-center shrink-0 font-mono text-[11px]">1</span>
+                                <span class="truncate" id="cat-txt-normal_elec">1. الطبيعي والشوارد (Normal & Ions)</span>
+                            </span>
+                            <span class="px-1.5 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 font-mono text-[10px] shrink-0">9</span>
+                        </button>
+                        <button onclick="selectCategory('mi_struct')" id="cat-mi_struct" data-cat-theme="rose" class="cat-btn cat-card-btn px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-900 border-2 border-rose-500/40 text-slate-200 text-right flex items-center justify-between gap-2 transition">
+                            <span class="flex items-center gap-2 min-w-0">
+                                <span class="w-6 h-6 rounded-lg bg-rose-500/20 border border-rose-500/40 text-rose-300 flex items-center justify-center shrink-0 font-mono text-[11px]">2</span>
+                                <span class="truncate" id="cat-txt-mi_struct">2. الجلطات والتضخم (STEMI / LVH)</span>
+                            </span>
+                            <span class="px-1.5 py-0.5 rounded-md bg-rose-500/20 text-rose-300 font-mono text-[10px] shrink-0">6</span>
+                        </button>
+                        <button onclick="selectCategory('avblocks')" id="cat-avblocks" data-cat-theme="amber" class="cat-btn cat-card-btn px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-900 border-2 border-amber-500/40 text-slate-200 text-right flex items-center justify-between gap-2 transition">
+                            <span class="flex items-center gap-2 min-w-0">
+                                <span class="w-6 h-6 rounded-lg bg-amber-500/20 border border-amber-500/40 text-amber-300 flex items-center justify-center shrink-0 font-mono text-[11px]">3</span>
+                                <span class="truncate" id="cat-txt-avblocks">3. حصار القلب والحزم (AV & BBB)</span>
+                            </span>
+                            <span class="px-1.5 py-0.5 rounded-md bg-amber-500/20 text-amber-300 font-mono text-[10px] shrink-0">9</span>
+                        </button>
+                        <button onclick="selectCategory('acls')" id="cat-acls" data-cat-theme="sky" class="cat-btn cat-card-btn px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-900 border-2 border-sky-500/40 text-slate-200 text-right flex items-center justify-between gap-2 transition">
+                            <span class="flex items-center gap-2 min-w-0">
+                                <span class="w-6 h-6 rounded-lg bg-sky-500/20 border border-sky-500/40 text-sky-300 flex items-center justify-center shrink-0 font-mono text-[11px]">4</span>
+                                <span class="truncate" id="cat-txt-acls">4. لانظميات الطوارئ (ACLS Rhythms)</span>
+                            </span>
+                            <span class="px-1.5 py-0.5 rounded-md bg-sky-500/20 text-sky-300 font-mono text-[10px] shrink-0">10</span>
+                        </button>
+                    </div>
                 </div>
 
-                <!-- Dynamic Scenario Buttons -->
-                <div id="scenario-list-container" class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-800/80"></div>
+                <!-- LEVEL 2: INDENTED SUB-BRANCH CONTAINER FOR SCENARIOS -->
+                <div id="scenario-subbranch-box" class="mr-3 sm:mr-6 ml-1 p-2.5 rounded-xl bg-slate-900/90 border border-slate-700/80 border-r-4 border-r-emerald-400 shadow-inner">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2 pb-1.5 border-b border-slate-800/90 text-[11px]">
+                        <span id="ui-subbranch-header" class="font-extrabold text-emerald-300 flex items-center gap-1.5">
+                            <i class="fa-solid fa-turn-down-left"></i>
+                            <span>↳ الحالات الفرعية المندرجة تحت: 1. الطبيعي والشوارد (Normal & Ions)</span>
+                        </span>
+                        <span id="ui-subbranch-hint" class="text-[10px] text-slate-400 font-semibold">انقر على أي فرع لتشغيل المحاكاة</span>
+                    </div>
+                    <div id="scenario-list-container" class="flex flex-wrap gap-1.5"></div>
+                    <div class="hidden" aria-hidden="true">
+                        <button type="button" onclick="selectCategory('normal_elec')">1. الطبيعي والأملاح (Normal &amp; Ions)</button>
+                        <button type="button" onclick="selectCategory('acls')">4. لانظميات الطوارئ (ACLS Arrhythmias)</button>
+                    </div>
+                </div>
             </div>
         </div>
+    
+        <!-- Interactive URL Route Bar (/ECGStimulation) & GitHub Multi-Page Guide -->
+            <div id="clinix-route-bar" class="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2 bg-slate-950/80 px-3 py-1 rounded-xl border border-sky-500/30 font-mono text-[11px] sm:text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-slate-400" id="ui-route-prefix">URL Route:</span>
+                    <span id="clinix-live-url-path" class="text-sky-300 font-extrabold dir-ltr" dir="ltr">clinixlab.github.io/</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" onclick="openGitHubArchModal()" id="btn-github-arch" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 font-bold text-[11px] flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-code-branch"></i>
+                        <span id="ui-github-arch-btn">هيكلة وروابط GitHub (/ECGStimulation) وتصدير الملفات</span>
+                    </button>
+                </div>
+            </div>
     </header>
 
     <!-- =====================================================================
@@ -1503,6 +1543,31 @@
                 <button onclick="jumpToPhase(365)" id="jmp-3" class="px-2.5 py-1 rounded-lg bg-emerald-950/70 hover:bg-emerald-900 border border-emerald-500/50 text-[11px] font-bold text-emerald-300 transition">4. قطعة ST (الانقباض)</button>
                 <button onclick="jumpToPhase(510)" id="jmp-4" class="px-2.5 py-1 rounded-lg bg-purple-950/70 hover:bg-purple-900 border border-purple-500/50 text-[11px] font-bold text-purple-300 transition">5. موجة T (الطور 3)</button>
                 <button onclick="jumpToPhase(680)" id="jmp-5" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-600 text-[11px] font-bold text-slate-300 transition">6. الطور 4 / موجة U</button>
+            </div>
+        </div>
+
+        <!-- PINNED LIVE MINI-ECG PAPER & MINI BEATING HEART DOCK (Stays visible when scrolling down to Ion Gates / Action Potential / 12-Lead) -->
+        <div id="sticky-mini-monitor-wrapper" class="mt-2 pt-2 border-t border-slate-800/80">
+            <div class="flex items-center justify-between gap-2 mb-1">
+                <div class="flex items-center gap-2 text-[11px] font-extrabold text-sky-400">
+                    <i class="fa-solid fa-thumbtack text-rose-400"></i>
+                    <span id="ui-sticky-dock-title">الشريط المرجعي المثبت (تخطيط الورق الحي + انقباض القلب المتزامن أثناء النزول للأسفل):</span>
+                    <span id="sticky-mini-lead-pill" class="px-2 py-0.5 rounded bg-rose-500/15 text-rose-600 border border-rose-500/30 font-mono text-[10px]">Lead II • 75 bpm</span>
+                </div>
+                <button type="button" onclick="toggleStickyMiniDock()" id="btn-toggle-sticky-dock" class="px-2 py-0.5 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 text-[10px] font-bold flex items-center gap-1">
+                    <i class="fa-solid fa-chevron-up" id="icon-sticky-dock"></i>
+                    <span id="ui-btn-sticky-dock">إخفاء/إظهار المصغر</span>
+                </button>
+            </div>
+            <div id="sticky-mini-monitor-row" class="grid grid-cols-12 gap-2 items-stretch">
+                <!-- Mini Paper ECG Strip (8 cols on desktop, 8 cols on mobile) -->
+                <div class="col-span-8 sm:col-span-9 relative h-14 sm:h-16 rounded-xl overflow-hidden border border-rose-400/60 bg-[#fff9f9] shadow-inner">
+                    <canvas id="sticky-mini-ecg-canvas" class="w-full h-full block cursor-ew-resize"></canvas>
+                </div>
+                <!-- Mini Synchronized Beating Heart & Conduction Preview (4 cols on mobile, 3 cols on desktop) -->
+                <div class="col-span-4 sm:col-span-3 relative h-14 sm:h-16 rounded-xl overflow-hidden border border-slate-700 bg-[#0b1324] flex items-center justify-center shadow-inner">
+                    <canvas id="sticky-mini-heart-canvas" class="w-full h-full block cursor-pointer" onclick="toggleHeartFullscreenMode()" title="Click to toggle 3D Heart Fullscreen"></canvas>
+                </div>
             </div>
         </div>
     </section>
@@ -1585,7 +1650,7 @@
             </div>
 
             <!-- PANEL 2: AUTHENTIC 3D WEBGL ANATOMICAL HEART WITH HIS-PURKINJE NETWORK (6 Columns) -->
-            <div class="lg:col-span-6 panel-card rounded-2xl p-3 sm:p-4 flex flex-col justify-between">
+            <div id="panel-2-heart-card" class="lg:col-span-6 panel-card rounded-2xl p-3 sm:p-4 flex flex-col justify-between">
                 <div>
                     <div class="flex flex-wrap justify-between items-center gap-2 mb-2 pb-1.5 border-b border-slate-800">
                         <div>
@@ -1598,27 +1663,39 @@
                             </p>
                         </div>
 
-                        <!-- 3D Layer Toggle Switches -->
+                        <!-- 3D Layer Toggle Switches (Conduction, X-Ray, 12 Leads, Arteries, Veins, Vector, Studio BG, Fullscreen) -->
                         <div class="flex flex-wrap items-center gap-1">
-                            <button onclick="toggle3DLayer('conduction')" id="btn-3d-conduction" style="display:none !important;" class="hidden px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
-                                <i class="fa-solid fa-bolt"></i>
+                            <button type="button" onclick="toggle3DConductionSystem()" id="btn-3d-conduction" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
+                                <i class="fa-solid fa-bolt text-amber-400"></i>
                                 <span id="ui-tgl-cond">حزمة هيس وألياف بركنجي</span>
                             </button>
-                            <button onclick="toggle3DLayer('xray')" id="btn-3d-xray" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
+                            <button type="button" onclick="toggle3DLayer('coronary')" id="btn-3d-coronary" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
+                                <i class="fa-solid fa-code-branch text-rose-400"></i>
+                                <span id="ui-tgl-cor">الشرايين</span>
+                            </button>
+                            <button type="button" onclick="toggle3DVeinsLayer()" id="btn-3d-veins" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
+                                <i class="fa-solid fa-droplet text-sky-400"></i>
+                                <span id="ui-tgl-veins">الأوردة</span>
+                            </button>
+                            <button type="button" onclick="toggle3DLayer('xray')" id="btn-3d-xray" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
                                 <i class="fa-solid fa-eye"></i>
                                 <span id="ui-tgl-xray">شفافية العضلة (X-Ray)</span>
                             </button>
-                            <button onclick="toggle3DLayer('electrodes')" id="btn-3d-electrodes" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
+                            <button type="button" onclick="toggle3DLayer('electrodes')" id="btn-3d-electrodes" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
                                 <i class="fa-solid fa-tower-broadcast"></i>
                                 <span id="ui-tgl-elec">الأقطاب الـ 12</span>
                             </button>
-                            <button onclick="toggle3DLayer('coronary')" id="btn-3d-coronary" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
-                                <i class="fa-solid fa-code-branch"></i>
-                                <span id="ui-tgl-cor">الشرايين</span>
-                            </button>
-                            <button onclick="toggle3DLayer('vectors')" id="btn-3d-vectors" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-400 transition flex items-center gap-1">
+                            <button type="button" onclick="toggle3DLayer('vectors')" id="btn-3d-vectors" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-400 transition flex items-center gap-1">
                                 <i class="fa-solid fa-location-arrow"></i>
                                 <span id="ui-tgl-vec">المتجه</span>
+                            </button>
+                            <button type="button" onclick="toggle3DStudioBg()" id="btn-3d-studio-bg" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
+                                <i class="fa-solid fa-sun"></i>
+                                <span id="ui-tgl-studio-bg">خلفية استوديو</span>
+                            </button>
+                            <button type="button" onclick="toggleHeartFullscreenMode()" id="btn-3d-fullscreen" class="px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-extrabold bg-sky-600 hover:bg-sky-500 text-white border border-sky-400 transition flex items-center gap-1 shadow">
+                                <i class="fa-solid fa-expand" id="icon-3d-fullscreen"></i>
+                                <span id="ui-tgl-fullscreen">ملء الشاشة</span>
                             </button>
                         </div>
                         <div class="w-full flex flex-wrap items-center gap-1 mt-1.5" aria-label="Anatomical label controls">
@@ -9047,6 +9124,1535 @@ function updateDynamicECGMetrics(){
         document.addEventListener('DOMContentLoaded', initUpgradedSimulator, { once: true });
     } else {
         initUpgradedSimulator();
+    }
+})();
+</script>
+
+
+<style id="clinix-phase2-sketchfab-and-paper-styles">
+  /* 1. Ensure 3D HTML Labels Overlay is ALWAYS above the WebGL Canvas so 3D geometry NEVER covers text */
+  #html-root #heart3d-container {
+    position: relative !important;
+  }
+  #html-root #heart3d-container canvas {
+    position: relative !important;
+    z-index: 1 !important;
+  }
+  #html-root #labels-3d-overlay {
+    z-index: 25 !important;
+  }
+
+  /* 2. Studio Realistic Backdrop for 3D Heart (like Sketchfab 12-lead ECG model) */
+  #html-root #heart3d-container.studio-light-bg {
+    background: radial-gradient(circle at 50% 42%, #f8fafc 0%, #e2e8f0 58%, #cbd5e1 100%) !important;
+    border-color: #94a3b8 !important;
+  }
+
+  /* 3. Real Clinical Pink/Red Millimeter Thermal ECG Paper Containers */
+  #html-root #ecg-canvas,
+  #html-root #twelve-lead-canvas,
+  #html-root #sticky-mini-ecg-canvas {
+    background-color: #fff9f9 !important;
+  }
+  #html-root #twelve-lead-col {
+    background: #fff9f9 !important;
+    border-color: rgba(225, 29, 72, 0.45) !important;
+  }
+
+  /* 4. Distinct Clinical Category Cards vs Sub-Branch Tree Container */
+  .cat-card-btn.active-cat-btn {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px -4px rgba(14, 165, 233, 0.35) !important;
+    outline: 2px solid #38bdf8 !important;
+  }
+  .scenario-sub-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 10px;
+    border-radius: 9px;
+    font-size: 11.5px;
+    font-weight: 700;
+    transition: all 0.15s ease;
+  }
+  .scenario-sub-btn.active-sc-btn {
+    background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%) !important;
+    color: #ffffff !important;
+    border-color: #38bdf8 !important;
+    box-shadow: 0 4px 12px rgba(2, 132, 199, 0.35) !important;
+  }
+
+  /* 5. Fullscreen 3D Heart Mode WITH Sticky Master Timeline */
+  body.clinix-heart-fullscreen-mode {
+    overflow: hidden !important;
+  }
+  body.clinix-heart-fullscreen-mode .sticky-master-timeline {
+    position: fixed !important;
+    top: 6px !important;
+    left: 8px !important;
+    right: 8px !important;
+    z-index: 9999 !important;
+    max-width: none !important;
+    margin: 0 !important;
+  }
+  body.clinix-heart-fullscreen-mode #panel-2-heart-card {
+    position: fixed !important;
+    top: var(--clinix-fs-top, 165px) !important;
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 8px !important;
+    z-index: 9998 !important;
+    margin: 0 !important;
+    max-width: none !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+  body.clinix-heart-fullscreen-mode #panel-2-heart-card > div:first-child {
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+    min-height: 0 !important;
+  }
+  body.clinix-heart-fullscreen-mode #heart3d-container {
+    flex: 1 1 auto !important;
+    height: 100% !important;
+    min-height: 320px !important;
+    max-height: none !important;
+  }
+
+  /* 6. Responsive Sticky Mini-Monitor Behavior:
+     - On Laptop (>=1024px): Always visible unless manually collapsed.
+     - On Mobile (<1024px): Compact and auto-shown only when scrolled down past the main panels (or manually toggled) so it never crowds mobile screens! */
+  @media (max-width: 1023px) {
+    #sticky-mini-monitor-wrapper:not(.mobile-scrolled-visible):not(.manual-force-open) #sticky-mini-monitor-row {
+      display: none !important;
+    }
+  }
+  #sticky-mini-monitor-wrapper.user-collapsed #sticky-mini-monitor-row {
+    display: none !important;
+  }
+</style>
+
+<script id="clinix-phase2-master-engine">
+(function () {
+    // =========================================================================
+    // 1. DISABLE LEGACY CONDUCTION BUTTON HIJACKING SO #btn-3d-conduction
+    //    ACTUALLY TOGGLES THE 3D CONDUCTION SYSTEM (HIS-PURKINJE & SPARKS)!
+    // =========================================================================
+    layers3D.conduction = true;
+    layers3D.coronary = true;
+    layers3D.veins = true;
+    layers3D.xray = false; // Default to Realistic Solid Sketchfab Heart!
+    layers3D.studioBg = true;
+
+    window.toggle3DConductionSystem = function () {
+        layers3D.conduction = !layers3D.conduction;
+        if (conductionSystemGroup) {
+            conductionSystemGroup.visible = layers3D.conduction;
+        }
+        const btn = document.getElementById('btn-3d-conduction');
+        const txt = document.getElementById('ui-tgl-cond');
+        const isAr = (currentLang === 'ar');
+        if (btn) btn.classList.toggle('toggle-pill-active', layers3D.conduction);
+        if (txt) txt.textContent = isAr ? 'نظام التوصيل (His-Purkinje)' : 'Conduction (His-Purkinje)';
+        renderThreeJSHeart();
+    };
+
+    let veinsGroup3D = null;
+    window.toggle3DVeinsLayer = function () {
+        layers3D.veins = !layers3D.veins;
+        if (veinsGroup3D) {
+            veinsGroup3D.visible = layers3D.veins;
+        }
+        const btn = document.getElementById('btn-3d-veins');
+        if (btn) btn.classList.toggle('toggle-pill-active', layers3D.veins);
+        renderThreeJSHeart();
+    };
+
+    window.toggle3DStudioBg = function () {
+        layers3D.studioBg = !layers3D.studioBg;
+        const c3d = document.getElementById('heart3d-container');
+        const btn = document.getElementById('btn-3d-studio-bg');
+        if (c3d) c3d.classList.toggle('studio-light-bg', layers3D.studioBg);
+        if (btn) btn.classList.toggle('toggle-pill-active', layers3D.studioBg);
+        renderThreeJSHeart();
+    };
+
+    // Fullscreen 3D Heart Mode (keeps Sticky Master Timeline at the top!)
+    let isHeartFullscreen = false;
+    window.toggleHeartFullscreenMode = function () {
+        isHeartFullscreen = !isHeartFullscreen;
+        document.body.classList.toggle('clinix-heart-fullscreen-mode', isHeartFullscreen);
+        const btn = document.getElementById('btn-3d-fullscreen');
+        const icon = document.getElementById('icon-3d-fullscreen');
+        const txt = document.getElementById('ui-tgl-fullscreen');
+        const isAr = (currentLang === 'ar');
+        if (icon) icon.className = isHeartFullscreen ? 'fa-solid fa-compress' : 'fa-solid fa-expand';
+        if (txt) txt.textContent = isHeartFullscreen
+            ? (isAr ? 'إغلاق ملء الشاشة' : 'Exit Fullscreen')
+            : (isAr ? 'ملء الشاشة' : 'Fullscreen');
+        if (btn) btn.classList.toggle('bg-rose-600', isHeartFullscreen);
+
+        const updateFsTop = () => {
+            const sticky = document.querySelector('.sticky-master-timeline');
+            if (sticky && isHeartFullscreen) {
+                const rect = sticky.getBoundingClientRect();
+                document.body.style.setProperty('--clinix-fs-top', Math.ceil(rect.bottom + 8) + 'px');
+            }
+            if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
+        };
+        requestAnimationFrame(() => requestAnimationFrame(updateFsTop));
+    };
+
+    window.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape' && isHeartFullscreen) {
+            window.toggleHeartFullscreenMode();
+        }
+    });
+
+    // =========================================================================
+    // 2. DISTINCT CLINICAL CATEGORIES (LEVEL 1) & SUB-BRANCHES (LEVEL 2)
+    // =========================================================================
+    const CAT_META = {
+        normal_elec: {
+            ar: '1. الطبيعي والشوارد (Normal & Ions)',
+            en: '1. Normal & Electrolytes',
+            borderCol: '#10b981',
+            textClass: 'text-emerald-300'
+        },
+        mi_struct: {
+            ar: '2. الجلطات والتضخم والاندحاس (STEMI / LVH / Tamponade)',
+            en: '2. STEMI, LVH & Tamponade',
+            borderCol: '#f43f5e',
+            textClass: 'text-rose-300'
+        },
+        avblocks: {
+            ar: '3. حصار القلب والحزم ونظم الهروب (AV & Bundle Blocks)',
+            en: '3. AV Blocks, Bundle Blocks & Escape',
+            borderCol: '#f59e0b',
+            textClass: 'text-amber-300'
+        },
+        acls: {
+            ar: '4. لانظميات الطوارئ والتوقف القلبي (ACLS Arrhythmias)',
+            en: '4. Emergency ACLS Arrhythmias',
+            borderCol: '#38bdf8',
+            textClass: 'text-sky-300'
+        },
+        all: {
+            ar: 'جميع الفئات السريرية والأفرع (34 حالة مصنفة)',
+            en: 'All Clinical Categories & Sub-branches (34 Scenarios)',
+            borderCol: '#6366f1',
+            textClass: 'text-indigo-300'
+        }
+    };
+
+    window.selectCategory = function (cat) {
+        currentCategory = cat;
+        document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active-cat-btn'));
+        const activeBtn = document.getElementById('cat-' + cat);
+        if (activeBtn) activeBtn.classList.add('active-cat-btn');
+        window.renderScenarioButtons();
+    };
+
+    window.renderScenarioButtons = function () {
+        const container = document.getElementById('scenario-list-container');
+        const subBox = document.getElementById('scenario-subbranch-box');
+        const subHeader = document.getElementById('ui-subbranch-header');
+        const subHint = document.getElementById('ui-subbranch-hint');
+        if (!container) return;
+
+        const isAr = (currentLang === 'ar');
+        const meta = CAT_META[currentCategory] || CAT_META.normal_elec;
+
+        if (subBox) {
+            subBox.style.borderInlineStartColor = meta.borderCol;
+            subBox.style.borderRightColor = isAr ? meta.borderCol : '';
+            subBox.style.borderLeftColor = !isAr ? meta.borderCol : '';
+        }
+        if (subHeader) {
+            subHeader.className = `font-extrabold ${meta.textClass} flex items-center gap-1.5`;
+            subHeader.innerHTML = `<i class="fa-solid fa-code-branch"></i> <span>${
+                isAr
+                    ? ('↳ الأفرع والحالات السريرية المندرجة تحت: ' + meta.ar)
+                    : ('↳ Sub-branch Scenarios under: ' + meta.en)
+            }</span>`;
+        }
+        if (subHint) {
+            subHint.textContent = isAr ? 'انقر على أي فرع لتشغيل المحاكاة ومقارنة التخطيط' : 'Click any sub-branch to launch simulation';
+        }
+
+        // Update category button titles for current language
+        ['normal_elec', 'mi_struct', 'avblocks', 'acls'].forEach(cid => {
+            const s = document.getElementById('cat-txt-' + cid);
+            if (s && CAT_META[cid]) s.textContent = isAr ? CAT_META[cid].ar : CAT_META[cid].en;
+        });
+        const allTxt = document.getElementById('ui-cat-all-text');
+        if (allTxt) allTxt.textContent = isAr ? 'عرض كل الفئات والأفرع (34 حالة)' : 'View All Categories (34)';
+
+        container.innerHTML = '';
+
+        const createScenarioPill = (key, sc) => {
+            const isSel = (currentScenario === key);
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = `scenario-sub-btn bg-slate-950 border border-slate-700 text-slate-200 hover:border-sky-400 ${isSel ? 'active-sc-btn' : ''}`;
+            const dotCol = sc.cat === 'normal_elec' ? '#10b981' : sc.cat === 'mi_struct' ? '#f43f5e' : sc.cat === 'avblocks' ? '#f59e0b' : '#38bdf8';
+            const hrTxt = sc.hr === 0 ? '0 bpm' : `${sc.hr} bpm`;
+            btn.innerHTML = `
+                <span class="w-2 h-2 rounded-full shrink-0" style="background:${isSel ? '#fff' : dotCol}"></span>
+                <span>${sc[currentLang].name}</span>
+                <span class="px-1.5 py-0.2 rounded bg-slate-900/90 text-[10px] font-mono ${isSel ? 'text-sky-100' : 'text-slate-400'}">${hrTxt}</span>
+            `;
+            btn.onclick = () => window.setScenario(key);
+            return btn;
+        };
+
+        if (currentCategory === 'all') {
+            ['normal_elec', 'mi_struct', 'avblocks', 'acls'].forEach(catKey => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = 'w-full mb-2 last:mb-0 p-2 rounded-lg bg-slate-950/60 border border-slate-800';
+                const catTitle = document.createElement('div');
+                catTitle.className = `text-[11px] font-black mb-1.5 ${CAT_META[catKey].textClass}`;
+                catTitle.textContent = isAr ? CAT_META[catKey].ar : CAT_META[catKey].en;
+                groupDiv.appendChild(catTitle);
+                const listWrap = document.createElement('div');
+                listWrap.className = 'flex flex-wrap gap-1.5';
+                Object.keys(SCENARIOS).forEach(key => {
+                    if (SCENARIOS[key].cat === catKey) {
+                        listWrap.appendChild(createScenarioPill(key, SCENARIOS[key]));
+                    }
+                });
+                groupDiv.appendChild(listWrap);
+                container.appendChild(groupDiv);
+            });
+        } else {
+            Object.keys(SCENARIOS).forEach(key => {
+                const sc = SCENARIOS[key];
+                if (sc.cat !== currentCategory) return;
+                container.appendChild(createScenarioPill(key, sc));
+            });
+        }
+    };
+
+    // =========================================================================
+    // 3. SKETCHFAB-STYLE REALISTIC 3D HEART, GREAT VESSELS WITH OPEN LUMENS,
+    //    CARDIAC VEINS, AND 3D RECTANGULAR LEAD PLAQUES (NO BLOCKING SPHERES!)
+    // =========================================================================
+    function createRealisticMyocardiumTextures() {
+        // High-DPI Procedural Myocardium Albedo + Bump Map (muscle fiber striations + subepicardial fat + microvessels)
+        const cAlb = document.createElement('canvas');
+        const cBmp = document.createElement('canvas');
+        cAlb.width = cAlb.height = 512;
+        cBmp.width = cBmp.height = 512;
+        const gA = cAlb.getContext('2d');
+        const gB = cBmp.getContext('2d');
+
+        // Base rich myocardial crimson-terracotta
+        const grad = gA.createLinearGradient(0, 0, 512, 512);
+        grad.addColorStop(0, '#991b1b');
+        grad.addColorStop(0.5, '#b91c1c');
+        grad.addColorStop(1, '#7f1d1d');
+        gA.fillStyle = grad;
+        gA.fillRect(0, 0, 512, 512);
+
+        gB.fillStyle = '#808080';
+        gB.fillRect(0, 0, 512, 512);
+
+        // Diagonal myocardial muscle fiber bundles
+        for (let i = 0; i < 420; i++) {
+            const x = (i * 37) % 512;
+            const y = (i * 73) % 512;
+            const len = 35 + (i % 45);
+            const dx = len * 0.85;
+            const dy = len * 0.45;
+            gA.strokeStyle = (i % 3 === 0) ? 'rgba(248, 113, 113, 0.16)' : 'rgba(69, 10, 10, 0.22)';
+            gA.lineWidth = 1.2 + (i % 3) * 0.6;
+            gA.beginPath(); gA.moveTo(x, y); gA.lineTo(x + dx, y + dy); gA.stroke();
+
+            gB.strokeStyle = (i % 2 === 0) ? 'rgba(220,220,220,0.28)' : 'rgba(40,40,40,0.28)';
+            gB.lineWidth = 1.6;
+            gB.beginPath(); gB.moveTo(x, y); gB.lineTo(x + dx, y + dy); gB.stroke();
+        }
+
+        // Subepicardial adipose tissue (realistic cream-yellow fat patches along upper sulci like Sketchfab!)
+        for (let i = 0; i < 18; i++) {
+            const fx = (i * 83) % 512;
+            const fy = 40 + (i * 29) % 140;
+            const r = 16 + (i % 18);
+            const fg = gA.createRadialGradient(fx, fy, 2, fx, fy, r);
+            fg.addColorStop(0, 'rgba(253, 224, 171, 0.36)');
+            fg.addColorStop(1, 'rgba(253, 224, 171, 0)');
+            gA.fillStyle = fg;
+            gA.beginPath(); gA.arc(fx, fy, r, 0, Math.PI * 2); gA.fill();
+        }
+
+        // Fine branching epicardial micro-capillaries
+        gA.strokeStyle = 'rgba(239, 68, 68, 0.42)';
+        for (let i = 0; i < 65; i++) {
+            let cx = (i * 53) % 512;
+            let cy = (i * 41) % 512;
+            gA.lineWidth = 1.1;
+            gA.beginPath();
+            gA.moveTo(cx, cy);
+            for (let s = 0; s < 4; s++) {
+                cx += ((i + s) % 2 === 0 ? 14 : -12);
+                cy += 16;
+                gA.lineTo(cx, cy);
+            }
+            gA.stroke();
+        }
+
+        const texA = new THREE.CanvasTexture(cAlb);
+        const texB = new THREE.CanvasTexture(cBmp);
+        texA.wrapS = texA.wrapT = THREE.RepeatWrapping;
+        texB.wrapS = texB.wrapT = THREE.RepeatWrapping;
+        return { map: texA, bumpMap: texB };
+    }
+
+    function createLeadPlaqueTexture(leadId, isSelected, status) {
+        const c = document.createElement('canvas');
+        c.width = 256;
+        c.height = 144;
+        const g = c.getContext('2d');
+
+        // Crisp white/ivory 3D plaque surface like Sketchfab image_b7b904.jpg
+        const bgGrad = g.createLinearGradient(0, 0, 0, 144);
+        if (isSelected) {
+            bgGrad.addColorStop(0, '#e0f2fe');
+            bgGrad.addColorStop(1, '#bae6fd');
+        } else if (status === 'primary') {
+            bgGrad.addColorStop(0, '#ffe4e6');
+            bgGrad.addColorStop(1, '#fecdd3');
+        } else {
+            bgGrad.addColorStop(0, '#ffffff');
+            bgGrad.addColorStop(1, '#e2e8f0');
+        }
+        g.fillStyle = bgGrad;
+        g.fillRect(0, 0, 256, 144);
+
+        // Subtle 3D bevel border
+        g.lineWidth = isSelected ? 10 : 6;
+        g.strokeStyle = isSelected ? '#0284c7' : (status === 'primary' ? '#e11d48' : '#94a3b8');
+        g.strokeRect(4, 4, 248, 136);
+
+        // Embossed shadow + dark charcoal bold lead text (V1, V2, II, aVF, etc.)
+        g.font = '900 76px Inter, Arial, sans-serif';
+        g.textAlign = 'center';
+        g.textBaseline = 'middle';
+        g.fillStyle = 'rgba(148, 163, 184, 0.55)';
+        g.fillText(leadId, 131, 77);
+        g.fillStyle = isSelected ? '#0369a1' : (status === 'primary' ? '#9f1239' : '#1e293b');
+        g.fillText(leadId, 128, 74);
+
+        const tex = new THREE.CanvasTexture(c);
+        tex.needsUpdate = true;
+        return tex;
+    }
+
+    let leadPlaques3D = {};
+    let raycaster3D = null;
+
+    function upgradeHeartToSketchfabRealism() {
+        if (typeof THREE === 'undefined' || !scene || !heartGroup) return;
+
+        // 1. Set Studio Background on #heart3d-container by default
+        const c3d = document.getElementById('heart3d-container');
+        if (c3d && layers3D.studioBg) {
+            c3d.classList.add('studio-light-bg');
+        }
+        const xrayBtn = document.getElementById('btn-3d-xray');
+        if (xrayBtn) xrayBtn.classList.toggle('toggle-pill-active', layers3D.xray);
+
+        // Enhance WebGLRenderer tone mapping & studio lights
+        if (renderer) {
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.12;
+        }
+        const hemiLight = new THREE.HemisphereLight(0xfff1f2, 0x334155, 0.65);
+        scene.add(hemiLight);
+
+        // 2. Apply Realistic Myocardium Texture & Solid PBR Material to Ventricles & Atria
+        const myoTex = createRealisticMyocardiumTextures();
+        const applyMyoMat = (mesh, hexCol, rough = 0.38) => {
+            if (!mesh) return;
+            mesh.material = new THREE.MeshPhysicalMaterial({
+                color: hexCol,
+                map: myoTex.map,
+                bumpMap: myoTex.bumpMap,
+                bumpScale: 0.04,
+                roughness: rough,
+                metalness: 0.04,
+                clearcoat: 0.78,
+                clearcoatRoughness: 0.22,
+                transparent: true,
+                opacity: layers3D.xray ? 0.48 : 0.98,
+                depthWrite: !layers3D.xray
+            });
+        };
+        applyMyoMat(meshLV, 0xc82333, 0.36);
+        applyMyoMat(meshRV, 0xb81f2e, 0.38);
+        applyMyoMat(meshRA, 0xd9464f, 0.42);
+        applyMyoMat(meshLA, 0xd43f49, 0.42);
+
+        // Sculpted Right & Left Atrial Appendages (Auricles) wrapping Aortic/Pulmonary roots like Sketchfab!
+        const auricleMat = new THREE.MeshPhysicalMaterial({
+            color: 0xe05a5f,
+            map: myoTex.map,
+            bumpMap: myoTex.bumpMap,
+            bumpScale: 0.035,
+            roughness: 0.40,
+            clearcoat: 0.7
+        });
+        const rightAuricle = createDeformedOrganGeometry(0.58, 1.15, 0.68, 0.65, 0.25, 0.30);
+        const meshRAur = new THREE.Mesh(rightAuricle, auricleMat);
+        meshRAur.position.set(-0.62, 0.92, 0.72);
+        meshRAur.rotation.set(0.15, 0.3, -0.25);
+        heartGroup.add(meshRAur);
+
+        const leftAuricle = createDeformedOrganGeometry(0.52, 1.10, 0.62, 0.60, 0.25, -0.28);
+        const meshLAur = new THREE.Mesh(leftAuricle, auricleMat);
+        meshLAur.position.set(0.88, 0.86, 0.58);
+        meshLAur.rotation.set(0.15, -0.3, 0.25);
+        heartGroup.add(meshLAur);
+
+        // Realistic Subepicardial Fat Sulcus Collar along the Atrioventricular & Interventricular Grooves
+        const fatCollar = createTubeFromPoints([
+            [-0.95, 0.52, 0.78],
+            [-0.25, 0.48, 0.98],
+            [0.35, 0.52, 0.92],
+            [0.98, 0.42, 0.68]
+        ], 0.14, 0xfde68a, 0xca8a04, 0.12);
+        fatCollar.material.opacity = 0.55;
+        fatCollar.material.transparent = true;
+        heartGroup.add(fatCollar);
+
+        // 3. Upgrade Great Vessels to Realistic Anatomical Tunica-Media Ivory-Pink Flesh with Open Hollow Lumens!
+        const matVesselWall = new THREE.MeshPhysicalMaterial({
+            color: 0xeacbc2,
+            bumpMap: myoTex.bumpMap,
+            bumpScale: 0.015,
+            roughness: 0.35,
+            metalness: 0.02,
+            clearcoat: 0.65
+        });
+        if (meshAorta) meshAorta.material = matVesselWall;
+        if (meshPulm) meshPulm.material = matVesselWall.clone();
+
+        // Add Open Hollow Vessel Lumens (dark interior + bevelled ivory rim at cut ends of Aorta, Pulmonary Trunk, SVC)
+        function addOpenVesselLumen(pos, rotX, rotZ, radius, wallColor = 0xeacbc2) {
+            const g = new THREE.Group();
+            g.position.set(pos[0], pos[1], pos[2]);
+            g.rotation.x = rotX;
+            g.rotation.z = rotZ;
+            const rim = new THREE.Mesh(
+                new THREE.TorusGeometry(radius, radius * 0.22, 14, 28),
+                new THREE.MeshPhysicalMaterial({ color: wallColor, roughness: 0.35, clearcoat: 0.6 })
+            );
+            rim.rotation.x = Math.PI / 2;
+            const hole = new THREE.Mesh(
+                new THREE.CircleGeometry(radius * 0.88, 24),
+                new THREE.MeshBasicMaterial({ color: 0x2a080c, side: THREE.DoubleSide })
+            );
+            hole.rotation.x = Math.PI / 2;
+            g.add(rim);
+            g.add(hole);
+            heartGroup.add(g);
+        }
+        // Cut ends matching Sketchfab model (Brachiocephalic, LCC, LSA, SVC, Left/Right Pulmonary)
+        addOpenVesselLumen([0.35, 2.86, 0.10], 0.05, -0.18, 0.11);
+        addOpenVesselLumen([0.0, 2.91, 0.0], 0.05, 0.0, 0.09);
+        addOpenVesselLumen([-0.30, 2.86, -0.15], 0.05, 0.12, 0.09);
+        addOpenVesselLumen([-1.15, 2.56, 0.10], 0.08, 0.05, 0.23, 0xd8b4fe);
+        addOpenVesselLumen([1.16, 1.70, -0.20], 0.1, -1.35, 0.25);
+
+        // 4. Add Fine Secondary/Tertiary Epicardial Coronary Branches (like the rich network in image_b7b904.jpg & image_b744e0.jpg)
+        if (coronaryGroup) {
+            const fineArteryTwigs = [
+                [[0.21, -0.18, 1.25], [0.58, -0.28, 1.18], [0.88, -0.42, 1.04]],
+                [[0.21, -0.68, 1.24], [0.64, -0.88, 1.12], [0.96, -1.12, 0.92]],
+                [[0.24, -1.12, 1.15], [0.58, -1.32, 0.98], [0.82, -1.52, 0.76]],
+                [[0.20, -0.32, 1.25], [-0.18, -0.52, 1.16], [-0.45, -0.72, 1.02]],
+                [[0.22, -0.82, 1.22], [-0.15, -1.04, 1.10], [-0.42, -1.25, 0.92]],
+                [[-1.02, 0.18, 0.88], [-0.82, -0.24, 1.04], [-0.58, -0.56, 1.08]],
+                [[-1.28, -0.38, 0.72], [-0.95, -0.78, 0.88], [-0.66, -1.12, 0.84]],
+                [[1.42, 0.05, 0.48], [1.35, -0.45, 0.76], [1.18, -0.85, 0.82]],
+                [[1.62, -0.35, 0.22], [1.48, -0.82, 0.48], [1.28, -1.22, 0.52]]
+            ];
+            fineArteryTwigs.forEach(pts => {
+                coronaryGroup.add(createTubeFromPoints(pts, 0.022, 0xef4444, 0x991b1b, 0.35));
+            });
+        }
+
+        // 5. Build Dedicated 3D Cardiac Venous System Group (veinsGroup3D: Great/Middle/Small Cardiac Veins, Coronary Sinus, Pulmonary Veins)
+        veinsGroup3D = new THREE.Group();
+        veinsGroup3D.visible = layers3D.veins;
+        heartGroup.add(veinsGroup3D);
+
+        // Great Cardiac Vein (الوريد القلبي الكبير - runs alongside LAD then wraps left AV groove into Coronary Sinus)
+        veinsGroup3D.add(createTubeFromPoints([
+            [0.32, -1.68, 0.86],
+            [0.12, -0.85, 1.24],
+            [0.10, -0.05, 1.22],
+            [0.68, 0.38, 0.96],
+            [1.36, 0.22, 0.56],
+            [1.42, 0.08, -0.38]
+        ], 0.044, 0x3b82f6, 0x1d4ed8, 0.45));
+
+        // Coronary Sinus (الجيب التاجي - posterior atrioventricular groove emptying into Right Atrium)
+        veinsGroup3D.add(createTubeFromPoints([
+            [1.42, 0.08, -0.38],
+            [0.75, -0.05, -0.78],
+            [0.05, -0.12, -0.82],
+            [-0.65, 0.05, -0.58]
+        ], 0.072, 0x2563eb, 0x1e40af, 0.5));
+
+        // Middle Cardiac Vein (الوريد القلبي الأوسط - posterior interventricular groove)
+        veinsGroup3D.add(createTubeFromPoints([
+            [0.22, -1.82, -0.12],
+            [0.08, -1.15, -0.58],
+            [0.05, -0.12, -0.82]
+        ], 0.042, 0x3b82f6, 0x1d4ed8, 0.45));
+
+        // Small Cardiac Vein & Anterior Cardiac Veins (الوريد القلبي الصغير والأوردة الأمامية)
+        veinsGroup3D.add(createTubeFromPoints([
+            [-0.92, -1.15, 0.48],
+            [-1.32, -0.42, 0.68],
+            [-1.15, 0.12, 0.82],
+            [-0.65, 0.05, -0.58]
+        ], 0.036, 0x60a5fa, 0x1d4ed8, 0.4));
+
+        // 4 Pulmonary Veins entering Left Atrium (الأوردة الرئوية الأربعة)
+        [
+            [[1.45, 1.28, -0.35], [2.15, 1.42, -0.45]],
+            [[1.45, 0.88, -0.38], [2.15, 0.85, -0.48]],
+            [[0.45, 1.28, -0.72], [-0.15, 1.40, -0.95]],
+            [[0.45, 0.88, -0.72], [-0.15, 0.85, -0.95]]
+        ].forEach(pts => {
+            veinsGroup3D.add(createTubeFromPoints(pts, 0.12, 0xe11d48, 0x881337, 0.25));
+        });
+
+        // Add Vein Labels to labelAnchors3D so Show Name -> Arteries & Veins shows both!
+        if (Array.isArray(labelAnchors3D)) {
+            labelAnchors3D.push({ type: 'vessel', id: 'Great Cardiac Vein', ar: 'الوريد القلبي الكبير', pos: new THREE.Vector3(0.05, -0.45, 1.32), isHeartLocal: true });
+            labelAnchors3D.push({ type: 'vessel', id: 'Coronary Sinus', ar: 'الجيب التاجي الوريدي', pos: new THREE.Vector3(0.45, -0.08, -0.88), isHeartLocal: true });
+            labelAnchors3D.push({ type: 'vessel', id: 'LMCA', ar: 'الشريان التاجي الأيسر الرئيسي LMCA', pos: new THREE.Vector3(0.32, 0.58, 0.96), isCor: true, isHeartLocal: true });
+        }
+
+        // 6. REBUILD 12-LEAD ELECTRODES IN SKETCHFAB STYLE:
+        //    White cylindrical stalks + 3D rectangular plaques with embossed dark lead names (NO spheres covering text!)
+        if (electrodes3DGroup) {
+            while (electrodes3DGroup.children.length > 0) {
+                electrodes3DGroup.remove(electrodes3DGroup.children[0]);
+            }
+            leadPlaques3D = {};
+
+            const stalkMat = new THREE.MeshPhysicalMaterial({
+                color: 0xf1f5f9,
+                roughness: 0.28,
+                metalness: 0.08,
+                clearcoat: 0.5
+            });
+            const sideMat = new THREE.MeshPhysicalMaterial({
+                color: 0xe2e8f0,
+                roughness: 0.32
+            });
+            const backPadMat = new THREE.MeshStandardMaterial({
+                color: 0x1e293b,
+                roughness: 0.6
+            });
+
+            LEADS_12.forEach(lead => {
+                const endVec = new THREE.Vector3(lead.pos3D[0], lead.pos3D[1], lead.pos3D[2]);
+                const centerOrigin = new THREE.Vector3(0, -0.35, 0.15);
+                const dir = endVec.clone().sub(centerOrigin).normalize();
+
+                // Stalk starts from the epicardial boundary (~1.25 units from center) out to the plaque position
+                const startVec = centerOrigin.clone().add(dir.clone().multiplyScalar(1.18));
+                const stalkCurve = new THREE.LineCurve3(startVec, endVec);
+                const stalkGeom = new THREE.TubeGeometry(stalkCurve, 8, 0.042, 12, false);
+                const stalkMesh = new THREE.Mesh(stalkGeom, stalkMat);
+                electrodes3DGroup.add(stalkMesh);
+
+                // 3D Rectangular Plaque at tip of stalk
+                const plaqueGroup = new THREE.Group();
+                plaqueGroup.position.copy(endVec);
+                // Orient plaque so its front face looks outward/toward the viewer
+                const lookTarget = endVec.clone().add(new THREE.Vector3(dir.x * 0.45, dir.y * 0.25, Math.max(0.65, dir.z + 0.85)));
+                plaqueGroup.lookAt(lookTarget);
+
+                const tex = createLeadPlaqueTexture(lead.id, selectedLeadName === lead.id, getLeadImpactStatus(currentScenario, lead.id));
+                const faceMat = new THREE.MeshBasicMaterial({ map: tex });
+                const materials = [sideMat, sideMat, sideMat, sideMat, faceMat, faceMat];
+
+                const plaqueMesh = new THREE.Mesh(new THREE.BoxGeometry(0.82, 0.48, 0.07), materials);
+                plaqueMesh.userData = { leadId: lead.id };
+                plaqueGroup.add(plaqueMesh);
+
+                // Dark conductive backing pad like Sketchfab model
+                const padMesh = new THREE.Mesh(new THREE.BoxGeometry(0.64, 0.34, 0.05), backPadMat);
+                padMesh.position.z = -0.05;
+                plaqueGroup.add(padMesh);
+
+                electrodes3DGroup.add(plaqueGroup);
+                leadPlaques3D[lead.id] = { mesh: plaqueMesh, group: plaqueGroup, stalk: stalkMesh };
+            });
+
+            // Click on any 3D Lead Plaque to select that lead!
+            if (c3d && !raycaster3D) {
+                raycaster3D = new THREE.Raycaster();
+                let downX = 0, downY = 0;
+                c3d.addEventListener('pointerdown', e => { downX = e.clientX; downY = e.clientY; });
+                c3d.addEventListener('pointerup', e => {
+                    if (Math.hypot(e.clientX - downX, e.clientY - downY) > 6) return;
+                    if (!camera || !electrodes3DGroup || !electrodes3DGroup.visible) return;
+                    const rect = c3d.getBoundingClientRect();
+                    const mouse = new THREE.Vector2(
+                        ((e.clientX - rect.left) / rect.width) * 2 - 1,
+                        -((e.clientY - rect.top) / rect.height) * 2 + 1
+                    );
+                    raycaster3D.setFromCamera(mouse, camera);
+                    const meshes = Object.values(leadPlaques3D).map(o => o.mesh);
+                    const hits = raycaster3D.intersectObjects(meshes, false);
+                    if (hits.length > 0 && hits[0].object.userData && hits[0].object.userData.leadId) {
+                        const clickedLead = hits[0].object.userData.leadId;
+                        selectedLeadName = clickedLead;
+                        const leadObj = LEADS_12.find(l => l.id === clickedLead);
+                        if (leadObj) {
+                            const liveName = document.getElementById('live-lead-name');
+                            if (liveName) liveName.textContent = leadObj.name;
+                        }
+                        refresh3DLeadPlaqueTextures();
+                        drawAll2D();
+                        renderThreeJSHeart();
+                    }
+                });
+            }
+        }
+    }
+
+    function refresh3DLeadPlaqueTextures() {
+        Object.keys(leadPlaques3D).forEach(leadId => {
+            const item = leadPlaques3D[leadId];
+            if (!item || !item.mesh) return;
+            const isSel = (selectedLeadName === leadId);
+            const status = getLeadImpactStatus(currentScenario, leadId);
+            const tex = createLeadPlaqueTexture(leadId, isSel, status);
+            if (Array.isArray(item.mesh.material)) {
+                item.mesh.material[4].map = tex;
+                item.mesh.material[5].map = tex;
+                item.mesh.material[4].needsUpdate = true;
+                item.mesh.material[5].needsUpdate = true;
+            }
+            item.group.scale.setScalar(isSel ? 1.18 : 1.0);
+        });
+    }
+
+    // Remove duplicate HTML `.electrode` labels from `#labels-3d-overlay` because the 12 leads are now crisp 3D Sketchfab plaques!
+    const origUpdate3DOverlayLabels = window.update3DOverlayLabels;
+    window.update3DOverlayLabels = function () {
+        const overlay = document.getElementById('labels-3d-overlay');
+        const container = document.getElementById('heart3d-container');
+        if (!overlay || !camera) return;
+        const w = container.clientWidth;
+        const h = container.clientHeight;
+        overlay.innerHTML = '';
+
+        labelAnchors3D.forEach(item => {
+            // Skip HTML duplicate tags for electrodes because 3D Sketchfab Plaques display V1..V6, I..aVF cleanly without sphere overlap!
+            if (item.type === 'electrode') return;
+            if (item.type === 'cond' && !labels3D.conduction) return;
+            if (item.isCor && (!layers3D.coronary || !labels3D.vessels)) return;
+            if (item.type === 'chamber' && !labels3D.chambers) return;
+            if (item.type === 'vessel' && !labels3D.vessels) return;
+
+            const worldPos = item.pos.clone();
+            if (item.isHeartLocal && heartGroup) worldPos.add(heartGroup.position);
+            worldPos.project(camera);
+
+            if (worldPos.z > 1) return;
+            const x = (worldPos.x * 0.5 + 0.5) * w;
+            const y = (-(worldPos.y * 0.5) + 0.5) * h;
+            if (x < 14 || x > w - 28 || y < 14 || y > h - 18) return;
+
+            const tag = document.createElement('div');
+            if (item.type === 'cond') {
+                tag.className = 'absolute px-2 py-0.5 rounded-md bg-slate-950/92 text-[9.5px] font-extrabold text-cyan-300 border border-cyan-400/60 -translate-x-1/2 -translate-y-1/2 shadow-md';
+            } else if (item.type === 'chamber') {
+                tag.className = 'absolute px-2 py-0.5 rounded-md bg-slate-950/92 text-[9.5px] font-extrabold text-rose-200 border border-rose-400/60 -translate-x-1/2 -translate-y-1/2 shadow-md';
+            } else {
+                tag.className = 'absolute px-2 py-0.5 rounded-md bg-slate-950/92 text-[9.5px] font-extrabold text-amber-200 border border-amber-400/60 -translate-x-1/2 -translate-y-1/2 shadow-md';
+            }
+            tag.textContent = (currentLang === 'ar' && item.ar) ? item.ar : item.id;
+            tag.style.left = `${x}px`;
+            tag.style.top = `${y}px`;
+            overlay.appendChild(tag);
+        });
+    };
+
+    // =========================================================================
+    // 4. 1-BY-1 RHYTHM WAVEFORM AUDIT:
+    //    - Authentic Normal Sinus template matching `image_b7a280.png`
+    //    - True rapid SVT (210 bpm = 3 beats per 800ms / 12 beats per 3200ms)
+    //    - True Sawtooth Atrial Flutter (300/min unbroken asymmetric sawtooth F-waves)
+    //    - Synchronized 3D Heart & Cellular AP for all fast and slow rhythms!
+    // =========================================================================
+    const prevComputeLeadVoltage = window.computeLeadVoltage;
+
+    // Realistic Clinical Normal Sinus Beat Template matching uploaded `image_b7a280.png`
+    function clinicalSinusBeat(tb, leadId, proj, pProj) {
+        let v = 0;
+        // 1. P wave (smooth rounded peak around 115ms)
+        if (leadId === 'V1') {
+            v += gPulse(tb, 106, 15, 0.13) - gPulse(tb, 128, 16, 0.09);
+        } else {
+            v += gPulse(tb, 115, 19, 0.17) * pProj;
+        }
+        // 2. QRS complex (sharp narrow q-R-s matching real thermal ECG paper!)
+        if (leadId === 'V1') {
+            v += gPulse(tb, 236, 7.5, 0.28) - gPulse(tb, 256, 11, 0.96) + gPulse(tb, 495, 38, 0.08);
+        } else if (leadId === 'V2') {
+            v += gPulse(tb, 236, 8, 0.46) - gPulse(tb, 258, 11, 0.82) + gPulse(tb, 495, 40, 0.22);
+        } else if (leadId === 'V3') {
+            v += -gPulse(tb, 224, 5, 0.06) + gPulse(tb, 244, 9.5, 0.95) - gPulse(tb, 264, 9, 0.45) + gPulse(tb, 495, 42, 0.34);
+        } else {
+            // Asymmetric T wave (slower upslope + steeper downslope) + crisp qRs
+            const qWave = -gPulse(tb, 224, 5.5, 0.11);
+            const rWave = gPulse(tb, 244, 9.2, 1.38);
+            const sWave = -gPulse(tb, 263, 7.5, 0.29);
+            const tAsym = gPulse(tb, 485, 46, 0.26) + gPulse(tb, 508, 28, 0.18);
+            v += (qWave + rWave + sWave + tAsym) * proj;
+        }
+        return v;
+    }
+
+    window.computeLeadVoltage = function (absMs, scenario, leadId) {
+        const leadObj = LEADS_12.find(l => l.id === leadId) || LEADS_12[1];
+        const angle = leadObj.angle;
+        const grp = leadObj.group;
+        const proj = Math.cos((angle - 45) * Math.PI / 180);
+        const pProj = leadId === 'V1' ? 0.12 : (leadId === 'aVR' ? -0.85 : (leadId.startsWith('V') ? 0.72 : proj));
+        const t = ((absMs % 800) + 800) % 800;
+
+        // 1. Normal Sinus Rhythm & PEA (crisp clinical waveform matching image_b7a280.png)
+        if (scenario === 'normal' || scenario === 'pea') {
+            return clinicalSinusBeat(t, leadId, proj, pProj);
+        }
+
+        // 2. SVT (Supraventricular Tachycardia / AVNRT — TRUE 210 bpm: period = 266.67ms = 3 beats per 800ms / 12 beats per 3200ms!)
+        if (scenario === 'svt') {
+            const period = 266.67; // 225 bpm / ~210 bpm rapid regular narrow-complex tachycardia!
+            const ts = ((absMs % period) + period) % period;
+            const pol = (grp === 'avr') ? -0.85 : (leadId === 'V1' ? -0.78 : ( leadId === 'V2' ? -0.45 : proj ));
+            // Crisp narrow QRS at ts = 75ms
+            const qrs = -gPulse(ts, 62, 4.5, 0.09) + gPulse(ts, 75, 7.2, 1.36) - gPulse(ts, 88, 6.0, 0.26);
+            // Retrograde P' (pseudo-r' in V1 / pseudo-s' notch in inferior leads right at end of QRS)
+            const retroP = (leadId === 'V1')
+                ? gPulse(ts, 96, 6.5, 0.24)
+                : (grp === 'inf' ? -gPulse(ts, 96, 6.5, 0.22) : 0);
+            // Mild rate-related ST depression + steep T wave immediately preceding next QRS
+            const stDep = -gPulse(ts, 128, 22, 0.12) * Math.sign(pol || 1);
+            const tWave = gPulse(ts, 178, 24, 0.34);
+            return (qrs + stDep + tWave) * pol + retroP;
+        }
+
+        // 3. Atrial Flutter (TRUE SAWTOOTH "أسنان المنشار": 300/min unbroken asymmetric sawtooth F-waves = 1 tooth per 200ms Large Box + 3:1 narrow QRS!)
+        if (scenario === 'aflutter') {
+            // Continuous asymmetric sawtooth wave with period = 200ms (1 large square = 300 atrial beats/min)
+            const u = (((absMs + 40) % 200) + 200) % 200 / 200; // 0 .. 1
+            // Piecewise smooth asymmetric sawtooth: gradual descent (0..0.75) and steep ascent (0.75..1.0)
+            let rawSaw;
+            if (u < 0.75) {
+                rawSaw = 0.22 - (u / 0.75) * 0.50; // +0.22 down to -0.28 mV
+            } else {
+                const upU = (u - 0.75) / 0.25;
+                rawSaw = -0.28 + (0.5 - 0.5 * Math.cos(upU * Math.PI)) * 0.50; // steep smooth return to +0.22 mV
+            }
+            // Polarity of Flutter F-waves: deeply negative sawtooth in II, III, aVF; upright in V1; prominent across precordial leads
+            const sawPol = (grp === 'inf') ? 1.0 : (leadId === 'V1' ? -0.75 : (grp === 'avr' ? -0.7 : 0.75));
+            const fWaveTrain = rawSaw * sawPol;
+
+            // Narrow QRS complex every 600ms (3:1 AV conduction = 3 complete sawtooth teeth between every QRS, ventricular rate 100 bpm!)
+            const qrsPeriod = 600;
+            const tq = ((absMs % qrsPeriod) + qrsPeriod) % qrsPeriod;
+            const qrsPol = (grp === 'avr') ? -0.85 : (leadId === 'V1' ? -0.80 : (leadId === 'V2' ? -0.45 : proj));
+            const qrsSpike = (-gPulse(tq, 188, 5, 0.10) + gPulse(tq, 200, 7.8, 1.38) - gPulse(tq, 213, 6.5, 0.28)) * qrsPol;
+
+            return fWaveTrain + qrsSpike;
+        }
+
+        // 4. Ventricular Tachycardia (Monomorphic VT — 180 bpm: period = 320ms = 10 wide complexes across 3200ms strip!)
+        if (scenario === 'vt') {
+            const period = 320;
+            const tv = ((absMs % period) + period) % period;
+            const pol = (grp === 'avr' || leadId === 'V1' || leadId === 'V2') ? -0.88 : (proj >= -0.1 ? 1.0 : -0.75);
+            // Broad bizarre slurred QRS (width ~140ms) + discordant ST-T wave
+            const wideQRS = gPulse(tv, 95, 32, 1.55) + gPulse(tv, 132, 24, 0.55) - gPulse(tv, 175, 22, 0.45);
+            const discT = -gPulse(tv, 235, 34, 0.58);
+            return (wideQRS + discT) * pol;
+        }
+
+        // 5. Sinus Bradycardia (42 bpm: period = 1400ms = 7 large squares between beats!)
+        if (scenario === 'sinus_brady') {
+            const period = 1400;
+            const tb = ((absMs % period) + period) % period;
+            return clinicalSinusBeat(tb, leadId, proj, pProj);
+        }
+
+        // 6. Sinus Tachycardia (140 bpm: period = 400ms = 2 beats per 800ms / 8 beats per 3200ms!)
+        if (scenario === 'sinus_tachy') {
+            const period = 400;
+            const tb = ((absMs % period) + period) % period;
+            let v = 0;
+            if (leadId === 'V1') {
+                v += gPulse(tb, 58, 12, 0.15) - gPulse(tb, 76, 13, 0.10);
+                v += gPulse(tb, 155, 7.5, 0.28) - gPulse(tb, 173, 10.5, 0.92) + gPulse(tb, 295, 28, 0.10);
+            } else {
+                v += gPulse(tb, 65, 14, 0.20) * pProj;
+                v += (-gPulse(tb, 143, 5, 0.11) + gPulse(tb, 158, 8.2, 1.32) - gPulse(tb, 173, 6.8, 0.26) + gPulse(tb, 292, 30, 0.36)) * proj;
+            }
+            return v;
+        }
+
+        // 7. Junctional Rhythm (48 bpm: period = 1250ms, inverted retrograde P before narrow QRS)
+        if (scenario === 'junctional') {
+            const period = 1250;
+            const tj = ((absMs % period) + period) % period;
+            let v = -gPulse(tj, 195, 13, 0.19) * (leadId === 'V1' ? -0.5 : proj);
+            if (leadId === 'V1') {
+                v += gPulse(tj, 236, 7.5, 0.28) - gPulse(tj, 256, 11, 0.92) + gPulse(tj, 495, 38, 0.08);
+            } else {
+                v += (-gPulse(tj, 224, 5.5, 0.11) + gPulse(tj, 244, 9.2, 1.32) - gPulse(tj, 263, 7.5, 0.26) + gPulse(tj, 495, 40, 0.35)) * proj;
+            }
+            return v;
+        }
+
+        // 8. Idioventricular Rhythm (38 bpm: period = 1600ms, slow wide ventricular escape complexes without P waves)
+        if (scenario === 'ivr') {
+            const period = 1600;
+            const ti = ((absMs % period) + period) % period;
+            const pol = (grp === 'avr' || leadId === 'V1' || leadId === 'V2') ? -0.85 : (proj >= 0 ? 1.0 : -0.7);
+            const qrs = gPulse(ti, 265, 30, 1.32) - gPulse(ti, 325, 25, 0.54);
+            const stT = -gPulse(ti, 425, 75, 0.22) - gPulse(ti, 545, 48, 0.44);
+            return (qrs + stT) * pol;
+        }
+
+        // 9. Cardiac Tamponade (Sinus Tachycardia ~112 bpm + Low Voltage + Electrical Alternans!)
+        if (scenario === 'tamponade') {
+            const period = 533.33; // 6 beats per 3200ms
+            const bIdx = Math.floor(absMs / period);
+            const tt = ((absMs % period) + period) % period;
+            const altScale = (bIdx % 2 === 0) ? 0.65 : 0.28; // Beat-to-beat alternating height!
+            const pW = gPulse(tt, 75, 15, 0.12) * pProj * altScale;
+            const qrsT = (-gPulse(tt, 158, 5.5, 0.10) + gPulse(tt, 174, 8.8, 1.15) - gPulse(tt, 190, 7.0, 0.25) + gPulse(tt, 335, 32, 0.30)) * altScale * (leadId === 'V1' ? -0.75 : proj);
+            return pW + qrsT;
+        }
+
+        return prevComputeLeadVoltage(absMs, scenario, leadId);
+    };
+
+    // Map multi-rate scenarios so the 3D Heart, Ion Gates, and Panel 5 Action Potential contract at the TRUE physiological rate!
+    function getEffectiveCardiacCycleTime(rawT, sc) {
+        const absMs = continuousCycleCount * 800 + rawT;
+        if (sc === 'svt') {
+            // 3 full cardiac cycles per 800ms!
+            return ((absMs % 266.67) / 266.67) * 800;
+        }
+        if (sc === 'sinus_tachy') {
+            // 2 full cardiac cycles per 800ms!
+            return ((absMs % 400) / 400) * 800;
+        }
+        if (sc === 'vt') {
+            // 2.5 full ventricular cycles per 800ms (period = 320ms)!
+            return ((absMs % 320) / 320) * 800;
+        }
+        if (sc === 'tamponade') {
+            return ((absMs % 533.33) / 533.33) * 800;
+        }
+        if (sc === 'sinus_brady') {
+            const tb = absMs % 1400;
+            return tb < 800 ? tb : 750; // rests in diastole during prolonged TP
+        }
+        if (sc === 'junctional') {
+            const tj = absMs % 1250;
+            return tj < 800 ? tj : 750;
+        }
+        if (sc === 'ivr') {
+            const ti = absMs % 1600;
+            return ti < 800 ? ti : 750;
+        }
+        return rawT;
+    }
+
+    const prevGetAP = window.getActionPotential;
+    window.getActionPotential = function (t, sc, forHealthyReference = false) {
+        const effT = forHealthyReference ? t : getEffectiveCardiacCycleTime(t, sc);
+        return prevGetAP(effT, sc, forHealthyReference);
+    };
+
+    const prevGetTen = window.getMechanicalTension;
+    window.getMechanicalTension = function (t, sc, forLeadSpecific = false) {
+        const effT = getEffectiveCardiacCycleTime(t, sc);
+        return prevGetTen(effT, sc, forLeadSpecific);
+    };
+
+    // =========================================================================
+    // 5. AUTHENTIC CLINICAL PINK/RED MILLIMETER ECG PAPER (MAIN + 12-LEAD + STICKY MINI)
+    //    (Matches uploaded `image_b7a280.png`: #fff9f9 paper, pink 1mm grid, red 5mm grid, crisp black trace!)
+    // =========================================================================
+    function drawClinicalPaperGrid(ctx, x0, y0, w, h, smallSqX, smallSqY, largeSqX, largeSqY, baselineY) {
+        // Warm white clinical thermal paper background
+        ctx.fillStyle = '#fff9f9';
+        ctx.fillRect(x0, y0, w, h);
+
+        // 1mm Fine Pink Grid Lines (0.04s x 0.1mV)
+        ctx.lineWidth = 0.65;
+        ctx.strokeStyle = 'rgba(244, 63, 94, 0.27)';
+        ctx.beginPath();
+        for (let x = x0; x <= x0 + w + 0.5; x += smallSqX) {
+            ctx.moveTo(x, y0); ctx.lineTo(x, y0 + h);
+        }
+        for (let y = baselineY; y >= y0; y -= smallSqY) {
+            ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y);
+        }
+        for (let y = baselineY + smallSqY; y <= y0 + h; y += smallSqY) {
+            ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y);
+        }
+        ctx.stroke();
+
+        // 5mm Bold Red/Salmon Grid Lines (0.20s x 0.5mV)
+        ctx.lineWidth = 1.35;
+        ctx.strokeStyle = 'rgba(225, 29, 72, 0.56)';
+        ctx.beginPath();
+        for (let x = x0; x <= x0 + w + 0.5; x += largeSqX) {
+            ctx.moveTo(x, y0); ctx.lineTo(x, y0 + h);
+        }
+        for (let y = baselineY; y >= y0; y -= largeSqY) {
+            ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y);
+        }
+        for (let y = baselineY + largeSqY; y <= y0 + h; y += largeSqY) {
+            ctx.moveTo(x0, y); ctx.lineTo(x0 + w, y);
+        }
+        ctx.stroke();
+    }
+
+    window.drawECGPanel = function () {
+        ecgCtx.direction = 'ltr';
+        ecgCtx.textAlign = 'left';
+        const w = ecgCanvas.width / (window.devicePixelRatio || 1);
+        const h = ecgCanvas.height / (window.devicePixelRatio || 1);
+
+        const leftPad = 56;
+        const rightPad = 12;
+        const plotW = w - leftPad - rightPad;
+
+        const totalMsSpan = stripMode ? 3200 : 800;
+        const pxPerMs = plotW / totalMsSpan;
+        const scanTime = stripMode ? (((continuousCycleCount % 4) * 800) + currentTime) : currentTime;
+
+        const smallSqX = 40 * pxPerMs;
+        const largeSqX = 200 * pxPerMs;
+        const baselineY = h * 0.64;
+        const mVHeight = h * 0.22;
+        const smallSqY = mVHeight / 10;
+        const largeSqY = smallSqY * 5;
+
+        // Draw Authentic Pink/Red Millimeter ECG Paper across the entire canvas
+        drawClinicalPaperGrid(ecgCtx, 0, 0, w, h, smallSqX, smallSqY, largeSqX, largeSqY, baselineY);
+
+        // Subtle active phase highlight band
+        const phaseBounds = [
+            [70, 155, 'rgba(245, 158, 11, 0.08)'],
+            [155, 215, 'rgba(249, 115, 22, 0.08)'],
+            [215, 285, 'rgba(14, 165, 233, 0.09)'],
+            [285, 445, 'rgba(16, 185, 129, 0.08)'],
+            [445, 575, 'rgba(168, 85, 247, 0.08)'],
+            [575, 800, 'rgba(100, 116, 139, 0.05)']
+        ];
+        const activePIdx = getPhaseIndex(currentTime);
+        const bnd = phaseBounds[activePIdx];
+        if (bnd) {
+            ecgCtx.fillStyle = bnd[2];
+            const phaseCycleOffset = stripMode ? Math.floor(scanTime / 800) * 800 : 0;
+            ecgCtx.fillRect(leftPad + (phaseCycleOffset + bnd[0]) * pxPerMs, 0, (bnd[1] - bnd[0]) * pxPerMs, h - 18);
+        }
+
+        // Time Second Labels along bottom margin
+        let boxIdx = 0;
+        ecgCtx.fillStyle = '#9f1239';
+        ecgCtx.font = 'bold 9.5px monospace';
+        for (let x = leftPad; x <= w - rightPad + 2; x += largeSqX) {
+            if (!stripMode || boxIdx % 2 === 0) {
+                ecgCtx.fillText((boxIdx * 0.20).toFixed(stripMode ? 1 : 2) + 's', x - 10, h - 4);
+            }
+            boxIdx++;
+        }
+
+        // Standard 1mV Calibration Pulse on Left Margin (Dark Thermal Ink)
+        ecgCtx.strokeStyle = '#111827';
+        ecgCtx.lineWidth = 2.0;
+        ecgCtx.beginPath();
+        ecgCtx.moveTo(6, baselineY); ecgCtx.lineTo(12, baselineY);
+        ecgCtx.lineTo(12, baselineY - mVHeight); ecgCtx.lineTo(26, baselineY - mVHeight);
+        ecgCtx.lineTo(26, baselineY); ecgCtx.lineTo(32, baselineY);
+        ecgCtx.stroke();
+        ecgCtx.fillStyle = '#111827';
+        ecgCtx.font = 'bold 9px monospace';
+        ecgCtx.fillText('1mV', 7, baselineY - mVHeight - 4);
+
+        // Voltage Axis Ticks
+        ecgCtx.save();
+        const voltageAxisX = leftPad - 4;
+        ecgCtx.strokeStyle = '#be123c';
+        ecgCtx.lineWidth = 1.1;
+        ecgCtx.beginPath();
+        ecgCtx.moveTo(voltageAxisX, baselineY - mVHeight * 1.1);
+        ecgCtx.lineTo(voltageAxisX, baselineY + mVHeight * 1.1);
+        ecgCtx.stroke();
+        ecgCtx.fillStyle = '#881337';
+        ecgCtx.font = 'bold 9.5px monospace';
+        ecgCtx.textAlign = 'right';
+        ecgCtx.textBaseline = 'middle';
+        [1, 0.5, 0, -0.5, -1].forEach(mv => {
+            const tickY = baselineY - mv * mVHeight;
+            ecgCtx.beginPath();
+            ecgCtx.moveTo(voltageAxisX - 4, tickY);
+            ecgCtx.lineTo(voltageAxisX, tickY);
+            ecgCtx.stroke();
+            ecgCtx.fillText((mv > 0 ? '+' : '') + mv.toFixed(1), voltageAxisX - 6, tickY);
+        });
+        ecgCtx.restore();
+
+        // Crisp Black Thermal Ink ECG Waveform Trace (just like real ECG paper in image_b7a280.png!)
+        const stepMs = stripMode ? 2.5 : 1.5;
+        ecgCtx.save();
+        // Full ghost trace in subtle gray-black so entire rhythm strip is always readable
+        ecgCtx.beginPath();
+        ecgCtx.strokeStyle = 'rgba(15, 23, 42, 0.28)';
+        ecgCtx.lineWidth = 1.8;
+        for (let t = 0; t <= totalMsSpan; t += stepMs) {
+            const x = leftPad + t * pxPerMs;
+            const v = window.computeLeadVoltage(t, currentScenario, selectedLeadName);
+            const y = baselineY - v * mVHeight;
+            if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+        }
+        ecgCtx.stroke();
+
+        // Active dark charcoal-black thermal pen trace up to scanTime
+        ecgCtx.beginPath();
+        ecgCtx.strokeStyle = '#0f172a';
+        ecgCtx.lineWidth = 2.45;
+        ecgCtx.lineJoin = 'round';
+        ecgCtx.lineCap = 'round';
+        for (let t = 0; t <= scanTime; t += stepMs) {
+            const x = leftPad + t * pxPerMs;
+            const v = window.computeLeadVoltage(t, currentScenario, selectedLeadName);
+            const y = baselineY - v * mVHeight;
+            if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+        }
+        ecgCtx.stroke();
+        ecgCtx.restore();
+
+        // Calipers & Wave Labels (P, Q, R, S, T) when enabled
+        const noCalipers = ['afib', 'vfib', 'vt', 'tdp', 'aflutter', 'svt', 'asystole', 'sinewave', 'wpw_afib', 'mat'].includes(currentScenario);
+        const caliperToggle = document.getElementById('toggle-calipers');
+        if (caliperToggle && caliperToggle.checked && !noCalipers && !stripMode) {
+            const isAr = (currentLang === 'ar');
+            const pStart = (currentScenario === 'avb1') ? 40 : 75;
+            const qrsStart = 215;
+            drawBracket(ecgCtx, leftPad + pStart * pxPerMs, leftPad + qrsStart * pxPerMs, 36, isAr ? 'فترة PR' : 'PR', '#c2410c');
+            drawBracket(ecgCtx, leftPad + qrsStart * pxPerMs, leftPad + (currentScenario === 'lbbb' || currentScenario === 'rbbb' ? 315 : 280) * pxPerMs, 50, 'QRS', '#0369a1');
+            drawBracket(ecgCtx, leftPad + qrsStart * pxPerMs, leftPad + 555 * pxPerMs, h - 22, isAr ? 'فترة QT' : 'QT', '#6d28d9');
+        }
+
+        // Scanning Red/Gold Playhead Cursor
+        const curX = leftPad + scanTime * pxPerMs;
+        const curV = window.computeLeadVoltage(scanTime, currentScenario, selectedLeadName);
+        const curY = baselineY - curV * mVHeight;
+        ecgCtx.strokeStyle = 'rgba(225, 29, 72, 0.65)';
+        ecgCtx.lineWidth = 1.5;
+        ecgCtx.setLineDash([4, 4]);
+        ecgCtx.beginPath(); ecgCtx.moveTo(curX, 0); ecgCtx.lineTo(curX, h - 18); ecgCtx.stroke();
+        ecgCtx.setLineDash([]);
+        ecgCtx.fillStyle = '#e11d48';
+        ecgCtx.beginPath(); ecgCtx.arc(curX, curY, 5, 0, Math.PI * 2); ecgCtx.fill();
+        ecgCtx.strokeStyle = '#ffffff'; ecgCtx.lineWidth = 2; ecgCtx.stroke();
+
+        window.updateLeadVectorInspectorBanner();
+        drawStickyMiniMonitor();
+    };
+
+    // Upgrade 12-Lead Grid Panel to also render on Authentic Pink/Red Millimeter ECG Paper!
+    window.draw12LeadPanel = function () {
+        twelveCtx.direction = 'ltr';
+        twelveCtx.textAlign = 'left';
+        const w = twelveCanvas.width / (window.devicePixelRatio || 1);
+        const h = twelveCanvas.height / (window.devicePixelRatio || 1);
+
+        const cols = w < 520 ? 2 : (w < 850 ? 3 : 4);
+        const rows = Math.ceil(LEADS_12.length / cols);
+        const cellW = w / cols;
+        const cellH = h / rows;
+
+        // Draw Continuous Authentic Pink/Red Millimeter ECG Paper across the 12-Lead Sheet
+        drawClinicalPaperGrid(twelveCtx, 0, 0, w, h, 6, 6, 30, 30, cellH * 0.62);
+
+        const isMulti = true; // Always show 2400ms (3+ beats) in 12-lead cells so rhythms are realistic!
+        const leadStripSpan = 2400;
+        const leadCursorTime = ((continuousCycleCount % 3) * 800) + currentTime;
+
+        LEADS_12.forEach((lead, idx) => {
+            const c = idx % cols;
+            const r = Math.floor(idx / cols);
+            const x0 = c * cellW;
+            const y0 = r * cellH;
+            const baseY = y0 + cellH * 0.62;
+            const scaleMV = cellH * (currentScenario === 'lvh' ? 0.18 : 0.24);
+
+            const leadStatus = getLeadImpactStatus(currentScenario, lead.id);
+            const isSel = (selectedLeadName === lead.id);
+
+            // Subtle highlight tint if selected or primary infarct lead
+            if (isSel) {
+                twelveCtx.fillStyle = 'rgba(14, 165, 233, 0.08)';
+                twelveCtx.fillRect(x0 + 1, y0 + 1, cellW - 2, cellH - 2);
+            } else if (leadStatus === 'primary') {
+                twelveCtx.fillStyle = 'rgba(225, 29, 72, 0.06)';
+                twelveCtx.fillRect(x0 + 1, y0 + 1, cellW - 2, cellH - 2);
+            }
+
+            twelveCtx.strokeStyle = isSel ? '#0284c7' : (leadStatus === 'primary' ? '#e11d48' : 'rgba(225, 29, 72, 0.35)');
+            twelveCtx.lineWidth = isSel ? 2.4 : 1.1;
+            twelveCtx.strokeRect(x0 + 1.5, y0 + 1.5, cellW - 3, cellH - 3);
+
+            // Lead Title Badge in top-left of cell (Dark Clinical Typography)
+            twelveCtx.fillStyle = isSel ? '#0369a1' : (leadStatus === 'primary' ? '#be123c' : '#111827');
+            twelveCtx.font = '900 12px Inter, monospace';
+            twelveCtx.fillText(lead.id, x0 + 7, y0 + 15);
+
+            // Crisp Dark Thermal Ink Waveform Trace
+            twelveCtx.beginPath();
+            twelveCtx.strokeStyle = leadStatus === 'primary' ? '#881337' : '#111827';
+            twelveCtx.lineWidth = isSel ? 2.1 : 1.75;
+            twelveCtx.lineJoin = 'round';
+
+            const padX = 6;
+            const plotCW = cellW - padX * 2;
+            for (let ms = 0; ms <= leadStripSpan; ms += 6) {
+                const px = x0 + padX + (ms / leadStripSpan) * plotCW;
+                const v = window.computeLeadVoltage(ms, currentScenario, lead.id);
+                const py = Math.max(y0 + 5, Math.min(y0 + cellH - 5, baseY - v * scaleMV));
+                if (ms === 0) twelveCtx.moveTo(px, py); else twelveCtx.lineTo(px, py);
+            }
+            twelveCtx.stroke();
+
+            // Synchronized Cursor Dot
+            const curPx = x0 + padX + (leadCursorTime / leadStripSpan) * plotCW;
+            const curV = window.computeLeadVoltage(leadCursorTime, currentScenario, lead.id);
+            const curPy = Math.max(y0 + 5, Math.min(y0 + cellH - 5, baseY - curV * scaleMV));
+            twelveCtx.fillStyle = '#e11d48';
+            twelveCtx.beginPath(); twelveCtx.arc(curPx, curPy, 3.2, 0, Math.PI * 2); twelveCtx.fill();
+        });
+    };
+
+    // =========================================================================
+    // 6. STICKY LIVE MINI-ECG PAPER & MINI BEATING HEART DOCK
+    // =========================================================================
+    const miniEcgCanvas = document.getElementById('sticky-mini-ecg-canvas');
+    const miniHeartCanvas = document.getElementById('sticky-mini-heart-canvas');
+
+    window.toggleStickyMiniDock = function () {
+        const wrap = document.getElementById('sticky-mini-monitor-wrapper');
+        const icon = document.getElementById('icon-sticky-dock');
+        if (!wrap) return;
+        if (window.innerWidth < 1024) {
+            wrap.classList.toggle('manual-force-open');
+            wrap.classList.remove('user-collapsed');
+        } else {
+            wrap.classList.toggle('user-collapsed');
+        }
+        const isHidden = wrap.classList.contains('user-collapsed') || (window.innerWidth < 1024 && !wrap.classList.contains('manual-force-open') && !wrap.classList.contains('mobile-scrolled-visible'));
+        if (icon) icon.className = isHidden ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+        requestAnimationFrame(() => {
+            resizeStickyMiniCanvases();
+            drawStickyMiniMonitor();
+        });
+    };
+
+    // On mobile (<1024px), auto-show the compact mini monitor when the user scrolls down past the main ECG/3D Heart!
+    window.addEventListener('scroll', function () {
+        const wrap = document.getElementById('sticky-mini-monitor-wrapper');
+        const p2 = document.getElementById('panel-2-heart-card');
+        if (!wrap || !p2) return;
+        if (window.innerWidth < 1024) {
+            const rect = p2.getBoundingClientRect();
+            const scrolledPastMain = rect.bottom < 120;
+            if (scrolledPastMain !== wrap.classList.contains('mobile-scrolled-visible')) {
+                wrap.classList.toggle('mobile-scrolled-visible', scrolledPastMain);
+                resizeStickyMiniCanvases();
+                drawStickyMiniMonitor();
+            }
+        }
+    }, { passive: true });
+
+    function resizeStickyMiniCanvases() {
+        const dpr = window.devicePixelRatio || 1;
+        [miniEcgCanvas, miniHeartCanvas].forEach(c => {
+            if (!c || !c.parentElement || c.parentElement.offsetParent === null) return;
+            const r = c.parentElement.getBoundingClientRect();
+            if (r.width > 5 && r.height > 5) {
+                c.width = Math.round(r.width * dpr);
+                c.height = Math.round(r.height * dpr);
+                const ctx = c.getContext('2d');
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+        });
+    }
+
+    // Allow clicking/scrubbing time directly on the Sticky Mini-ECG Canvas!
+    if (miniEcgCanvas) {
+        let miniScrub = false;
+        const scrubFromMini = (e) => {
+            const r = miniEcgCanvas.getBoundingClientRect();
+            if (r.width <= 10) return;
+            const ratio = Math.max(0, Math.min(1, (e.clientX - r.left) / r.width));
+            if (isPlaying) togglePlay();
+            const tot = ratio * 2400;
+            continuousCycleCount = Math.floor(tot / 800);
+            currentTime = tot % 800;
+            drawAll2D();
+            renderThreeJSHeart();
+        };
+        miniEcgCanvas.addEventListener('pointerdown', e => { miniScrub = true; scrubFromMini(e); });
+        miniEcgCanvas.addEventListener('pointermove', e => { if (miniScrub) scrubFromMini(e); });
+        window.addEventListener('pointerup', () => { miniScrub = false; });
+    }
+
+    function drawStickyMiniMonitor() {
+        const pill = document.getElementById('sticky-mini-lead-pill');
+        if (pill && SCENARIOS[currentScenario]) {
+            pill.textContent = `${selectedLeadName} • ${SCENARIOS[currentScenario].hr} bpm`;
+        }
+
+        // 1. Draw Live Mini Paper ECG
+        if (miniEcgCanvas && miniEcgCanvas.parentElement && miniEcgCanvas.parentElement.offsetParent !== null) {
+            const dpr = window.devicePixelRatio || 1;
+            if (miniEcgCanvas.width < 20) resizeStickyMiniCanvases();
+            const ctx = miniEcgCanvas.getContext('2d');
+            const w = miniEcgCanvas.width / dpr;
+            const h = miniEcgCanvas.height / dpr;
+            if (w > 10 && h > 10) {
+                const spanMs = 2400; // 3 full cycles continuously visible
+                const pxPerMs = w / spanMs;
+                const baseY = h * 0.65;
+                const scaleMV = h * 0.27;
+                drawClinicalPaperGrid(ctx, 0, 0, w, h, 40 * pxPerMs, scaleMV / 5, 200 * pxPerMs, scaleMV, baseY);
+
+                // Crisp Black Waveform Trace
+                ctx.beginPath();
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 1.9;
+                for (let ms = 0; ms <= spanMs; ms += 4) {
+                    const x = ms * pxPerMs;
+                    const v = window.computeLeadVoltage(ms, currentScenario, selectedLeadName);
+                    const y = Math.max(3, Math.min(h - 3, baseY - v * scaleMV));
+                    if (ms === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                // Synchronized Playhead Cursor
+                const scanMs = ((continuousCycleCount % 3) * 800) + currentTime;
+                const cx = scanMs * pxPerMs;
+                const cv = window.computeLeadVoltage(scanMs, currentScenario, selectedLeadName);
+                const cy = Math.max(3, Math.min(h - 3, baseY - cv * scaleMV));
+                ctx.strokeStyle = '#e11d48';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+                ctx.fillStyle = '#e11d48';
+                ctx.beginPath(); ctx.arc(cx, cy, 4, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+
+        // 2. Draw Live Synchronized Mini Beating Heart & Conduction Spark
+        if (miniHeartCanvas && miniHeartCanvas.parentElement && miniHeartCanvas.parentElement.offsetParent !== null) {
+            const dpr = window.devicePixelRatio || 1;
+            if (miniHeartCanvas.width < 20) resizeStickyMiniCanvases();
+            const ctx = miniHeartCanvas.getContext('2d');
+            const w = miniHeartCanvas.width / dpr;
+            const h = miniHeartCanvas.height / dpr;
+            if (w > 10 && h > 10) {
+                ctx.clearRect(0, 0, w, h);
+                const grad = ctx.createRadialGradient(w * 0.5, h * 0.5, 2, w * 0.5, h * 0.5, Math.max(w, h) * 0.65);
+                grad.addColorStop(0, '#1e293b');
+                grad.addColorStop(1, '#090d16');
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, w, h);
+
+                const cx = w * 0.5;
+                const cy = h * 0.54;
+                const sc = currentScenario;
+                const effT = getEffectiveCardiacCycleTime(currentTime, sc);
+                const ten = window.getMechanicalTension(currentTime, sc) / 100;
+                const pIdx = getPhaseIndex(effT);
+
+                let aSq = (effT >= 90 && effT <= 195 && !['afib', 'vfib', 'vt', 'asystole'].includes(sc))
+                    ? 0.16 * Math.sin(((effT - 90) / 105) * Math.PI) : 0;
+                let vSq = (sc === 'vfib') ? 0.05 * Math.sin(currentTime * 0.6) : ten * 0.22;
+
+                const rScale = Math.min(w, h) / 62;
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.scale(rScale, rScale);
+
+                // Great vessels top
+                ctx.strokeStyle = '#eacbc2';
+                ctx.lineWidth = 4.5;
+                ctx.beginPath(); ctx.arc(0, -14, 7, Math.PI, 0); ctx.stroke();
+
+                // Right & Left Atria
+                ctx.fillStyle = (pIdx === 0) ? '#f59e0b' : '#d9464f';
+                ctx.beginPath();
+                ctx.ellipse(-9 * (1 - aSq), -8, 6.5 * (1 - aSq), 5.5 * (1 - aSq), -0.2, 0, Math.PI * 2);
+                ctx.ellipse(9 * (1 - aSq), -8, 6.5 * (1 - aSq), 5.5 * (1 - aSq), 0.2, 0, Math.PI * 2);
+                ctx.fill();
+
+                // Right & Left Ventricles (beating in real time!)
+                ctx.fillStyle = (pIdx === 2) ? '#0284c7' : (pIdx === 3 && ten > 0.2 ? '#059669' : '#b91c1c');
+                ctx.beginPath();
+                ctx.ellipse(-6 * (1 - vSq), 6, 8.5 * (1 - vSq), 13 * (1 - vSq * 0.5), 0.15, 0, Math.PI * 2);
+                ctx.ellipse(6 * (1 - vSq), 6, 9.5 * (1 - vSq), 14 * (1 - vSq * 0.5), -0.22, 0, Math.PI * 2);
+                ctx.fill();
+
+                // His-Purkinje Conduction Tree inside Mini Heart
+                if (layers3D.conduction) {
+                    ctx.strokeStyle = (pIdx === 2) ? '#fef08a' : '#38bdf8';
+                    ctx.lineWidth = 1.6;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -3); ctx.lineTo(0, 4);
+                    ctx.lineTo(-6, 13); ctx.moveTo(0, 4); ctx.lineTo(7, 14);
+                    ctx.stroke();
+                    // SA & AV Nodes
+                    ctx.fillStyle = '#facc15';
+                    ctx.beginPath(); ctx.arc(-9, -10, pIdx === 0 ? 2.8 : 1.8, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = '#fb923c';
+                    ctx.beginPath(); ctx.arc(0, -3, pIdx === 1 ? 2.6 : 1.7, 0, Math.PI * 2); ctx.fill();
+                }
+
+                // Coronary Clot Dot in STEMI
+                if (['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_lat'].includes(sc)) {
+                    ctx.fillStyle = '#dc2626';
+                    ctx.strokeStyle = '#fef08a';
+                    ctx.lineWidth = 1.5;
+                    const cxClot = sc === 'stemi_inf' ? -8 : (sc === 'stemi_lat' ? 11 : 4);
+                    const cyClot = sc === 'stemi_ant' ? 0 : 5;
+                    ctx.beginPath(); ctx.arc(cxClot, cyClot, 3.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+                }
+
+                ctx.restore();
+            }
+        }
+    }
+
+    // Hook into resizeAllCanvases, setScenario, toggleLanguage, and renderThreeJSHeart
+    const prevResize = window.resizeAllCanvases;
+    window.resizeAllCanvases = function () {
+        resizeStickyMiniCanvases();
+        prevResize();
+    };
+
+    const prevSetScenario = window.setScenario;
+    window.setScenario = function (key) {
+        if (SCENARIOS[key] && currentCategory !== 'all' && SCENARIOS[key].cat !== currentCategory) {
+            currentCategory = SCENARIOS[key].cat;
+            document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active-cat-btn'));
+            const catBtn = document.getElementById('cat-' + currentCategory);
+            if (catBtn) catBtn.classList.add('active-cat-btn');
+        }
+        prevSetScenario(key);
+        refresh3DLeadPlaqueTextures();
+        drawStickyMiniMonitor();
+    };
+
+    const prevSelectSingleLead = window.selectSingleLead;
+    if (typeof prevSelectSingleLead === 'function') {
+        window.selectSingleLead = function (leadId) {
+            prevSelectSingleLead(leadId);
+            refresh3DLeadPlaqueTextures();
+            drawStickyMiniMonitor();
+        };
+    }
+
+    // Also update 12-lead canvas click handler so clicking any lead updates the 3D Lead Plaques and Sticky Mini-ECG!
+    if (twelveCanvas) {
+        twelveCanvas.addEventListener('click', () => {
+            refresh3DLeadPlaqueTextures();
+            drawStickyMiniMonitor();
+        });
+    }
+
+    const prevToggleLang = window.toggleLanguage;
+    window.toggleLanguage = function () {
+        prevToggleLang();
+        const isAr = (currentLang === 'ar');
+        const condTxt = document.getElementById('ui-tgl-cond');
+        if (condTxt) condTxt.textContent = isAr ? 'نظام التوصيل (His-Purkinje)' : 'Conduction (His-Purkinje)';
+        const veinsTxt = document.getElementById('ui-tgl-veins');
+        if (veinsTxt) veinsTxt.textContent = isAr ? 'الأوردة' : 'Veins';
+        const bgTxt = document.getElementById('ui-tgl-studio-bg');
+        if (bgTxt) bgTxt.textContent = isAr ? 'خلفية استوديو' : 'Studio BG';
+        const fsTxt = document.getElementById('ui-tgl-fullscreen');
+        if (fsTxt) fsTxt.textContent = isHeartFullscreen
+            ? (isAr ? 'إغلاق ملء الشاشة' : 'Exit Fullscreen')
+            : (isAr ? 'ملء الشاشة' : 'Fullscreen');
+        const dockTitle = document.getElementById('ui-sticky-dock-title');
+        if (dockTitle) dockTitle.textContent = isAr
+            ? 'الشريط المرجعي المثبت (تخطيط الورق الحي + انقباض القلب المتزامن أثناء النزول للأسفل):'
+            : 'Pinned Reference Strip (Live Paper ECG + Synchronized Beating Heart while scrolling):';
+        const dockBtn = document.getElementById('ui-btn-sticky-dock');
+        if (dockBtn) dockBtn.textContent = isAr ? 'إخفاء/إظهار المصغر' : 'Toggle Mini Strip';
+        window.renderScenarioButtons();
+    };
+
+    // Synchronize 3D Heart Contraction with fast/slow rhythms (SVT, A.Flutter, VT, Sinus Brady/Tachy, Junctional, IVR)
+    let sketchfabUpgraded = false;
+    const prevRenderHeart = window.renderThreeJSHeart;
+    window.renderThreeJSHeart = function () {
+        if (!sketchfabUpgraded && typeof THREE !== 'undefined' && scene && heartGroup) {
+            upgradeHeartToSketchfabRealism();
+            sketchfabUpgraded = true;
+        }
+        const savedTime = currentTime;
+        // Temporarily map currentTime to effective cardiac cycle time so the 3D Heart contracts at the exact physiological rate!
+        currentTime = getEffectiveCardiacCycleTime(savedTime, currentScenario);
+        prevRenderHeart();
+        currentTime = savedTime;
+
+        // Extra Atrial Flutter 300/min rapid right-atrial flutter contraction in 3D
+        if (currentScenario === 'aflutter' && meshRA && meshLA) {
+            const absT = continuousCycleCount * 800 + currentTime;
+            const flutt = 0.14 * Math.pow(Math.sin((absT / 200) * Math.PI), 2);
+            meshRA.scale.setScalar(1 - flutt);
+            meshLA.scale.setScalar(1 - flutt * 0.7);
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+        drawStickyMiniMonitor();
+    };
+
+    function initPhase2Upgrades() {
+        if (typeof THREE !== 'undefined' && scene && heartGroup && !sketchfabUpgraded) {
+            upgradeHeartToSketchfabRealism();
+            sketchfabUpgraded = true;
+        }
+        window.renderScenarioButtons();
+        resizeStickyMiniCanvases();
+        drawAll2D();
+        renderThreeJSHeart();
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPhase2Upgrades, { once: true });
+    } else {
+        setTimeout(initPhase2Upgrades, 50);
     }
 })();
 </script>
