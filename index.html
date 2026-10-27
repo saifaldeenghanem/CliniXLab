@@ -1256,6 +1256,22 @@
                     </button>
                 </div>
             </div>
+        
+            <!-- Interactive URL Route Bar (/ECGStimulation) & GitHub Multi-Page Guide -->
+            <div id="clinix-route-bar" class="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="flex items-center gap-2 bg-slate-950/80 px-3 py-1 rounded-xl border border-sky-500/30 font-mono text-[11px] sm:text-xs">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                    <span class="text-slate-400" id="ui-route-prefix">URL Route:</span>
+                    <span id="clinix-live-url-path" class="text-sky-300 font-extrabold dir-ltr" dir="ltr">clinixlab.github.io/</span>
+                </div>
+                <div class="flex flex-wrap items-center gap-1.5">
+                    <button type="button" onclick="openGitHubArchModal()" id="btn-github-arch" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-emerald-300 border border-emerald-500/40 font-bold text-[11px] flex items-center gap-1.5 transition">
+                        <i class="fa-solid fa-code-branch"></i>
+                        <span id="ui-github-arch-btn">هيكلة وروابط GitHub (/ECGStimulation) وتصدير الملفات</span>
+                    </button>
+                </div>
+            </div>
+
         </header>
 
         <!-- VIEW 1: THE MAIN DASHBOARD HUB (CARDS GRID) -->
@@ -1281,7 +1297,7 @@
                         </p>
                     </div>
                     <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs font-bold text-sky-400">
-                        <span id="card1-action">فتح المحاكي الشامل</span>
+                        <span id="card1-action">فتح المحاكي الشامل (/ECGStimulation)</span>
                         <i class="fa-solid fa-arrow-left"></i>
                     </div>
                 </div>
@@ -1584,7 +1600,7 @@
 
                         <!-- 3D Layer Toggle Switches -->
                         <div class="flex flex-wrap items-center gap-1">
-                            <button onclick="toggle3DLayer('conduction')" id="btn-3d-conduction" class="toggle-pill-active px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
+                            <button onclick="toggle3DLayer('conduction')" id="btn-3d-conduction" style="display:none !important;" class="hidden px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-300 transition flex items-center gap-1">
                                 <i class="fa-solid fa-bolt"></i>
                                 <span id="ui-tgl-cond">حزمة هيس وألياف بركنجي</span>
                             </button>
@@ -1606,7 +1622,9 @@
                             </button>
                         </div>
                         <div class="w-full flex flex-wrap items-center gap-1 mt-1.5" aria-label="Anatomical label controls">
-                            <span id="ui-3d-labels-heading" class="text-[10px] sm:text-[11px] font-bold text-slate-400 ml-1">إظهار التسميات:</span>
+                            <button type="button" onclick="toggleAll3DNames()" id="btn-3d-labels-all" aria-pressed="false" class="px-2.5 py-1 rounded-lg text-[10px] sm:text-[11px] font-extrabold bg-slate-900 border border-sky-500/50 text-sky-300 transition flex items-center gap-1">
+                                <i class="fa-solid fa-tags"></i><span id="ui-3d-labels-heading">إظهار الأسماء (Show Name)</span>
+                            </button>
                             <button type="button" onclick="toggle3DLabels('chambers')" id="btn-3d-labels-chambers" aria-pressed="false" class="px-2 py-1 rounded-lg text-[10px] sm:text-[11px] font-bold bg-slate-900 border border-slate-700 text-slate-400 transition flex items-center gap-1">
                                 <i class="fa-solid fa-heart"></i><span id="ui-3d-label-chambers">حجرات القلب</span>
                             </button>
@@ -1724,6 +1742,16 @@
                     </div>
                     <p id="path-phase-desc" class="text-xs sm:text-sm text-white font-semibold leading-relaxed mb-2"></p>
                     <p id="path-overall-summary" class="text-[11px] sm:text-xs text-slate-300 bg-slate-950/70 p-2 rounded-lg border border-slate-800 leading-relaxed"></p>
+                    <div id="acls-protocol-box" class="mt-2 p-2.5 rounded-xl bg-slate-950/90 border border-amber-500/40 text-[11px] sm:text-xs leading-relaxed">
+                        <div class="flex flex-wrap items-center justify-between gap-1 mb-1">
+                            <span class="font-extrabold text-amber-300 flex items-center gap-1.5">
+                                <i class="fa-solid fa-bolt"></i>
+                                <span id="ui-acls-box-title">البروتوكول العلاجي السريري وأدوية الطوارئ (AHA ACLS Protocol):</span>
+                            </span>
+                            <span id="acls-triage-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-extrabold">نظم مرجعي مستقر</span>
+                        </div>
+                        <p id="acls-protocol-text" class="text-slate-200 font-semibold"></p>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1757,6 +1785,23 @@
             </div>
         </div>
 
+        <!-- Live Lead Vector Projection & Morphology Inspector -->
+        <div id="lead-vector-inspector" class="mb-3 p-3 rounded-xl bg-slate-900/90 border border-sky-500/40 flex flex-col md:flex-row items-start md:items-center justify-between gap-2.5 text-xs">
+            <div class="flex-1 min-w-0">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                    <span class="px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/40 font-extrabold text-[11px]" id="vec-insp-lead-badge">
+                        الاتجاه المختار: Lead II (+60°)
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 font-mono font-bold text-[11px]" id="vec-insp-proj-badge">
+                        إسقاط المتجه اللحظي: cos(θ) = +0.97 (موجة إيجابية ↑)
+                    </span>
+                    <span class="px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/40 font-bold text-[11px] hidden" id="vec-insp-clot-badge"></span>
+                </div>
+                <p id="vec-insp-explanation" class="text-slate-200 leading-relaxed text-[11px] sm:text-xs font-semibold">
+                    ينظر هذا القطب من الزاوية (+60° سفلي أيسر): عندما تتجه المحصلة الكهربائية للبطينين نحو الأسفل واليسار (+60°)، فإنها تقترب مباشرة من هذا القطب فترسم موجة R إيجابية شاهقة.
+                </p>
+            </div>
+        </div>
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
             <!-- 12-Lead Grid Canvas -->
             <div id="twelve-lead-col" class="lg:col-span-8 relative w-full h-80 sm:h-96 rounded-xl bg-[#0b070a] border border-rose-500/30 overflow-hidden">
@@ -1846,14 +1891,19 @@
                 </div>
             </div>
 
-            <div class="mt-3 pt-2 border-t border-slate-800 bg-slate-900/90 p-2 rounded-xl flex flex-wrap justify-between items-center gap-2 text-xs">
-                <div>
-                    <span class="text-slate-400" id="lbl-ap-volt">جهد الغشاء اللحظي (Vm):</span>
-                    <strong id="live-vm-val" class="text-amber-400 font-mono mr-1">-90 mV</strong>
+            <div class="mt-3 pt-2 border-t border-slate-800 bg-slate-900/90 p-2.5 rounded-xl space-y-1.5 text-xs">
+                <div class="flex flex-wrap justify-between items-center gap-2">
+                    <div>
+                        <span class="text-slate-400" id="lbl-ap-volt">جهد الغشاء اللحظي (Vm) تحت القطب المختار:</span>
+                        <strong id="live-vm-val" class="text-amber-400 font-mono mr-1">-90 mV</strong>
+                    </div>
+                    <div>
+                        <span class="text-slate-400" id="lbl-sarc-state">حالة الأكتين والميوسين (Sarcomere):</span>
+                        <strong id="live-sarc-val" class="text-emerald-400 mr-1">ارتخاء تام (Diastole)</strong>
+                    </div>
                 </div>
-                <div>
-                    <span class="text-slate-400" id="lbl-sarc-state">حالة الأكتين والميوسين (Sarcomere):</span>
-                    <strong id="live-sarc-val" class="text-emerald-400 mr-1">ارتخاء تام (Diastole)</strong>
+                <div id="ap-lead-territory-note" class="text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800 text-sky-300">
+                    القطب المختار (Lead II) يرصد عضلة بطينية سليمة: جهد الراحة -90mV وذروة الطور 0 تصل +20mV مع انقباض كامل 100%.
                 </div>
             </div>
         </div>
@@ -2938,7 +2988,7 @@
             return new THREE.Mesh(geom, mat);
         }
 
-        function initThreeJSHeart() {
+        function initThreeJSHeart() { if (typeof THREE === 'undefined') return;
             const container = document.getElementById('heart3d-container');
             const w = container.clientWidth || 500;
             const h = container.clientHeight || 320;
@@ -4560,7 +4610,7 @@
             const activePill = document.getElementById('active-scenario-pill');
             if (activePill && SCENARIOS[currentScenario]) activePill.textContent = SCENARIOS[currentScenario][currentLang].name;
             document.getElementById('ui-sub-title').textContent = t.subTitle;
-            const localLangBtn = document.getElementById('lang-btn-text');
+            const localLangBtn = document.getElementById('hub-lang-btn-text');
             if (localLangBtn) localLangBtn.textContent = t.langBtn;
             document.getElementById('ui-3d-labels-heading').textContent = t.labelsHeading;
             document.getElementById('ui-3d-label-chambers').textContent = t.labelChambers;
@@ -6088,7 +6138,7 @@
       if(legend.parentElement===heart) heart.parentNode.insertBefore(legend,heart.nextSibling);
       legend.classList.add('heart3d-legend-mobile-flow');
     }else{
-      if(legend.parentElement!==heart) heart.appendChild(legend);
+      if(legend.parentElement===heart) heart.parentNode.insertBefore(legend,heart);
       legend.classList.remove('heart3d-legend-mobile-flow');
     }
   }
@@ -6400,6 +6450,2606 @@ function updateDynamicECGMetrics(){
 #heart3d-charge-caption { position:relative!important; inset:auto!important; display:block!important; width:100%!important; max-width:100%!important; margin:6px 0 8px!important; box-sizing:border-box!important; white-space:normal!important; overflow-wrap:anywhere!important; }
 @media (max-width:639px) { #heart3d-charge-caption { padding:6px 9px!important; font-size:10px!important; line-height:1.45!important; } }
 </style>
+
+
+<!-- =========================================================================
+     GITHUB MULTI-PAGE ARCHITECTURE & EXPORT MODAL (/ECGStimulation)
+     ========================================================================= -->
+<div id="github-arch-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md">
+    <div class="panel-card w-full max-w-3xl rounded-2xl p-4 sm:p-6 border border-sky-500/50 shadow-2xl max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
+            <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-xl bg-sky-500/20 border border-sky-500/40 flex items-center justify-center text-sky-400">
+                    <i class="fa-solid fa-code-branch"></i>
+                </div>
+                <div>
+                    <h3 id="gh-modal-title" class="text-sm sm:text-base font-black text-white">
+                        هيكلة مشروع GitHub Pages والرابط المستقل (/ECGStimulation)
+                    </h3>
+                    <p id="gh-modal-sub" class="text-[11px] text-slate-400">
+                        يعمل الكود حالياً بنظام التوجيه الذكي (SPA Router) ويمكنك أيضاً تنزيل الملفين منفصلين بنقرة واحدة
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="closeGitHubArchModal()" class="px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700">✕</button>
+        </div>
+
+        <div class="space-y-3 text-xs sm:text-sm leading-relaxed text-slate-200">
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-emerald-500/30">
+                <div class="font-extrabold text-emerald-400 mb-1" id="gh-sec1-title">1. كيف يعمل الرابط `/ECGStimulation` حالياً وفي GitHub Pages؟</div>
+                <p id="gh-sec1-desc" class="text-xs text-slate-300 leading-relaxed">
+                    عند الضغط على بطاقة محاكي تخطيط القلب في الصفحة الرئيسية، يقوم المحرك تلقائياً بتحديث الرابط إلى <code class="px-1.5 py-0.5 rounded bg-slate-950 text-sky-300 font-mono" dir="ltr">/ECGStimulation</code> عبر <code class="font-mono text-amber-300">History API (pushState)</code> مع دعم الرجوع للخلف والفتح المباشر للرابط.
+                </p>
+            </div>
+
+            <div class="p-3 rounded-xl bg-slate-900/90 border border-sky-500/30">
+                <div class="font-extrabold text-sky-400 mb-1.5" id="gh-sec2-title">2. هيكلية المجلدات القياسية على GitHub لإضافة أقسام مستقبلية بدون تعديل الصفحة الرئيسية:</div>
+                <pre class="p-2.5 rounded-lg bg-slate-950 text-sky-300 font-mono text-[11px] overflow-x-auto" dir="ltr">CliniX-Lab-Repo/
+├── index.html                  # الصفحة الرئيسية فقط (Main Hub) -> تفتح البطاقات عبر روابط مثل /ECGStimulation/
+├── ECGStimulation/
+│   └── index.html              # كود محاكي الـ ECG الكامل مستقل تماماً (يفتح عند الرابط /ECGStimulation)
+├── PhysicalExam/
+│   └── index.html              # (مستقبلاً) يضاف هنا دون لمس الملفات السابقة!
+├── ACLSPharmacology/
+│   └── index.html              # (مستقبلاً)
+└── ABGs/
+    └── index.html              # (مستقبلاً)</pre>
+            </div>
+
+            <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800">
+                <div class="flex flex-wrap gap-2">
+                    <button type="button" onclick="downloadSplitGitHubFile('hub')" class="px-3 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-house"></i>
+                        <span id="gh-dl-hub">تنزيل index.html (صفحة Hub الرئيسية فقط)</span>
+                    </button>
+                    <button type="button" onclick="downloadSplitGitHubFile('ecg')" class="px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs flex items-center gap-1.5 shadow">
+                        <i class="fa-solid fa-wave-square"></i>
+                        <span id="gh-dl-ecg">تنزيل ECGStimulation/index.html (محاكي ECG مستقل)</span>
+                    </button>
+                </div>
+                <button type="button" onclick="closeGitHubArchModal()" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-bold border border-slate-700" id="gh-close-btn">إغلاق</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style id="clinix-master-consolidated-fixes">
+  /* 1. Fix Laptop & Mobile Sticky Timeline so #current-phase-badge NEVER overlaps #time-slider */
+  @media (min-width: 1024px) {
+    #html-root .sticky-master-timeline {
+      padding: 8px 12px !important;
+      top: 4px !important;
+    }
+    #html-root .sticky-master-timeline > div:first-child {
+      gap: 6px !important;
+    }
+    #html-root .sticky-master-timeline > div:first-child > div:nth-child(2) > div:first-child {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      height: auto !important;
+      min-height: 32px !important;
+      max-height: none !important;
+      gap: 8px !important;
+      margin: 0 0 5px 0 !important;
+    }
+    #html-root .sticky-master-timeline #current-phase-badge {
+      flex: 0 1 auto !important;
+      width: auto !important;
+      max-width: 55% !important;
+      height: auto !important;
+      min-height: 26px !important;
+      max-height: none !important;
+      padding: 3px 10px !important;
+      font-size: 11.5px !important;
+      line-height: 1.3 !important;
+      white-space: normal !important;
+    }
+    #html-root .sticky-master-timeline > div:first-child > div:nth-child(3) {
+      grid-template-columns: repeat(6, minmax(0, 1fr)) !important;
+      grid-auto-rows: minmax(32px, auto) !important;
+      gap: 5px !important;
+    }
+    #html-root .sticky-master-timeline > div:first-child > div:nth-child(3) > button {
+      height: auto !important;
+      min-height: 32px !important;
+      max-height: none !important;
+      padding: 4px 6px !important;
+      font-size: 11px !important;
+    }
+  }
+
+  /* 2. Mobile Sticky Timeline: clean, non-overlapping, with compact height */
+  @media (max-width: 1023px) {
+    #html-root .sticky-master-timeline {
+      padding: 6px 8px !important;
+      top: 2px !important;
+    }
+    #html-root .sticky-master-timeline > div:first-child > div:nth-child(2) > div:first-child {
+      display: flex !important;
+      flex-wrap: wrap !important;
+      align-items: center !important;
+      justify-content: space-between !important;
+      height: auto !important;
+      min-height: 0 !important;
+      max-height: none !important;
+      gap: 4px !important;
+      margin-bottom: 4px !important;
+    }
+    #html-root .sticky-master-timeline #current-phase-badge {
+      flex: 1 1 100% !important;
+      width: 100% !important;
+      max-width: 100% !important;
+      height: auto !important;
+      min-height: 24px !important;
+      max-height: none !important;
+      padding: 3px 8px !important;
+      font-size: 10.5px !important;
+      line-height: 1.3 !important;
+      white-space: normal !important;
+    }
+    #html-root .sticky-master-timeline > div:first-child > div:nth-child(3) {
+      display: grid !important;
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+      grid-auto-rows: minmax(28px, auto) !important;
+      gap: 4px !important;
+      overflow: visible !important;
+    }
+    #html-root .sticky-master-timeline > div:first-child > div:nth-child(3) > button {
+      width: 100% !important;
+      max-width: none !important;
+      height: auto !important;
+      min-height: 28px !important;
+      max-height: none !important;
+      padding: 3px 4px !important;
+      font-size: 9.5px !important;
+      line-height: 1.2 !important;
+      white-space: normal !important;
+      text-overflow: clip !important;
+    }
+  }
+
+  /* 3. Keep #heart3d-color-legend ALWAYS outside #heart3d-container so it never pushes WebGL canvas down */
+  #html-root #heart3d-color-legend {
+    position: relative !important;
+    inset: auto !important;
+    width: 100% !important;
+    margin: 0 0 8px 0 !important;
+    padding: 7px 10px !important;
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    gap: 5px 10px !important;
+    border-radius: 10px !important;
+    box-sizing: border-box !important;
+  }
+  @media (max-width: 639px) {
+    #html-root #heart3d-color-legend {
+      grid-template-columns: minmax(0, 1fr) !important;
+    }
+  }
+  #html-root #heart3d-container > canvas {
+    position: absolute !important;
+    inset: 0 !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: block !important;
+  }
+
+  /* 4. Prevent ECG overlay badges from colliding with each other or with the mV axis / calipers */
+  #html-root #ecg-canvas {
+    position: relative !important;
+  }
+  #html-root #ecg-simulator-view #ecg-active-segment-tag {
+    max-width: calc(100% - 210px) !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    font-size: 10.5px !important;
+    padding: 3px 8px !important;
+  }
+  @media (max-width: 639px) {
+    #html-root #ecg-simulator-view #ecg-active-segment-tag {
+      top: auto !important;
+      bottom: 4px !important;
+      right: 6px !important;
+      max-width: calc(100% - 12px) !important;
+      font-size: 9.5px !important;
+    }
+  }
+
+  /* 5. Light mode styling for newly added inspector & ACLS boxes */
+  #html-root:not(.dark) #clinix-route-bar > div:first-child,
+  #html-root:not(.dark) #lead-vector-inspector,
+  #html-root:not(.dark) #acls-protocol-box,
+  #html-root:not(.dark) #ap-lead-territory-note {
+    background: #f1f5f9 !important;
+    border-color: #cbd5e1 !important;
+    color: #1e293b !important;
+  }
+  #html-root:not(.dark) #vec-insp-explanation,
+  #html-root:not(.dark) #acls-protocol-text {
+    color: #334155 !important;
+  }
+</style>
+
+<script id="clinix-master-upgrade-engine">
+(function () {
+    // =========================================================================
+    // 1. EXPANDED CLINICAL SCENARIOS (SODIUM, SPLIT ANTERIOR STEMIs, & ALL PDF RHYTHMS)
+    // =========================================================================
+    const NEW_SCENARIOS = {
+        sinus_brady: {
+            cat: 'normal_elec', hr: 42, stripDefault: true,
+            ar: {
+                name: 'بطء النظم الجيبي (Sinus Bradycardia <50 bpm)',
+                summary: 'انخفاض معدل إطلاق العقدة الجيبية (SA Node < 50/دقيقة) بسبب زيادة نغمة العصب الحائر (Vagal Tone)، أو أدوية (حاصرات بيتا/الكالسيوم/الديجوكسين)، أو نقص الأكسجة. كل موجة P طبيعية ويتبعها QRS ضيق بنسبة 1:1.',
+                phases: [
+                    'المرحلة 1 (موجة P): تطلق عقدة SA الشرارة بانتظام ولكن بمعدل بطيء (42 نبضة/دقيقة)، فترتسم موجة P طبيعية الشكل والاتجاه قبل كل مركب QRS.',
+                    'المرحلة 2 (قطعة PR): تعبر النبضة عقدة AV بتأخير فيزيولوجي طبيعي (فترة PR = 0.16–0.18s).',
+                    'المرحلة 3 (مركب QRS): تنتشر النبضة بسرعة طبيعية عبر حزمة هيس وألياف بركنجي فترسم مركب QRS ضيقاً (0.08s).',
+                    'المرحلة 4 (قطعة ST): انقباض بطيني طبيعي، لكن بطء المعدل الشديد قد يقلل النتاج القلبي (CO = HR × SV) إذا هبط الضغط.',
+                    'المرحلة 5 (موجة T): إعادة استقطاب بطينية طبيعية.',
+                    'المرحلة 6 (الطور 4 الطويل): بطء ميل تيار منظم الخطى (Funny Current If) في الطور 4 داخل عقدة SA يطيل فترة الانبساط (TP segment) بين النبضات.'
+                ]
+            },
+            en: {
+                name: 'Sinus Bradycardia (<50 bpm)',
+                summary: 'Reduced SA nodal automaticity (<50 bpm) due to vagal tone, medications (BB/CCB/Digoxin), or inferior ischemia. Normal upright P wave before every narrow QRS (1:1 conduction).',
+                phases: [
+                    'Phase 1 (P Wave): SA node fires regularly at a slow rate (42 bpm), producing a normal upright P wave before every QRS.',
+                    'Phase 2 (PR Segment): Normal AV nodal conduction delay (PR = 0.16–0.18s).',
+                    'Phase 3 (QRS): Rapid His-Purkinje conduction yields a normal narrow QRS (0.08s).',
+                    'Phase 4 (ST Segment): Normal mechanical systole, though severe bradycardia can reduce cardiac output (CO = HR × SV).',
+                    'Phase 5 (T Wave): Normal Phase 3 ventricular repolarization.',
+                    'Phase 6 (Prolonged Phase 4): Slower Phase 4 pacemaker slope (If current) in SA nodal cells lengthens the TP diastolic interval.'
+                ]
+            }
+        },
+        sinus_tachy: {
+            cat: 'normal_elec', hr: 130, stripDefault: true,
+            ar: {
+                name: 'تسرع النظم الجيبي (Sinus Tachycardia 100–150 bpm)',
+                summary: 'زيادة سرعة إطلاق العقدة الجيبية (100–150/دقيقة) كاستجابة فيزيولوجية لتحفيز مستقبلات β1 الودية (حمى، نقص سوائل/نزف، ألم، نقص أكسجة، صمة رئوية، إنتان). يبدأ وينتهي تدريجياً مع موجة P واضحة قبل كل QRS.',
+                phases: [
+                    'المرحلة 1 (موجة P): تسارع إطلاق عقدة SA يرسم موجات P منتظمة وإيجابية قبل كل QRS (قد تقترب من نهاية موجة T السابقة).',
+                    'المرحلة 2 (قطعة PR): التوصيل عبر عقدة AV سريع ومنتظم (1:1).',
+                    'المرحلة 3 (مركب QRS): مركب QRS ضيق وطبيعي عبر حزمة هيس وألياف بركنجي.',
+                    'المرحلة 4 (قطعة ST): انقباض بطيني قوي وسريع بدافع التحفيز الودي (Sympathetic β1).',
+                    'المرحلة 5 (موجة T): إعادة استقطاب سريعة مع قصر طفيف في فترة QT تماشياً مع سرعة النبض.',
+                    'المرحلة 6 (قصر الطور 4): تقصر فترة الامتلاء الانبساطي (TP segment). تحذير ACLS: لا تعطِ أدينوزين ولا تصدم كهربائياً! عالج السبب الأساسي!'
+                ]
+            },
+            en: {
+                name: 'Sinus Tachycardia (100–150 bpm)',
+                summary: 'Accelerated SA nodal firing (100–150 bpm) driven by sympathetic β1 tone (fever, hypovolemia, pain, PE, sepsis). Gradual onset/offset with upright P waves before every narrow QRS.',
+                phases: [
+                    'Phase 1 (P Wave): Rapid regular SA nodal firing produces upright P waves before every QRS.',
+                    'Phase 2 (PR Segment): Normal 1:1 AV nodal conduction.',
+                    'Phase 3 (QRS): Narrow QRS via intact His-Purkinje network.',
+                    'Phase 4 (ST Segment): Hyperdynamic ventricular systolic contraction.',
+                    'Phase 5 (T Wave): Physiological rate-related QT shortening.',
+                    'Phase 6 (Shortened Phase 4): Steep SA nodal Phase 4 slope shortens diastole. ACLS Rule: Do NOT shock or give Adenosine—treat the underlying cause!'
+                ]
+            }
+        },
+        hypona: {
+            cat: 'normal_elec', hr: 64,
+            ar: {
+                name: 'نقص الصوديوم الشديد (Hyponatremia [Na+] < 120 mEq/L)',
+                summary: 'انخفاض تركيز الصوديوم خارج الخلية ([Na+]o < 120 mEq/L) يقلل القوة الدافعة لدخول الصوديوم وفق معادلة نيرنست (ENa)، مما يبطئ سرعة صعود الطور 0 (dV/dt max) ويخفض قمة جهد الفعل إلى +5mV بدلاً من +20mV فيسبب بطء التوصيل واتساعاً طفيفاً وانخفاضاً في فولتية QRS.',
+                phases: [
+                    'في نقص الصوديوم (المرحلة 1 - موجة P): يقل تيار الصوديوم الأذيني قليلاً فتكون موجة P أعرض قليلاً وأقل ارتفاعاً.',
+                    'في نقص الصوديوم (المرحلة 2 - قطعة PR): يتباطأ التوصيل في الأنسجة المعتمدة على الصوديوم وحزمة هيس فتطول فترة PR بشكل طفيف (~0.20s).',
+                    'الخلل الخلوي الجوهري في المرحلة 3 (مركب QRS - الطور 0): عندما تفتح بوابات (m) لقنوات الصوديوم السريعة، يكون اندفاع Na+ للداخل أضعف وأبطأ بسبب نقص تركيز الصوديوم خارج الخلية! فيرتفع جهد الغشاء ببطء إلى +5mV فقط (بدلاً من +20mV)، مما يبطئ سرعة انتشار النبضة في ألياف بركنجي والبطينين فيتسع مركب QRS قليلاً (~0.11s) وتنخفض سعته!',
+                    'في المرحلة 4 (قطعة ST): في حالات نقص الصوديوم الشديد قد يظهر ارتفاع بسيط في نقطة J وقطعة ST في V1-V2 يشبه متلازمة بروغادا (Brugada Phenocopy) نتيجة ضعف تيار الصوديوم (INa).',
+                    'في المرحلة 5 (موجة T): إعادة استقطاب طبيعية مع موجة T منخفضة السعة قليلاً.',
+                    'في المرحلة 6 (الطور 4): يبقى جهد الراحة قريباً من -90mV لأن جهد الراحة يعتمد أساساً على البوتاسيوم (IK1) وليس الصوديوم.'
+                ]
+            },
+            en: {
+                name: 'Severe Hyponatremia ([Na+] < 120 mEq/L)',
+                summary: 'Low extracellular [Na+]o reduces the Nernst driving force (ENa) for inward Na+ current during Phase 0: slowing dV/dt(max), blunting the Action Potential peak to +5mV (vs +20mV), widening QRS (~0.11s), lowering QRS amplitude, and occasionally unmasking a Brugada-like V1–V2 pattern.',
+                phases: [
+                    'Phase 1 (P Wave): Reduced extracellular Na+ mildly slows intra-atrial conduction.',
+                    'Phase 2 (PR Segment): Mild conduction delay across His-Purkinje fibers slightly prolongs PR (~0.20s).',
+                    'PRIMARY DEFECT IN PHASE 3 (QRS - Phase 0 Upstroke): When Fast Na+ m-gates open, the lower extracellular [Na+] gradient weakens Na+ influx! Phase 0 upstroke slope (dV/dt) slows and peaks at only +5mV instead of +20mV—slowing ventricular conduction velocity, widening QRS (~0.11s), and reducing R-wave amplitude!',
+                    'Phase 4 (ST Segment): Severe INa reduction can produce mild coved J-point/ST elevation in V1–V2 (Brugada phenocopy).',
+                    'Phase 5 (T Wave): Mildly reduced T-wave amplitude.',
+                    'Phase 6 (Phase 4): Resting potential remains near -90mV (governed by K+ equilibrium EK).'
+                ]
+            }
+        },
+        hyperna: {
+            cat: 'normal_elec', hr: 88,
+            ar: {
+                name: 'فرط الصوديوم الشديد (Hypernatremia [Na+] > 155 mEq/L)',
+                summary: 'ارتفاع تركيز الصوديوم خارج الخلية ([Na+]o > 155 mEq/L) يرفع جهد توازن الصوديوم (ENa ≈ +68mV) ويزيد القوة الدافعة لاندفاع الصوديوم في الطور 0، فتزداد سرعة صعود الطور 0 وتصل قمة جهد الفعل إلى +30mV مع مركب QRS حاد وضيق وقصر طفيف في QT.',
+                phases: [
+                    'في فرط الصوديوم (المرحلة 1 - موجة P): تسرع جيبي خفيف نتيجة الانكماش الخلوي الأسموزي والتحفيز الودي العصبي.',
+                    'في فرط الصوديوم (المرحلة 2 - قطعة PR): توصيل سريع عبر الأذينين وحزمة هيس (فترة PR قصيرة-طبيعية ~0.14s).',
+                    'الخلل الخلوي الجوهري في المرحلة 3 (مركب QRS - الطور 0): بسبب التدرج العالي جداً للصوديوم خارج الخلية، تندفع أيونات Na+ بقوة وسرعة فائقة لحظة فتح بوابة (m)، فيقفز جهد الغشاء (Overshoot) إلى +30mV (بدلاً من +20mV) ويرتسم مركب QRS حاد وضيق وعالي الفولتية (~0.07s)!',
+                    'في المرحلة 4 (قطعة ST): ارتفاع الصوديوم خارج الخلية يؤثر على مبادل الصوديوم/الكالسيوم (NCX) ويزيد دخول الكالسيوم وقوة الانقباض مع قصر طفيف في الطور الهضبي 2.',
+                    'في المرحلة 5 (موجة T): قصر طفيف في زمن جهد الفعل وفترة QT مع زيادة استثارة العضلة القلبية.',
+                    'في المرحلة 6 (الطور 4): جهد الراحة -90mV مع زيادة القابلية لظهور خوارج انقباض بسبب فرط الأسمولية.'
+                ]
+            },
+            en: {
+                name: 'Severe Hypernatremia ([Na+] > 155 mEq/L)',
+                summary: 'High extracellular [Na+]o increases the inward Na+ driving force (ENa shifts to ~+68mV), accelerating Phase 0 upstroke (dV/dt max) and raising the Action Potential overshoot peak to +30mV—producing sharp, narrow, high-amplitude QRS complexes (~0.07s) and mild QT shortening.',
+                phases: [
+                    'Phase 1 (P Wave): Mild sinus tachycardia driven by hyperosmolar cellular dehydration and sympathetic tone.',
+                    'Phase 2 (PR Segment): Brisk AV and His-Purkinje conduction (PR ~0.14s).',
+                    'PRIMARY EFFECT IN PHASE 3 (QRS - Steep Phase 0 Overshoot): Steep extracellular Na+ gradient drives rapid, intense Na+ influx when m-gates open! Transmembrane voltage shoots up to +30mV (vs +20mV normally), accelerating conduction velocity and drawing a razor-sharp, narrow QRS (~0.07s)!',
+                    'Phase 4 (ST Segment): Altered Na+/Ca2+ exchanger (NCX) gradient slightly shortens the Phase 2 plateau while enhancing Ca2+ loading.',
+                    'Phase 5 (T Wave): Mildly shortened action potential duration and QT interval.',
+                    'Phase 6 (Phase 4): Resting potential remains -90mV with heightened myocardial irritability.'
+                ]
+            }
+        },
+        sinewave: {
+            cat: 'normal_elec', hr: 50, stripDefault: true,
+            ar: {
+                name: 'موجة الجيب القاتلة لفرط البوتاسيوم (Hyperkalemic Sine-Wave K+ > 7.5)',
+                summary: 'المرحلة النهائية الحرجة لفرط البوتاسيوم الشديد (>7.5–8.0 mEq/L - Rhythm #6 في بوستر ACLS): يرتفع جهد الراحة إلى -62mV فتُقفل معظم بوابات الصوديوم (h-gates)، ويتوقف الأذينان (غياب P)، ويتسع QRS بشدة هائلة ليندمج مع موجة T المؤنفة في شكل "موجة جيبية" (Sine-Wave) تسبق الرجفان البطيني أو توقف القلب!',
+                phases: [
+                    'المرحلة 1 (غياب موجة P - شلل الأذينين): خلايا الأذينين تفقد استثارتها تماماً عند K+ > 7.5 mEq/L فيختفي نشاط الأذينين وموجة P (Sinoventricular Rhythm).',
+                    'المرحلة 2: تنتقل النبضة ببطء شديد عبر مسارات الأذين المقاومة إلى عقدة AV دون رسم موجة P.',
+                    'المرحلة 3 (اتساع QRS الشديد واندماجه): بسبب ارتفاع جهد الراحة إلى -62mV، تُغلق أغلب بوابات الصوديوم السريعة (h-gates)، فيزحف الاستقطاب في البطينين ببطء شديد جداً (QRS > 0.24s).',
+                    'المرحلة 4 (غياب قطعة ST): يختفي الطور الهضبي وتندمج نهاية QRS العريض مباشرة في صعود موجة T.',
+                    'المرحلة 5 (موجة الجيب Sine-Wave): يتحد مركب QRS العريض جداً مع موجة T المؤنفة ليشكلا تموجاً جيبياً مستمراً (Sine-Wave) ينذر بتوقف القلب الوشيك!',
+                    'المرحلة 6 (علاج طارئ فوري): إعطاء كلوريد الكالسيوم 1g IV فوراً لتثبيت غشاء الخلية + بيكربونات الصوديوم 50mEq + أنسولين 10 وحدات مع غلوكوز!'
+                ]
+            },
+            en: {
+                name: 'Hyperkalemic Sine-Wave (Critical K+ > 7.5 mEq/L)',
+                summary: 'Pre-arrest critical Hyperkalemia (>7.5 mEq/L — ACLS Poster Rhythm #6): resting Vm depolarizes to -62mV, locking most Na+ h-gates closed. P waves vanish (atrial paralysis) and extreme QRS widening merges with the tall T wave into a continuous lethal Sine-Wave!',
+                phases: [
+                    'Phase 1 (Absent P Wave - Atrial Arrest): Atrial myocytes are completely inactivated by severe hyperkalemia (sinoventricular conduction).',
+                    'Phase 2: Slow impulse transmission to the ventricles without a visible P wave.',
+                    'Phase 3 (Extreme QRS Widening): With resting potential at -62mV, severe Na+ channel inactivation slows Phase 0 upstroke drastically (QRS > 0.24s).',
+                    'Phase 4 (Merged ST): Phase 2 plateau disappears as repolarization begins in some regions before depolarization finishes in others.',
+                    'Phase 5 (Sine-Wave Pattern): The slurred wide R/S wave blends seamlessly into the tall T wave, forming a continuous sinusoidal wave!',
+                    'Phase 6 (Immediate ACLS Action): Give IV Calcium Chloride 1 g (or Ca Gluconate 3 g) IMMEDIATELY to stabilize membrane + NaHCO3 50 mEq + Insulin 10U/D50W!'
+                ]
+            }
+        },
+        stemi_ant_pure: {
+            cat: 'mi_struct', hr: 86,
+            ar: {
+                name: 'جلطة الجدار الأمامي بدون الحاجز (Anterior STEMI without Septum - Mid LAD)',
+                summary: 'انسداد الشريان الأمامي النازل الأوسط (Mid-LAD) بعد خروج الفروع الحاجزية الثاقبة (Septal Perforators): ينجو الحاجز بين البطينين (تبقى V1–V2 سليمة بموجة r الحاجزية وبدون ارتفاع ST!) بينما يحتشي الجدار الأمامي للبطين الأيسر فقط فتظهر موجة Q مرضية وارتفاع ST حاد في V3–V4!',
+                phases: [
+                    'المرحلة 1 (موجة P): الأذينان سليمان تماماً، فترتسم موجة P طبيعية.',
+                    'المرحلة 2 (قطعة PR): عقدة AV وحزمة هيس سليمتان (فترة PR طبيعية 0.16s).',
+                    'المرحلة 3 (سلامة الحاجز V1-V2 + موجة Q المرضية في V3-V4): لأن الخثرة تقع في منتصف شريان LAD بعد الفرع الحاجزي الأول (شاهد الخثرة المضيئة في منتصف LAD على القلب 3D)، يظل الحاجز بين البطينين سليماً فيرسم موجة r طبيعية في V1 و V2! أما الجدار الأمامي الحر المقابل لـ V3 و V4 فيموت ويرسم موجة Q مرضية عميقة في V3–V4 فقط!',
+                    'المرحلة 4 (ارتفاع ST معزول في V3-V4 وسلامة V1-V2): تيار الإصابة يرفع قطعة ST بشدة في V3 و V4 (مع انخفاض مرآتي طفيف في II, III, aVF)، بينما تبقى قطعة ST في V1 و V2 على خط السواء! انقر على V1 ثم V3 ولاحظ تغير جهد الفعل (Vm) في اللوحة السفلية!',
+                    'المرحلة 5 (موجة T): موجة T فائقة الحدة (Hyperacute T) مندمجة مع ارتفاع ST في V3–V4 فقط.',
+                    'المرحلة 6 (الطور 4): في V3–V4 يكون جهد الراحة للخلايا المصابة مرتفعاً (-68mV) بينما في V1–V2 (الحاجز السليم) يكون جهد الراحة طبيعياً (-90mV)!'
+                ]
+            },
+            en: {
+                name: 'Localized Anterior STEMI without Septum (Mid-LAD: V3–V4)',
+                summary: 'Mid-LAD occlusion DISTAL to the Septal Perforator branches spares the interventricular septum (V1–V2 preserve normal septal r waves and flat ST segments!) while infarcting the anterior LV free wall—causing pathological Q waves and ST elevation strictly in V3–V4!',
+                phases: [
+                    'Phase 1 (P Wave): Normal sinus P wave.',
+                    'Phase 2 (PR Segment): Normal AV nodal delay.',
+                    'PHASE 3 (Spared Septum in V1–V2 + Pathological Q in V3–V4): Because the thrombus occludes the Mid-LAD AFTER the first septal perforator branch (inspect the Mid-LAD clot marker on the 3D heart!), the septum remains viable and generates a normal r wave in V1–V2, whereas the necrotic anterior LV free wall produces deep Q waves in V3–V4!',
+                    'PHASE 4 (ST Elevation in V3–V4, Isoelectric V1–V2): Injury current elevates ST segments in V3–V4 (with mild reciprocal depression in II, III, aVF) while V1–V2 remain isoelectric! Click V1 vs V3 in the 12-lead grid to compare their healthy vs ischemic cellular Action Potentials below!',
+                    'Phase 5 (T Wave): Hyperacute T waves localized to V3–V4.',
+                    'Phase 6 (Phase 4): Resting Vm is depolarized (-68mV) in V3–V4 myocytes but normal (-90mV) in septal V1–V2 myocytes.'
+                ]
+            }
+        },
+        rbbb: {
+            cat: 'avblocks', hr: 74,
+            ar: {
+                name: 'حصار الحزمة اليمنى (Right Bundle Branch Block - RBBB)',
+                summary: 'انسداد فرع الحزمة الأيمن (RBB): يستقطب الحاجز طبيعياً من اليسار لليمين (موجة r الأولى في V1)، ثم يستقطب البطين الأيسر طبيعياً عبر الحزمة اليسرى السليمة (موجة S في V1)، وأخيراً تنتقل الكهرباء ببطء من خلية لخلية للبطين الأيمن المتأخر فترسم موجة R\' عريضة ثانية (نمط أذني الأرنب rsR\' M-shape في V1–V2) وموجة S عريضة متأخرة في I, aVL, V5, V6.',
+                phases: [
+                    'المرحلة 1 (موجة P): موجة P جيبية طبيعية.',
+                    'المرحلة 2 (قطعة PR): فترة PR طبيعية.',
+                    'المرحلة 3 (نمط rsR\' في V1–V2 وموجة S العريضة في V5–V6): الحزمة اليسرى سليمة فتستقطب الحاجز من اليسار لليمين (يرسم r صغيرة في V1 و q طبيعية في V6) ثم البطين الأيسر (يرسم S في V1 و R في V6)، ثم تزحف النبضة ببطء نحو البطين الأيمن المحجوب فترسم قمة ثانية عريضة R\' في V1–V2 وموجة S عريضة مائلة في I, V5, V6 (عرض QRS ≥ 0.12s)!',
+                    'المرحلة 4 (قطعة ST): انخفاض ST ثانوي بسيط في V1–V2 معاكس للموجة النهائية R\'.',
+                    'المرحلة 5 (موجة T): انقلاب موجة T بشكل غير متناظر في V1–V2 (Discordant T inversion).',
+                    'المرحلة 6 (الطور 4): طور راحة طبيعي.'
+                ]
+            },
+            en: {
+                name: 'Right Bundle Branch Block (RBBB - rsR\' in V1–V2)',
+                summary: 'Blocked Right Bundle Branch (RBB): normal left-to-right septal activation (initial r in V1) and normal LV activation (S in V1), followed by delayed slow cell-to-cell RV activation—producing a wide M-shaped rsR\' ("rabbit ears") in V1–V2 and a wide slurred terminal S wave in I, aVL, V5, V6 (QRS ≥ 0.12s).',
+                phases: [
+                    'Phase 1 (P Wave): Normal sinus P wave.',
+                    'Phase 2 (PR Segment): Normal PR interval.',
+                    'PHASE 3 (rsR\' in V1–V2 & Wide S in Lateral Leads): Intact LBB depolarizes the septum left-to-right (r wave in V1) and LV normally (S wave in V1, R wave in V6). Delayed cell-to-cell depolarization of the Right Ventricle then produces a tall, broad terminal R\' peak in V1–V2 and a wide slurred S wave in I, aVL, V5, V6!',
+                    'Phase 4 (ST Segment): Secondary discordant ST depression in V1–V2.',
+                    'Phase 5 (T Wave): Discordant T-wave inversion in V1–V2.',
+                    'Phase 6 (Phase 4): Normal resting potential.'
+                ]
+            }
+        },
+        junctional: {
+            cat: 'avblocks', hr: 48, stripDefault: true,
+            ar: {
+                name: 'النظم الوصلي الهروبي والمتسارع (Junctional Escape / Accelerated Rhythm)',
+                summary: 'عند فشل العقدة الجيبية (SA) أو تثبيطها، تتولى العقدة الأذينية البطينية وحزمة هيس (AV Junction) قيادة القلب بمعدل هروبي (40–60/دقيقة) أو متسارع (60–100/دقيقة، علامة كلاسيكية لتسمم الديجوكسين! - Rhythm #11 في البوستر): مركب QRS ضيق وطبيعي مع غياب موجة P أو انقلابها (Retrograde Inverted P) قبل أو داخل أو بعد QRS.',
+                phases: [
+                    'المرحلة 1 (موجة P رجعية مقلوبة أو مخفية): تنطلق الشرارة من عقدة AV/حزمة هيس وتصعد بالاتجاه المعاكس للأعلى (Retrograde) نحو الأذينين، فترسم موجة P مقلوبة (سالبة في II, III, aVF) قبيل QRS أو تختبئ داخله أو تظهر بعده مباشرة!',
+                    'المرحلة 2: فترة PR قصيرة جداً (<0.12s) إذا سبقت موجة P الرجعية مركب QRS.',
+                    'المرحلة 3 (مركب QRS ضيق ومنتظم): لأن البؤرة تقع في عقدة AV/أعلى حزمة هيس، تنزل النبضة للبطينين عبر المسار السريع الطبيعي (هيس وبركنجي) فترسم مركب QRS ضيقاً وطبيعياً!',
+                    'المرحلة 4 (قطعة ST): انقباض بطيني سليم ولكن دون توقيت الضخ الأذيني الطبيعي.',
+                    'المرحلة 5 (موجة T): إعادة استقطاب بطينية طبيعية.',
+                    'المرحلة 6 (البروتوكول السريري): إذا كان بطيئاً وغير مستقر ← أتروبين 1mg IV. إذا كان متسارعاً (60–100/د) ← ابحث عن تسمم الديجوكسين (أوقف الديجوكسين وأعطِ الترياق Digoxin Immune Fab)!'
+                ]
+            },
+            en: {
+                name: 'Junctional Escape (40–60) / Accelerated Junctional Rhythm',
+                summary: 'AV Junction assumes pacemaker control when SA node fails (40–60 bpm escape; or 60–100 bpm Accelerated Junctional in Digoxin Toxicity — ACLS Poster Rhythm #11): regular narrow QRS complexes with absent or inverted retrograde P waves (before, buried in, or after QRS).',
+                phases: [
+                    'Phase 1 (Retrograde Inverted or Hidden P Wave): Pacemaker fires from the AV junction, depolarizing the atria upward (retrogradely) to produce inverted P waves in inferior leads (II, III, aVF) just before, hidden within, or just after the QRS.',
+                    'Phase 2: Short PR interval (<0.12s) when retrograde P precedes QRS.',
+                    'Phase 3 (Narrow Regular QRS): Antegrade conduction down the normal His-Purkinje system yields a narrow QRS complex.',
+                    'Phase 4 (ST Segment): Coordinated ventricular contraction.',
+                    'Phase 5 (T Wave): Normal repolarization.',
+                    'Phase 6 (ACLS Protocol): Unstable bradycardia -> Atropine 1 mg IV. Accelerated Junctional (60–100 bpm) -> classic sign of Digoxin Toxicity (hold Digoxin, check K+, give Digoxin Immune Fab)!'
+                ]
+            }
+        },
+        ivr: {
+            cat: 'avblocks', hr: 36, stripDefault: true,
+            ar: {
+                name: 'النظم البطيني الذاتي الهروبي والمتسارع (IVR 20–40 / AIVR 40–100)',
+                summary: 'نظم هروب بطيني من ألياف بركنجي (20–40/دقيقة، أو 40–100/دقيقة في AIVR وهو العلامة الكلاسيكية لإعادة التروية بعد فتح الشريان في الجلطة - Rhythm #12 في البوستر): مركبات QRS عريضة ومنتظمة (≥0.12s) بدون موجات P. فخ قاتل: يمنع منعاً باتاً إعطاء الليدوكائين أو الأميودارون لأنه يوقف البؤرة الوحيدة المتبقية ويسبب توقف القلب الفوري (Asystole)!',
+                phases: [
+                    'المرحلة 1 (غياب موجة P): فشل العقدة SA و AV عن تحفيز البطينين (أو تفوق سرعة بؤرة بركنجي في AIVR).',
+                    'المرحلة 2: لا يوجد توصيل أذيني بطيني.',
+                    'المرحلة 3 (مركب QRS عريض ومنتظم <100/دقيقة): تنطلق النبضة من ألياف بركنجي البطينية وتنتشر ببطء من خلية لخلية فترسم مركب QRS عريضاً (≥0.12s) ومنتظماً بمعدل بطيء (20–40 في IVR أو 40–100 في AIVR).',
+                    'المرحلة 4 (قطعة ST): انقباض بطيني بطيء يحافظ على الحد الأدنى من النبض.',
+                    'المرحلة 5 (موجة T): موجة T معاكسة لاتجاه مركب QRS العريض.',
+                    'المرحلة 6 (فخ سريري قاتل ⛔): إياك وإعطاء مضادات اللانظميات البطينية (Lidocaine / Amiodarone / Procainamide) لأن كبح هذا النظم الهروبي يسبب توقف القلب الفوري (Asystole)! في حال هبوط الضغط يعطى أتروبين أو تنظيم خطى عبر الجلد (TCP).'
+                ]
+            },
+            en: {
+                name: 'Idioventricular (IVR 20–40) & Accelerated IVR (AIVR 40–100)',
+                summary: 'Purkinje pacemaker rhythm: regular wide ventricular complexes (≥0.12s) at <100 bpm with absent P waves (AIVR 40–100 bpm is a classic post-MI reperfusion rhythm — ACLS Poster Rhythm #12). LETHAL TRAP: NEVER give Lidocaine, Amiodarone, or Procainamide (causes immediate Asystole)!',
+                phases: [
+                    'Phase 1 (Absent P Waves): No sinus conduction to ventricles.',
+                    'Phase 2: Infranodal Purkinje pacemaker focus.',
+                    'Phase 3 (Regular Wide QRS <100 bpm): Autonomous Purkinje focus depolarizes ventricles slowly cell-to-cell, producing wide (≥0.12s) regular QRS complexes.',
+                    'Phase 4 (ST Segment): Slow ventricular mechanical ejection.',
+                    'Phase 5 (T Wave): Discordant T-wave inversion.',
+                    'Phase 6 (LETHAL ACLS TRAP ⛔): NEVER administer Lidocaine, Amiodarone, or Procainamide—suppressing ventricular escape causes immediate Asystole! Observe in AIVR; if slow/hypotensive IVR, use Atropine or TCP.'
+                ]
+            }
+        },
+        mat: {
+            cat: 'acls', hr: 135, stripDefault: true,
+            ar: {
+                name: 'تسرع القلب الأذيني متعدد البؤر (Multifocal Atrial Tachycardia - MAT)',
+                summary: 'انطلاق نبضات سريعة وغير منتظمة من 3 بؤر أذينية منتبذة أو أكثر خارج عقدة SA (كلاسيكي في مرضى الانسداد الرئوي المزمن الشديد COPD ونقص الأكسجة - Rhythm #16 في البوستر): تسرع غير منتظم بمركب QRS ضيق مع وجود ≥ 3 أشكال مختلفة تماماً لموجة P واختلاف مستمر في فترات PR و R-R!',
+                phases: [
+                    'الخلل الأساسي في المرحلة 1 (≥ 3 أشكال مختلفة لموجة P): تتنافس 3 بؤر أذينية أو أكثر على إطلاق الشرارة، فترسم كل بؤرة موجة P بشكل وارتفاع وقطبية مختلفة (موجبة، مسطحة، ثنائية الطور، أو مدببة) من نبضة لأخرى!',
+                    'المرحلة 2 (تغير فترة PR من نبضة لأخرى): لأن كل بؤرة أذينية تبعد مسافة مختلفة عن عقدة AV، تختلف فترة PR في كل نبضة عن التي تليها!',
+                    'المرحلة 3 (مركب QRS ضيق وغير منتظم): تعبر النبضات حزمة هيس وألياف بركنجي طبيعياً فترسم مركبات QRS ضيقة ولكن بمسافات R-R غير منتظمة إطلاقاً (كثيراً ما يُخلط بينه وبين الرجفان الأذيني AFib، والفرق هو وجود موجات P متعددة الأشكال في MAT!).',
+                    'المرحلة 4: انقباض بطيني سريع ومتفاوت الامتلاء.',
+                    'المرحلة 5: موجات T طبيعية تتلوها موجات P مختلفة الشكل.',
+                    'المرحلة 6 (بروتوكول ACLS): الصدمة الكهربائية والأدينوزين غير فعالين! العلاج الأول هو إصلاح نقص الأكسجة و COPD + إعطاء كبريتات المغنيسيوم 2g IV والبوتاسيوم، ثم ضبط السرعة بالفيراباميل أو الديلتيازيم (تجنب حاصرات بيتا في COPD الشديد).'
+                ]
+            },
+            en: {
+                name: 'Multifocal Atrial Tachycardia (MAT — ≥3 P Morphologies)',
+                summary: 'Chaotic firing from ≥3 distinct ectopic atrial foci (classic in severe COPD / hypoxia — ACLS Poster Rhythm #16): irregularly irregular narrow-complex tachycardia (>100 bpm) with at least 3 distinct P-wave morphologies and varying PR intervals.',
+                phases: [
+                    'PRIMARY HALLMARK IN PHASE 1 (≥3 Distinct P-Wave Shapes): Multiple competing atrial foci fire in random sequence, generating P waves of visibly different heights, shapes, and axes beat-to-beat!',
+                    'Phase 2 (Varying PR Intervals): Because each ectopic focus lies at a different distance from the AV node, the PR interval changes from beat to beat.',
+                    'Phase 3 (Narrow Irregular QRS): Impulses conduct normally down His-Purkinje, producing narrow QRS complexes at irregular R-R intervals.',
+                    'Phase 4: Rapid ventricular contraction.',
+                    'Phase 5: Normal ventricular repolarization.',
+                    'Phase 6 (ACLS Protocol): Cardioversion & Adenosine are INEFFECTIVE! (1) Correct hypoxia/COPD + give IV MgSO4 2 g & K+ -> (2) Rate control with IV Diltiazem or Verapamil.'
+                ]
+            }
+        },
+        wpw_afib: {
+            cat: 'acls', hr: 220, stripDefault: true,
+            ar: {
+                name: 'الرجفان الأذيني مع وولف-باركنسون-وايت (Pre-Excited AFib - WPW "FBI")',
+                summary: 'أخطر تسرع في متلازمة WPW (Rhythm #17 في البوستر): تعبر نبضات الرجفان الأذيني السريعة جداً عبر مسار إضافي (حزمة كينت Bundle of Kent) متجاوزة عقدة AV مباشرة للبطينين! يظهر الثلاثي الكلاسيكي (FBI: Fast 200–300/min, Broad مع موجة دلتا Delta Wave وتغير عرض QRS، Irregular). تحذير قاتل: يمنع إعطاء أي دواء يبطئ عقدة AV (أدينوزين، حاصرات بيتا، ديلتيازيم، ديجوكسين، أميودارون) لأنه يحولها لرجفان بطيني قاتل!',
+                phases: [
+                    'المرحلة 1 (رجفان أذيني + مسار كينت الإضافي): فوضى كهربائية في الأذينين (>400/دقيقة) تجد طريقاً مختصراً عبر حزمة كينت العضلية مباشرة إلى البطين دون تأخير عقدة AV!',
+                    'المرحلة 2 (موجة دلتا Delta Wave وغياب PR): تبدأ إزالة استقطاب البطين مبكراً عبر مسار كينت فترسم صعوداً مائلاً في بداية QRS يُعرف بموجة دلتا (Slurred Delta Wave).',
+                    'المرحلة 3 (ثلاثي FBI: سريع جداً، عريض متغير الشكل، وغير منتظم): لأن كل نبضة هي اندماج متغير (Fusion) بين المسار الإضافي وعقدة AV، يتغير عرض وشكل مركبات QRS العريضة من نبضة لأخرى بسرعة خطيرة (200–260/دقيقة)!',
+                    'المرحلة 4: ضعف شديد في امتلاء البطينين وهبوط الضغط بسبب السرعة الفائقة.',
+                    'المرحلة 5: تغيرات ثانوية في ST-T.',
+                    'المرحلة 6 (تحذير ACLS القاتل ⛔): إياك وإعطاء قافلات عقدة AV (Adenosine, BB, CCB, Digoxin, Amiodarone) لأن إغلاق عقدة AV يجبر كل النبضات على النزول عبر حزمة كينت فيحدث رجفان بطيني (VFib) فوراً! العلاج: غير مستقر ← صدمة متزامنة؛ مستقر ← Procainamide أو Ibutilide.'
+                ]
+            },
+            en: {
+                name: 'Pre-Excited AFib (WPW Accessory Pathway — "FBI")',
+                summary: 'AFib conducting rapidly down a WPW Accessory Pathway (Bundle of Kent — ACLS Poster Rhythm #17): classic "FBI" triad—Fast (200–300 bpm), Broad (slurred Delta wave + varying QRS widths), and Irregular! LETHAL TRAP: NEVER give AV Nodal Blockers (Adenosine, BB, CCB, Digoxin, Amiodarone) -> triggers lethal VFib!',
+                phases: [
+                    'Phase 1 (AFib + Accessory Kent Pathway): Rapid chaotic atrial impulses bypass the AV node protection via the accessory Bundle of Kent.',
+                    'Phase 2 (Slurred Delta Wave): Early eccentric ventricular pre-excitation produces a slurred initial upstroke (Delta wave).',
+                    'PHASE 3 ("FBI" — Fast, Broad, Irregular QRS): Varying degrees of fusion between conduction over the Kent bundle and AV node create polymorphic wide QRS complexes with varying widths at 200–300 bpm!',
+                    'Phase 4: Severely shortened diastolic filling.',
+                    'Phase 5: Secondary discordant repolarization changes.',
+                    'Phase 6 (LETHAL ACLS TRAP ⛔): NEVER give Adenosine, Beta-Blockers, Diltiazem/Verapamil, Digoxin, or Amiodarone—blocking the AV node enhances accessory pathway conduction and precipitates Ventricular Fibrillation! Unstable -> Sync Cardioversion; Stable -> Procainamide or Ibutilide.'
+                ]
+            }
+        },
+        pvc_ront: {
+            cat: 'acls', hr: 84, stripDefault: true,
+            ar: {
+                name: 'خوارج الانقباض البطينية الخبيثة وظاهرة R-on-T (Malignant PVCs & R-on-T)',
+                summary: 'توامية بطينية (Bigeminy: نبضة جيبية طبيعية تتبعها خارجة انقباض بطينية PVC عريضة ومبكرة) مع ظاهرة R-on-T الخطيرة (Rhythm #18 في البوستر): سقوط مركب QRS لخارجة الانقباض البطينية فوق قمة أو منحدر موجة T للنبضة السابقة (فترة العصيان النسبي الطور 3)، مما قد يفجر تورساد دي بوانت أو الرجفان البطيني فوراً!',
+                phases: [
+                    'المرحلة 1: في النبضة الجيبية تنطلق موجة P طبيعية، بينما في خارجة الانقباض البطينية (PVC) تغيب موجة P وتليها وقفة تعويضية كاملة (Compensatory Pause).',
+                    'المرحلة 2: في النبضة الجيبية التوصيل طبيعي، بينما تنطلق الـ PVC مباشرة من بؤرة بطينية سريعة الاستثارة.',
+                    'المرحلة 3 (تناوب QRS ضيق مع PVC عريض ومبكر): النبضة الأولى طبيعية وضيقة، وتليها نبضة PVC مبكرة ذات مركب QRS عريض ومشوه (>0.12s).',
+                    'المرحلة 4: ضربة الـ PVC المبكرة تضخ حجماً أقل من الدم لأن البطين لم يكتمل امتلاؤه بعد (نبض ضعيف يتبعه نبض قوي).',
+                    'المرحلة 5 (ظاهرة R-on-T الخطيرة في الطور 3): عندما تضرب بؤرة الـ PVC أثناء موجة T (حيث بعض الخلايا استعادت استثارتها وأخرى ما زالت في طور العصيان)، يحدث تشتت كهربائي يطلق تسرعاً بطينياً أو رجفاناً بطينياً!',
+                    'المرحلة 6 (بروتوكول ACLS): تعويض المغنيسيوم (1–2g IV) والبوتاسيوم (>4.0 mEq/L)، علاج الإقفار التاجي، وإعطاء حاصرات بيتا أو ليدوكائين/أميودارون.'
+                ]
+            },
+            en: {
+                name: 'Malignant PVCs (Bigeminy & R-on-T Phenomenon)',
+                summary: 'Sinus beats alternating with premature, wide, bizarre ectopic ventricular complexes (Bigeminy) and R-on-T phenomenon (PVC falling on the vulnerable peak/downslope of the T wave during Phase 3 relative refractory period — ACLS Poster Rhythm #18), which can precipitate VT/VFib!',
+                phases: [
+                    'Phase 1: Normal P wave on sinus beats; absent P wave on premature ventricular beats followed by a compensatory pause.',
+                    'Phase 2: Ectopic ventricular focus fires prematurely without AV nodal conduction.',
+                    'Phase 3 (Alternating Narrow Sinus QRS & Wide Premature PVC): Ectopic impulse spreads slowly cell-to-cell across the ventricles, drawing a wide (>0.12s), high-amplitude bizarre QRS.',
+                    'Phase 4: Premature PVC beat has reduced stroke volume due to incomplete diastolic filling.',
+                    'PHASE 5 (R-on-T Phenomenon on T Wave): When a PVC fires directly on the T wave (Phase 3 vulnerable period of non-uniform refractoriness), it can trigger Torsades de Pointes or VFib!',
+                    'Phase 6 (ACLS Protocol): Replete MgSO4 (1–2 g IV) & K+ (>4.0 mEq/L), treat ischemia, and administer Beta-Blockers or Lidocaine/Amiodarone.'
+                ]
+            }
+        },
+        asystole: {
+            cat: 'acls', hr: 0, stripDefault: true,
+            ar: {
+                name: 'توقف القلب الكامل / الخط المستقيم (Asystole - Flatline Arrest)',
+                summary: 'الغياب التام للنشاط الكهربائي والميكانيكي للبطينين (Rhythm #4 في بوستر ACLS): يظهر خط التخطيط مستقيماً (Flatline) بلا أي موجات P أو QRS أو T، والقلب ثلاثي الأبعاد متوقف تماماً (النتاج القلبي = صفر). إيقاع غير قابل للصدمة (NON-SHOCKABLE)!',
+                phases: [
+                    'المرحلة 1 (فشل العقدة الجيبية والأذينين): توقف شامل لتوليد الشرارة الكهربائية وغياب موجة P.',
+                    'المرحلة 2: صمت كهربائي كامل في عقدة AV وحزمة هيس.',
+                    'المرحلة 3 (الخط المستقيم Flatline): لا تُفتح قنوات الصوديوم في الطور 0 ولا يوجد أي مركب QRS (يجب التأكد من الخط المستقيم في اتجاهين مختلفين لاستبعاد الرجفان البطيني الناعم Fine VF!).',
+                    'المرحلة 4 (توقف الانقباض والنبض الكامل): لا يدخل الكالسيوم ولا تنزلق خيوط الأكتين والميوسين؛ القلب متوقف تماماً في المجسم ثلاثي الأبعاد!',
+                    'المرحلة 5: غياب إعادة الاستقطاب وموجة T.',
+                    'المرحلة 6 (بروتوكول ACLS الطارئ 🚫): إيقاع غير قابل للصدمة (NO SHOCK)! إنعاش قلبي رئوي عالي الجودة فوراً (CPR) + إبينفرين 1mg IV/IO بأسرع وقت (يكرر كل 3–5 دقائق) + البحث عن الأسباب العكسية العشرة (5 H\'s & 5 T\'s).'
+                ]
+            },
+            en: {
+                name: 'Asystole (Flatline Cardiac Arrest — Non-Shockable)',
+                summary: 'Complete absence of ventricular electrical and mechanical activity (ACLS Poster Rhythm #4): flatline ECG with no P, QRS, or T waves and motionless 3D heart (Cardiac Output = 0). NON-SHOCKABLE rhythm!',
+                phases: [
+                    'Phase 1: Complete failure of SA node and atrial pacemakers; no P waves.',
+                    'Phase 2: Absent AV conduction.',
+                    'PHASE 3 (Flatline ECG): Zero Phase 0 depolarization across the ventricles (always confirm flatline in ≥2 leads to rule out fine VFib or loose leads!).',
+                    'PHASE 4 (Total Mechanical Arrest): Zero Ca2+ influx, zero sarcomere tension, and complete standstill of the 3D heart.',
+                    'Phase 5: Absent repolarization.',
+                    'Phase 6 (ACLS Protocol 🚫): DO NOT SHOCK! High-quality CPR (2 min cycles) + Epinephrine 1 mg IV/IO ASAP (repeat q3–5m) + Advanced airway + Treat reversible 5 H\'s & 5 T\'s!'
+                ]
+            }
+        }
+    };
+
+    // Merge new scenarios into SCENARIOS in logical clinical order per category
+    const ORDERED_KEYS = [
+        // Cat 1: Normal & Electrolytes
+        'normal', 'sinus_brady', 'sinus_tachy', 'pea', 'hyperk', 'sinewave', 'hypok', 'hypona', 'hyperna',
+        // Cat 2: STEMI, LVH, Tamponade
+        'stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_lat', 'lvh', 'tamponade',
+        // Cat 3: AV Blocks, Bundle Blocks & Escape
+        'avb1', 'avb2_1', 'avb2_2', 'avb_highgrade', 'avb3', 'lbbb', 'rbbb', 'junctional', 'ivr',
+        // Cat 4: ACLS Arrhythmias
+        'afib', 'aflutter', 'mat', 'svt', 'wpw_afib', 'pvc_ront', 'vt', 'tdp', 'vfib', 'asystole'
+    ];
+
+    // Refine stemi_ant name so the distinction between (Septum + Anterior Wall) vs (Anterior Wall without Septum) is 100% crystal clear
+    if (typeof SCENARIOS !== 'undefined' && SCENARIOS.stemi_ant) {
+        SCENARIOS.stemi_ant.ar.name = 'جلطة الجدار الأمامي والحاجز معاً (Anteroseptal STEMI - Proximal LAD: V1–V4)';
+        SCENARIOS.stemi_ant.en.name = 'Anteroseptal STEMI (Septum + Anterior Wall — Proximal LAD: V1–V4)';
+    }
+
+    Object.keys(NEW_SCENARIOS).forEach(k => {
+        SCENARIOS[k] = NEW_SCENARIOS[k];
+    });
+
+    // Reorder keys in SCENARIOS so buttons appear in clean clinical order
+    const tempScenarios = {};
+    ORDERED_KEYS.forEach(k => {
+        if (SCENARIOS[k]) tempScenarios[k] = SCENARIOS[k];
+    });
+    Object.keys(SCENARIOS).forEach(k => {
+        if (!tempScenarios[k]) tempScenarios[k] = SCENARIOS[k];
+        delete SCENARIOS[k];
+    });
+    Object.keys(tempScenarios).forEach(k => {
+        SCENARIOS[k] = tempScenarios[k];
+    });
+
+    // =========================================================================
+    // 2. EXPAND LEAD-BY-LEAD IMPACTS (CLINIX_LEAD_IMPACTS) FOR ALL NEW SCENARIOS
+    // =========================================================================
+    const NEW_LEAD_IMPACTS = {
+        sinus_brady: {
+            primary: ['II', 'V1'], secondary: ['I', 'III', 'aVR', 'aVL', 'aVF', 'V2', 'V3', 'V4', 'V5', 'V6'],
+            summary: { ar: 'بطء النظم الجيبي (<50/دقيقة): موجات P جيبية طبيعية (موجبة في II وسالبة في aVR) يتبعها QRS ضيق بنسبة 1:1 مع طول فترة الانبساط TP.', en: 'Sinus bradycardia (<50 bpm): normal sinus P waves (upright in II, inverted in aVR) conducting 1:1 to narrow QRS complexes with prolonged TP intervals.' },
+            primaryText: { ar: 'موجة P جيبية واضحة يتبعها QRS ضيق بمعدل بطيء (<50/د).', en: 'Clear sinus P wave followed by narrow QRS at a slow rate (<50 bpm).' },
+            secondaryText: { ar: 'بطء منتظم في المعدل مع شكل موجات طبيعي.', en: 'Regular slow rate with normal waveform morphology.' },
+            otherText: { ar: 'مظهر جيبي بطيء ومنتظم.', en: 'Slow regular sinus morphology.' }
+        },
+        sinus_tachy: {
+            primary: ['II', 'V1'], secondary: ['I', 'III', 'aVR', 'aVL', 'aVF', 'V2', 'V3', 'V4', 'V5', 'V6'],
+            summary: { ar: 'تسرع النظم الجيبي (100–150/دقيقة): موجات P جيبية طبيعية تسبق كل مركب QRS ضيق مع قصر فترة TP الانبساطية.', en: 'Sinus tachycardia (100–150 bpm): normal upright sinus P waves preceding every narrow QRS with shortened TP segments.' },
+            primaryText: { ar: 'موجة P جيبية تسبق كل QRS بسرعة 100–150/دقيقة.', en: 'Sinus P wave precedes every narrow QRS at 100–150 bpm.' },
+            secondaryText: { ar: 'تسرع جيبي منتظم؛ عالج السبب الأساسي.', en: 'Regular sinus tachycardia; treat underlying cause.' },
+            otherText: { ar: 'تسرع جيبي منتظم.', en: 'Regular sinus tachycardia.' }
+        },
+        hypona: {
+            primary: ['V1', 'V2'], secondary: ['I', 'II', 'III', 'aVR', 'aVL', 'aVF', 'V3', 'V4', 'V5', 'V6'],
+            summary: { ar: 'نقص الصوديوم الشديد (<120 mEq/L): ضعف تيار الصوديوم (INa) في الطور 0 يسبب اتساعاً طفيفاً وانخفاض فولتية QRS في جميع الاتجاهات، وقد يظهر نمط يشبه بروغادا (ارتفاع J/ST) في V1–V2.', en: 'Severe Hyponatremia (<120 mEq/L): reduced Phase 0 Na+ current causes mild diffuse QRS widening/low amplitude and may unmask a Brugada-like J/ST elevation pattern in V1–V2.' },
+            primaryText: { ar: 'بطء الطور 0 مع احتمال بروز نقطة J / ارتفاع ST شبيه ببروغادا في V1–V2.', en: 'Slowed Phase 0 with possible Brugada-like J-point/ST elevation in V1–V2.' },
+            secondaryText: { ar: 'انخفاض طفيف في سعة موجة R واتساع بسيط في QRS (~0.11s).', en: 'Mildly reduced R-wave amplitude and slight QRS widening (~0.11s).' },
+            otherText: { ar: 'تأثر منتشر بنقص تدرج الصوديوم.', en: 'Diffuse effect of reduced Na+ gradient.' }
+        },
+        hyperna: {
+            primary: 'all', secondary: [],
+            summary: { ar: 'فرط الصوديوم الشديد (>155 mEq/L): زيادة تدرج الصوديوم خارج الخلية يسرع الطور 0 ويرفع قمته إلى +30mV، مما يرسم مركبات QRS حادة وضيقة وعالية السعة مع قصر طفيف في QT.', en: 'Severe Hypernatremia (>155 mEq/L): steep extracellular Na+ gradient accelerates Phase 0 upstroke to +30mV, producing sharp, narrow, high-amplitude QRS complexes and mild QT shortening.' },
+            primaryText: { ar: 'مركب QRS حاد وضيق (~0.07s) وذروة R سريعة الصعود مع قصر طفيف في QT.', en: 'Sharp, narrow QRS (~0.07s) with steep R upstroke and mildly shortened QT.' },
+            secondaryText: { ar: '', en: '' },
+            otherText: { ar: 'تغير منتشر عبر الاتجاهات.', en: 'Diffuse change across leads.' }
+        },
+        sinewave: {
+            primary: 'all', secondary: [],
+            summary: { ar: 'موجة الجيب لفرط البوتاسيوم الحرج (K+ > 7.5 mEq/L): غياب موجة P واتساع شديد جداً في QRS يندمج مع موجة T المؤنفة ليشكل موجة جيبية مستمرة (Sine-Wave) في جميع الاتجاهات!', en: 'Hyperkalemic Sine-Wave (K+ > 7.5 mEq/L): absent P waves and extreme QRS widening merging with tall T waves into a continuous sinusoidal pattern across all leads!' },
+            primaryText: { ar: 'تموج جيبي عريض مستمر (Sine-Wave)؛ طارئة تستدعي الكالسيوم الوريدي فوراً!', en: 'Continuous wide Sine-Wave pattern; medical emergency requiring immediate IV Calcium!' },
+            secondaryText: { ar: '', en: '' },
+            otherText: { ar: 'نمط موجة الجيب منتشر في كل الاتجاهات.', en: 'Sine-wave pattern is diffuse across all leads.' }
+        },
+        stemi_ant_pure: {
+            primary: ['V3', 'V4'], secondary: ['V5', 'II', 'III', 'aVF'],
+            summary: { ar: 'جلطة الجدار الأمامي المعزولة بدون الحاجز (Mid-LAD بعد الفروع الحاجزية): ارتفاع ST وموجات Q مرضية في V3–V4 (وتغير خفيف في V5)، بينما ينجو الحاجز فتبقى V1 و V2 سليمتين بموجة r طبيعية وخط ST مستوٍ!', en: 'Localized Anterior STEMI without Septum (Mid-LAD occlusion distal to septal perforators): ST elevation and pathological Q waves in V3–V4, while septal leads V1–V2 are SPARED (normal r wave & flat ST)!' },
+            primaryText: { ar: 'ارتفاع ST حاد وموجة Q مرضية بسبب احتشاء الجدار الأمامي الحر للبطين الأيسر.', en: 'Marked ST elevation and pathological Q wave from anterior LV free-wall infarction.' },
+            secondaryText: { ar: 'تغير جانبي مجاور (V5) أو انخفاض ST مرآتي طفيف في السفلية (II, III, aVF).', en: 'Adjacent apical-lateral extension (V5) or mild reciprocal inferior ST depression (II, III, aVF).' },
+            otherText: { ar: 'سليم: الحاجز (V1–V2) سليم تماماً لأن انسداد LAD وقع بعد خروج الشريان الحاجزي!', en: 'Spared: Septal leads (V1–V2) remain normal because Mid-LAD occlusion is distal to septal perforators!' },
+            perLead: {
+                V1: { ar: 'سليم (Spared)! يحافظ على موجة r الحاجزية وقطعة ST مستوية (0.0mV) لسلامة الفرع الحاجزي.', en: 'SPARED! Preserves normal septal r wave and flat ST segment (0.0mV) due to patent septal perforator.' },
+                V2: { ar: 'سليم (Spared)! يحافظ على موجة r الحاجزية وقطعة ST مستوية بدون ارتفاع.', en: 'SPARED! Preserves normal septal rS complex and isoelectric ST segment.' },
+                V3: { ar: 'القطب البؤري الرئيسي: موجة Q مرضية عميقة + ارتفاع ST حاد (احتشاء الجدار الأمامي).', en: 'Primary Anterior Infarct Lead: deep pathological Q wave + marked ST elevation.' },
+                V4: { ar: 'القطب البؤري الرئيسي: موجة Q مرضية عميقة + ارتفاع ST حاد في قمة وجدار البطين الأيسر الأمامي.', en: 'Primary Anterior Infarct Lead: deep pathological Q wave + marked ST elevation.' },
+                V5: { ar: 'امتداد جانبي قمي خفيف لارتفاع ST.', en: 'Mild anterolateral border-zone ST elevation.' }
+            }
+        },
+        rbbb: {
+            primary: ['V1', 'V2', 'I', 'aVL', 'V5', 'V6'], secondary: ['V3', 'V4', 'II', 'III', 'aVF'],
+            summary: { ar: 'حصار الحزمة اليمنى (RBBB): اتساع QRS (≥120 ms) مع نمط أذني الأرنب (rsR\' M-shape) في V1–V2 وموجة S عريضة متأخرة (Slurred S) في I وaVL وV5–V6.', en: 'Right Bundle Branch Block (RBBB): widened QRS (≥120 ms) with M-shaped rsR\' ("rabbit ears") in V1–V2 and wide slurred terminal S waves in lateral leads (I, aVL, V5–V6).' },
+            primaryText: { ar: 'تغير مميز لحصار الحزمة اليمنى (rsR\' في V1–V2 أو S عريضة في الجانبية).', en: 'Hallmark RBBB morphology (rsR\' in V1–V2 or wide slurred terminal S in lateral leads).' },
+            secondaryText: { ar: 'اتساع الجزء النهائي من QRS نتيجة تأخر استقطاب البطين الأيمن.', en: 'Terminal QRS widening from delayed RV depolarization.' },
+            otherText: { ar: 'اتساع QRS النهائي.', en: 'Terminal QRS widening.' },
+            perLead: {
+                V1: { ar: 'النمط الكلاسيكي rsR\' (أذنا الأرنب M-shape) مع انقلاب موجة T الثانوي.', en: 'Classic M-shaped rsR\' ("rabbit ears") complex with discordant T-wave inversion.' },
+                V2: { ar: 'نمط rsR\' عريض مع انخفاض ST وانقلاب T الثانوي.', en: 'Broad rsR\' complex with secondary discordant ST-T changes.' },
+                I:  { ar: 'موجة S نهائية عريضة ومائلة (Wide slurred S wave) تعكس تأخر البطين الأيمن.', en: 'Wide slurred terminal S wave reflecting delayed rightward RV depolarization.' },
+                aVL:{ ar: 'موجة S نهائية عريضة ومائلة.', en: 'Wide slurred terminal S wave.' },
+                V5: { ar: 'موجة q طبيعية تليها R ثم موجة S نهائية عريضة (qRS).', en: 'Normal septal q, upright R, and wide slurred terminal S wave.' },
+                V6: { ar: 'موجة q طبيعية تليها R ثم موجة S نهائية عريضة (qRS).', en: 'Normal septal q, upright R, and wide slurred terminal S wave.' }
+            }
+        },
+        junctional: {
+            primary: ['II', 'III', 'aVF', 'aVR', 'V1'], secondary: ['I', 'aVL', 'V2', 'V3', 'V4', 'V5', 'V6'],
+            summary: { ar: 'النظم الوصلي (Junctional Rhythm): مركبات QRS ضيقة ومنتظمة مع موجات P رجعية مقلوبة (سالبة في II, III, aVF وموجبة في aVR) أو مخفية داخل QRS.', en: 'Junctional Rhythm: regular narrow QRS complexes with retrograde inverted P waves (negative in II, III, aVF and upright in aVR) or buried inside the QRS.' },
+            primaryText: { ar: 'موجة P رجعية مقلوبة (أو مخفية) مع مركب QRS ضيق ومنتظم.', en: 'Retrograde inverted (or hidden) P wave with a regular narrow QRS.' },
+            secondaryText: { ar: 'مركب QRS ضيق ومنتظم ينطلق من العقدة AV.', en: 'Regular narrow QRS originating from the AV junction.' },
+            otherText: { ar: 'نظم وصلي بمركب QRS ضيق.', en: 'Junctional narrow-complex rhythm.' }
+        },
+        ivr: {
+            primary: 'all', secondary: [],
+            summary: { ar: 'النظم البطيني الذاتي (IVR 20–40 / AIVR 40–100): مركبات QRS عريضة ومنتظمة (≥0.12s) بمعدل بطيء دون موجات P. تذكر: يُمنع إعطاء الليدوكائين أو الأميودارون!', en: 'Idioventricular Rhythm (IVR 20–40 / AIVR 40–100): regular wide ventricular complexes (≥0.12s) at a slow rate without P waves. NEVER give Lidocaine or Amiodarone!' },
+            primaryText: { ar: 'مركب هروب بطيني عريض ومنتظم (≥0.12s) مع غياب P وانقلاب T الثانوي.', en: 'Wide regular ventricular escape complex (≥0.12s) with absent P and discordant T.' },
+            secondaryText: { ar: '', en: '' },
+            otherText: { ar: 'نظم بطيني عريض.', en: 'Wide ventricular escape rhythm.' }
+        },
+        mat: {
+            primary: ['II', 'III', 'aVF', 'V1'], secondary: ['I', 'aVR', 'aVL', 'V2', 'V3', 'V4', 'V5', 'V6'],
+            summary: { ar: 'تسرع القلب الأذيني متعدد البؤر (MAT): تسرع غير منتظم مع ≥ 3 أشكال مختلفة لموجة P واختلاف فترات PR و R-R (أوضح ما تكون في II, III, aVF, V1).', en: 'Multifocal Atrial Tachycardia (MAT): irregular narrow-complex tachycardia with ≥3 distinct P-wave morphologies and varying PR intervals (best seen in II, III, aVF, V1).' },
+            primaryText: { ar: 'تظهر هنا بوضوح ≥ 3 أشكال وارتفاعات مختلفة لموجة P مع تغير PR.', en: 'Clearly displays ≥3 distinct P-wave shapes/amplitudes and varying PR intervals.' },
+            secondaryText: { ar: 'مركبات QRS ضيقة وغير منتظمة المسافات.', en: 'Irregularly spaced narrow QRS complexes.' },
+            otherText: { ar: 'تسرع أذيني متعدد البؤر.', en: 'Multifocal atrial tachycardia.' }
+        },
+        wpw_afib: {
+            primary: 'all', secondary: [],
+            summary: { ar: 'الرجفان الأذيني مع WPW (ثلاثي FBI): تسرع شديد (200–300/د)، عريض بموجة دلتا وتغير عرض QRS من نبضة لأخرى، وغير منتظم. يمنع إعطاء قافلات عقدة AV!', en: 'Pre-Excited AFib in WPW ("FBI" triad): Fast (200–300 bpm), Broad (slurred Delta wave + varying QRS widths), and Irregular. NEVER give AV nodal blockers!' },
+            primaryText: { ar: 'مركبات QRS عريضة وسريعة جداً ومتغيرة العرض (موجة دلتا + عدم انتظام R-R).', en: 'Very fast, irregular, wide QRS complexes of varying morphology (Delta wave pre-excitation).' },
+            secondaryText: { ar: '', en: '' },
+            otherText: { ar: 'تسرع عريض غير منتظم (WPW + AFib).', en: 'Fast broad irregular pre-excited AFib.' }
+        },
+        pvc_ront: {
+            primary: 'all', secondary: [],
+            summary: { ar: 'خوارج الانقباض البطينية الخبيثة (Bigeminy & R-on-T): نبضة جيبية طبيعية تتبعها PVC عريضة مبكرة، مع سقوط PVC فوق قمة موجة T (ظاهرة R-on-T المحفزة للرجفان البطيني).', en: 'Malignant PVCs (Bigeminy & R-on-T): normal sinus beat paired with a premature wide PVC, plus R-on-T phenomenon falling on the vulnerable T-wave peak.' },
+            primaryText: { ar: 'تناوب QRS ضيق طبيعي مع PVC عريض ومبكر يضرب موجة T (R-on-T).', en: 'Alternating normal narrow QRS and premature wide PVC striking the T wave (R-on-T).' },
+            secondaryText: { ar: '', en: '' },
+            otherText: { ar: 'توامية بطينية وظاهرة R-on-T.', en: 'Ventricular bigeminy and R-on-T phenomenon.' }
+        },
+        asystole: {
+            primary: 'all', secondary: [],
+            summary: { ar: 'توقف القلب الكامل (Asystole): خط مستقيم (Flatline) في جميع الاتجاهات دون أي نشاط كهربائي بطيني. لا يُصدم كهربائياً (CPR + Epinephrine فوراً)!', en: 'Asystole (Flatline): complete absence of ventricular electrical activity across all leads. NON-SHOCKABLE (immediate CPR + Epinephrine)!' },
+            primaryText: { ar: 'خط سواء مستقيم (Flatline)؛ غياب تام لموجات P و QRS و T.', en: 'Isoelectric flatline; complete absence of P, QRS, and T waves.' },
+            secondaryText: { ar: '', en: '' },
+            otherText: { ar: 'خط مستقيم (توقف القلب).', en: 'Flatline (cardiac arrest).' }
+        }
+    };
+    Object.keys(NEW_LEAD_IMPACTS).forEach(k => {
+        CLINIX_LEAD_IMPACTS[k] = NEW_LEAD_IMPACTS[k];
+    });
+
+    // =========================================================================
+    // 3. ACLS CLINICAL PROTOCOL & PHARMACOLOGY COMPENDIUM (FROM UPLOADED PDF)
+    // =========================================================================
+    const ACLS_PROTOCOLS = {
+        normal: {
+            badgeAr: 'نظم جيبي سليم (نبض طبيعي)', badgeEn: 'Normal Sinus (Perfusing)', col: 'emerald',
+            ar: 'لا يحتاج لتدخل دوائي طارئ. المرجع القياسي: HR 60–100 bpm، فترة PR = 0.12–0.20s (3–5 مربعات صغيرة)، عرض QRS = 0.06–0.10s (<2.5 مربع صغير)، وفترة QT < 0.44s.',
+            en: 'No emergency intervention required. Baseline reference: HR 60–100 bpm, PR 0.12–0.20s (3–5 small boxes), QRS 0.06–0.10s (<2.5 small boxes), QT < 0.44s.'
+        },
+        sinus_brady: {
+            badgeAr: 'بطء قلب مع نبض (HR < 50)', badgeEn: 'Bradycardia w/ Pulse (<50 bpm)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #7): إذا كان المريض مستقراً ← المراقبة وإيقاف الأدوية المسببة (BB/CCB/Digoxin). إذا كان غير مستقر (هبوط ضغط SBP<90، تغير وعي، ألم صدري، صدمة) ← الخط الأول: Atropine 1 mg IV bolus كل 3–5 دقائق (الحد الأقصى 3 mg) ← الخط الثاني: تنظيم ضربات عبر الجلد (TCP) أو تسريب Dopamine (5–20 mcg/kg/min) أو Epinephrine (2–10 mcg/min).',
+            en: 'ACLS Protocol (Rhythm #7): Stable -> Observe & hold offending drugs (BB/CCB/Digoxin). Unstable (SBP<90, altered mental status, shock, chest pain, acute HF) -> 1st-Line: Atropine 1 mg IV bolus q3–5m (Max 3 mg) -> 2nd-Line: Transcutaneous Pacing (TCP), Dopamine (5–20 mcg/kg/min), or Epinephrine (2–10 mcg/min).'
+        },
+        sinus_tachy: {
+            badgeAr: 'تسرع فيزيولوجي (عالج السبب!)', badgeEn: 'Reactive Tachycardia (Treat Cause!)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #13): ⛔ لا تقم بالصدمة الكهربائية ولا تعطِ الأدينوزين (Adenosine)! التسرع الجيبي هو استجابة تعويضية؛ ابحث عن السبب وعالجه فوراً (الحمى، نقص السوائل/النزف، الألم، نقص الأكسجة، الصمة الرئوية PE، أو الإنتان Sepsis).',
+            en: 'ACLS Protocol (Rhythm #13): ⛔ Do NOT shock or give Adenosine! Sinus tachycardia is a compensatory response—identify and treat the underlying cause (fever, hypovolemia, pain, hypoxia, pulmonary embolism, sepsis).'
+        },
+        pea: {
+            badgeAr: '🚫 توقف قلب غير قابل للصدمة (NO SHOCK)', badgeEn: '🚫 Non-Shockable Arrest (NO SHOCK)', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #5): 🚫 يُمنع الصدم الكهربائي! إنعاش قلبي رئوي عالي الجودة (CPR لمدة دقيقتين) + Epinephrine 1 mg IV/IO بأسرع وقت (يكرر كل 3–5 دقائق) + فحص إيكو سريري والبحث الفوري عن الأسباب العكسية العشرة (5 H\'s & 5 T\'s: سوائل وريدية لنقص الحجم، بزل الصدر بالإبرة لـ Tension Pneumothorax، بزل التامور، أو حالّات الخثرة للجلطة الرئوية).',
+            en: 'ACLS Protocol (Rhythm #5): 🚫 NO SHOCK! High-quality CPR (2 min) + Epinephrine 1 mg IV/IO ASAP (repeat q3–5m) + Bedside Echo & aggressive reversal of 5 H\'s & 5 T\'s (IV fluids, needle decompression, pericardiocentesis, thrombolysis).'
+        },
+        hyperk: {
+            badgeAr: 'اضطراب شوارد خطر (K+ > 6.0)', badgeEn: 'Electrolyte Emergency (High K+)', col: 'amber',
+            ar: 'البروتوكول السريري: (1) حماية وتثبيت غشاء الخلية القلبي: Calcium Gluconate 10% (1–3 g IV) أو Calcium Chloride 10% (1 g IV عبر خط مركزي) ← (2) إدخال البوتاسيوم للخلايا: أنسولين نظامي 10 وحدات IV + 50mL D50W + Sodium Bicarbonate 50 mEq IV + سالبوتامول إرذاذ ← (3) إخراج البوتاسيوم من الجسم (Furosemide / غسيل كلوي).',
+            en: 'Clinical Protocol: (1) Stabilize myocardial membrane: Calcium Gluconate 1–3 g IV (or CaCl2 1 g IV central) -> (2) Shift K+ intracellularly: Regular Insulin 10 U IV + D50W + Sodium Bicarbonate 50 mEq IV + nebulized Albuterol -> (3) Eliminate K+ (Furosemide / Hemodialysis).'
+        },
+        sinewave: {
+            badgeAr: '⚠️ ما قبل توقف القلب (K+ > 7.5)', badgeEn: '⚠️ Pre-Arrest Sine-Wave (K+ > 7.5)', col: 'rose',
+            ar: 'بروتوكول ACLS الطارئ (Rhythm #6): طارئة مهددة للحياة خلال ثوانٍ! أعطِ فوراً Calcium Chloride 10% (1 g = 10 mL IV) أو Calcium Gluconate (3 g IV) لرفع عتبة الاستثارة وحماية القلب من الرجفان البطيني + Sodium Bicarbonate 50 mEq IV push + Regular Insulin 10 U IV + D50W!',
+            en: 'ACLS Protocol (Rhythm #6): Imminent arrest! Give Calcium Chloride 1 g IV IMMEDIATELY (or Calcium Gluconate 3 g IV) to stabilize the myocardium + Sodium Bicarbonate 50 mEq IV + Regular Insulin 10 U IV + D50W!'
+        },
+        hypok: {
+            badgeAr: 'نقص البوتاسيوم (خطر Torsades)', badgeEn: 'Hypokalemia (Torsades Risk)', col: 'amber',
+            ar: 'البروتوكول السريري: تعويض البوتاسيوم الوريدي التدريجي (KCl 10–20 mEq/h IV مع مراقبة التخطيط) + فحص وتعويض المغنيسيوم (MgSO4 1–2 g IV) لأن نقص المغنيسيوم يمنع تصحيح البوتاسيوم ويزيد خطر Torsades de Pointes!',
+            en: 'Clinical Protocol: Controlled IV Potassium repletion (KCl 10–20 mEq/h IV under ECG monitoring) + concomitant Magnesium Sulfate (1–2 g IV) repletion to prevent Torsades de Pointes!'
+        },
+        hypona: {
+            badgeAr: 'نقص الصوديوم (<120 mEq/L)', badgeEn: 'Severe Hyponatremia (<120 mEq/L)', col: 'sky',
+            ar: 'البروتوكول السريري: في نقص الصوديوم العرضي الحاد أو المترافق مع اضطراب التوصيل: إعطاء محلول ملحي مفرط التوتر (3% Hypertonic Saline 100–150 mL IV على مدى 10–20 دقيقة) مع عدم تجاوز تصحيح 8–10 mEq/L خلال 24 ساعة لتجنب متلازمة التحلل الإسموزي للميلين (ODS).',
+            en: 'Clinical Protocol: For severe symptomatic hyponatremia with conduction delay: administer 3% Hypertonic Saline (100–150 mL IV bolus over 10–20 min) while limiting total correction to ≤8–10 mEq/L per 24h to prevent Osmotic Demyelination Syndrome (ODS).'
+        },
+        hyperna: {
+            badgeAr: 'فرط الصوديوم (>155 mEq/L)', badgeEn: 'Severe Hypernatremia (>155 mEq/L)', col: 'sky',
+            ar: 'البروتوكول السريري: حساب عجز الماء الحر (Free Water Deficit) وتعويضه تدريجياً بمحاليل ناقصة التوتر (D5W أو 0.45% Half-Normal Saline) بمعدل خفض لا يتجاوز 0.5 mEq/L/h (≤10–12 mEq/L في 24 ساعة) لتجنب الوذمة الدماغية.',
+            en: 'Clinical Protocol: Calculate Free Water Deficit and restore gradually with hypotonic fluids (D5W or 0.45% NaCl), lowering serum Na+ by no more than 0.5 mEq/L/h (≤10–12 mEq/L per 24h) to avoid cerebral edema.'
+        },
+        stemi_ant: {
+            badgeAr: '🚨 جلطة أمامية حاجزية (Proximal LAD)', badgeEn: '🚨 Anteroseptal STEMI (Proximal LAD)', col: 'rose',
+            ar: 'بروتوكول STEMI & ACLS: قسطرة تداخلية أولية عاجلة (Primary PCI خلال <90 دقيقة) لفتح الشريان الأمامي النازل القريب (Proximal LAD) + أسبرين 300mg + مضاد صفيحات (Ticagrelor/Prasugrel) + هيبارين + نتروغليسرين وريدي (5–200 mcg/min إذا كان SBP > 90 mmHg). في حال الصدمة القلبية ← Norepinephrine ± Dobutamine.',
+            en: 'STEMI & ACLS Protocol: Emergent Primary PCI (<90 min) of Proximal LAD occlusion + Aspirin + P2Y12 inhibitor + Heparin + IV Nitroglycerin (5–200 mcg/min if SBP > 90 mmHg). If cardiogenic shock -> Norepinephrine (#6) first if SBP < 90, then add Dobutamine (#8).'
+        },
+        stemi_ant_pure: {
+            badgeAr: '🚨 جلطة أمامية معزولة (Mid-LAD)', badgeEn: '🚨 Localized Anterior STEMI (Mid-LAD)', col: 'rose',
+            ar: 'بروتوكول STEMI: انسداد الشريان الأمامي النازل الأوسط (Mid-LAD) بعد خروج الفروع الحاجزية (لذلك V1–V2 سليمة والاحتشاء يتركز في V3–V4). يتطلب قسطرة تداخلية عاجلة (Primary PCI) + مضادات الصفيحات المزدوجة (DAPT) + مضادات التخثر.',
+            en: 'STEMI Protocol: Mid-LAD occlusion distal to septal perforators (sparing V1–V2 while infarcting V3–V4). Requires emergent Primary PCI + Dual Antiplatelet Therapy (DAPT) + anticoagulation.'
+        },
+        stemi_inf: {
+            badgeAr: '🚨 جلطة سفلية (RCA) — احذر النترات!', badgeEn: '🚨 Inferior STEMI (RCA) — Nitrate Warning!', col: 'rose',
+            ar: 'بروتوكول STEMI & ACLS (Drug #9 Warning): قسطرة تداخلية عاجلة لفتح الشريان الأيمن (RCA) + سوائل وريدية عند هبوط الضغط. ⛔ تحذير قاتل: اطلب تخطيط الاتجاهات اليمنى (V3R–V4R)؛ يُمنع منعاً باتاً إعطاء النتروغليسرين (Nitroglycerin) في حال مشاركة البطين الأيمن أو SBP < 90 لأن خفض الحمل القبلي (Preload) يسبب انهياراً وعائياً قاتلاً!',
+            en: 'STEMI Protocol (Drug #9 Warning): Emergent PCI of RCA. ⛔ CRITICAL CONTRAINDICATION: Obtain right-sided leads (V4R); AVOID Nitroglycerin/Nitrates if Right Ventricular (RV) infarction is present or SBP < 90 mmHg—preload reduction causes fatal hemodynamic collapse!'
+        },
+        stemi_lat: {
+            badgeAr: '🚨 جلطة جانبية (LCx / OM1)', badgeEn: '🚨 Lateral STEMI (LCx / OM1)', col: 'rose',
+            ar: 'بروتوكول STEMI: انسداد الشريان المنعطف الأيسر (LCx) أو الفرع الهامشي (OM1) المؤثر على الجدار الجانبي (I, aVL, V5, V6). يتطلب قسطرة تداخلية عاجلة (Primary PCI) + الأسبرين ومثبط P2Y12 والهيبارين.',
+            en: 'STEMI Protocol: Left Circumflex (LCx) or Obtuse Marginal (OM1) occlusion affecting lateral wall leads (I, aVL, V5, V6). Emergent Primary PCI + DAPT + anticoagulation.'
+        },
+        lvh: {
+            badgeAr: 'تضخم وإجهاد البطين الأيسر (LVH)', badgeEn: 'LV Hypertrophy & Strain', col: 'sky',
+            ar: 'المعايير التشخيصية والتدبير: معيار سوكولو-ليون (S في V1 + R في V5 أو V6 ≥ 35 mm / 3.5 mV) مع انخفاض ST وانقلاب T غير المتناظر (LV Strain). العلاج طويل الأمد: ضبط ضغط الدم (مثبطات ACE/ARBs) وتجنب نقص الحمل القبلي الحاد في تضخم العضلة القلبية الساد (HOCM).',
+            en: 'Diagnostic Criteria & Management: Sokolow-Lyon index (S in V1 + R in V5/V6 ≥ 35 mm / 3.5 mV) with lateral discordant ST depression and T-wave inversion ("LV Strain"). Manage hypertension/aortic stenosis with afterload reduction (ACEi/ARB).'
+        },
+        tamponade: {
+            badgeAr: '🚨 طارئة: اندحاس القلب (Tamponade)', badgeEn: '🚨 Cardiac Tamponade (5 T\'s)', col: 'rose',
+            ar: 'بروتوكول ACLS (أحد أسباب 5 T\'s العكسية): ثالوث بيك (هبوط الضغط، احتقان أوردة العنق JVD، خفوت أصوات القلب) مع فولتية منخفضة وتناوب كهربائي (Electrical Alternans). العلاج المنقذ للحياة فوراً: بزل التامور الإبري الموجه بالإيكو (Echo-guided Pericardiocentesis) + تعويض السوائل الوريدية قبل البزل!',
+            en: 'ACLS Protocol (Reversible "5 T\'s" Cause): Beck\'s Triad + Low Voltage & beat-to-beat Electrical Alternans. Immediate life-saving intervention: Echo-guided Pericardiocentesis (or surgical pericardial window) + IV fluid bolus bridge!'
+        },
+        avb1: {
+            badgeAr: 'حصار درجة أولى (PR > 0.20s)', badgeEn: '1st-Degree AV Block (PR > 0.20s)', col: 'emerald',
+            ar: 'بروتوكول ACLS (Rhythm #7): حميد غالباً ولا يتطلب علاجاً إذا كان المريض بلا أعراض؛ راجع الأدوية المبطئة لعقدة AV (Beta-blockers, Diltiazem/Verapamil, Digoxin). إذا ترافق مع بطء قلب عرضي غير مستقر ← Atropine 1 mg IV (حتى 3 mg).',
+            en: 'ACLS Protocol (Rhythm #7): Usually benign; observe and review AV nodal blocking medications (BB, CCB, Digoxin). If accompanied by unstable symptomatic bradycardia -> Atropine 1 mg IV q3–5m (Max 3 mg).'
+        },
+        avb2_1: {
+            badgeAr: 'حصار عقدي موبتز I (Wenckebach)', badgeEn: 'Mobitz Type I (AV Nodal Block)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #8): الخلل في مستوى عقدة AV نفسها (غالباً بسبب زيادة نغمة العصب الحائر أو جلطة سفلية RCA). إذا كان مستقراً بلا أعراض ← المراقبة فقط. إذا كان عرضياً أو غير مستقر ← يستجيب بشكل ممتاز لدواء Atropine 1 mg IV (كل 3–5 دقائق، بحد أقصى 3 mg)!',
+            en: 'ACLS Protocol (Rhythm #8): Block is at the AV Node level (often vagal or Inferior MI). If asymptomatic -> observe. If symptomatic/unstable -> responds well to Atropine 1 mg IV bolus q3–5m (Max 3 mg)!'
+        },
+        avb2_2: {
+            badgeAr: '⚡ حصار تحت عقدي خطير (Mobitz II)', badgeEn: '⚡ Infranodal Block (Mobitz II — TCP!)', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #9): ⛔ خطر عالٍ جداً للتحول المفاجئ إلى حصار كامل أو توقف قلب (Asystole)! لأن الحصار يقع تحت عقدة AV (في حزمة هيس أو فروعها)، فإن الأتروبين (Atropine) غير فعال! طبّق فوراً تنظيم الضربات عبر الجلد (⚡ Transcutaneous Pacing - TCP) أو Dopamine (5–20 mcg/kg/min) / Epinephrine (2–10 mcg/min) للتمهيد لبطارية دائمة (Permanent Pacemaker)!',
+            en: 'ACLS Protocol (Rhythm #9): ⛔ High risk of sudden progression to Complete Heart Block or Asystole! Because the block is infranodal (His-Purkinje), do NOT rely on Atropine! Apply immediate ⚡ Transcutaneous Pacing (TCP) + Dopamine (5–20 mcg/kg/min) or Epinephrine (2–10 mcg/min) -> Permanent Pacemaker!'
+        },
+        avb_highgrade: {
+            badgeAr: '⚡ حصار متقدم (3:1 High-Grade Block)', badgeEn: '⚡ High-Grade AV Block (Immediate TCP)', col: 'rose',
+            ar: 'بروتوكول ACLS: يعامل معاملة موبتز II والحصار الكامل! لا تعتمد على الأتروبين؛ ابدأ فوراً بتنظيم ضربات القلب عبر الجلد (⚡ TCP) أو تسريب الإبينفرين/الدوبامين مع التحضير لتركيب ناظم خطى وريدي/دائم عاجل.',
+            en: 'ACLS Protocol: Manage as unstable infranodal block! Apply immediate ⚡ Transcutaneous Pacing (TCP) and/or Epinephrine (2–10 mcg/min) or Dopamine (5–20 mcg/kg/min) infusion while preparing for transvenous/permanent pacing.'
+        },
+        avb3: {
+            badgeAr: '🚨 طارئة قصوى: حصار كامل (3rd° CHB)', badgeEn: '🚨 Complete Heart Block (Immediate TCP!)', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #10): طارئة طبية! انفصال كامل بين الأذينين والبطينين؛ الأتروبين لا يعمل في الحصار تحت العقدي ذي QRS العريض! طبّق فوراً تنظيم الضربات عبر الجلد (⚡ TCP) + تسريب Dopamine (5–20 mcg/kg/min) أو Epinephrine (2–10 mcg/min) أو Isoproterenol (2–10 mcg/min) ← ثم ناظم خطى عبر الوريد ودائم!',
+            en: 'ACLS Protocol (Rhythm #10): Medical emergency! Complete AV dissociation. Do NOT delay for Atropine in wide-complex infranodal block—apply immediate ⚡ Transcutaneous Pacing (TCP) + Dopamine (5–20 mcg/kg/min) or Epinephrine (2–10 mcg/min) -> Transvenous & Permanent Pacemaker!'
+        },
+        lbbb: {
+            badgeAr: 'حصار الحزمة اليسرى (LBBB ≥0.12s)', badgeEn: 'Left Bundle Branch Block (LBBB)', col: 'amber',
+            ar: 'الأهمية السريرية: وجود LBBB جديد أو يُفترض أنه جديد مع ألم صدري إقفاري يعامل كمعادل لجلطة STEMI (أو يُطبق عليه معايير Sgarbossa لتشخيص الجلطة). في قصور القلب مع EF ≤ 35% و LBBB عريض (≥150ms) يستطب تركيب جهاز إعادة التزامن القلبي (CRT).',
+            en: 'Clinical Significance: New or presumably new LBBB with ischemic symptoms warrants urgent evaluation (apply Modified Sgarbossa Criteria for acute MI). In HFrEF (EF ≤ 35%) with LBBB ≥ 150ms, Cardiac Resynchronization Therapy (CRT) restores mechanical synchrony.'
+        },
+        rbbb: {
+            badgeAr: 'حصار الحزمة اليمنى (RBBB ≥0.12s)', badgeEn: 'Right Bundle Branch Block (RBBB)', col: 'sky',
+            ar: 'الأهمية السريرية: نمط rsR\' في V1–V2 مع موجة S عريضة في I, V5, V6. قد يظهر في الأصحاء أو في إجهاد البطين الأيمن الحاد (مثل الصمة الرئوية PE، أو COPD) أو نقص التروية. لا يمنع تشخيص ارتفاع ST في الجلطات الأمامية.',
+            en: 'Clinical Significance: rsR\' pattern in V1–V2 with wide terminal S in I, V5, V6. Seen in right ventricular strain (e.g., Pulmonary Embolism, cor pulmonale), ischemia, or as an incidental conduction finding.'
+        },
+        junctional: {
+            badgeAr: 'نظم وصلي (تحقق من الديجوكسين!)', badgeEn: 'Junctional Rhythm (Check Digoxin!)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #11): إذا كان بطيئاً (40–60/د) وغير مستقر ← أعطِ Atropine 1 mg IV. أما إذا كان نظماً وصلياً متسارعاً (Accelerated Junctional 60–100/د) ← فهو العلامة الكلاسيكية لتسمم الديجوكسين (Digoxin Toxicity): أوقف الديجوكسين، صحح البوتاسيوم، وأعطِ الترياق النوعي Digoxin Immune Fab (Digibind)!',
+            en: 'ACLS Protocol (Rhythm #11): If slow/unstable junctional escape -> Atropine 1 mg IV. If Accelerated Junctional (60–100 bpm) -> classic hallmark of Digoxin Toxicity (stop Digoxin, check K+, administer Digoxin Immune Fab / Digibind)!'
+        },
+        ivr: {
+            badgeAr: '⛔ فخ قاتل: إياك وإعطاء الليدوكائين!', badgeEn: '⛔ LETHAL TRAP: No Lidocaine/Amio!', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #12): ⛔ فخ سريري قاتل: يُمنع منعاً باتاً إعطاء Lidocaine أو Amiodarone أو Procainamide! لأن هذا النظم هو نظم الهروب الوحيد الذي يبقي البطين نابضاً، وكبحه يسبب توقف القلب الفوري (Asystole)! في AIVR (بعد فتح الشريان بالجلطة) يراقب فقط؛ وفي IVR البطيء مع هبوط الضغط يُعطى Atropine أو TCP.',
+            en: 'ACLS Protocol (Rhythm #12): ⛔ LETHAL TRAP: NEVER give Lidocaine, Amiodarone, or Procainamide! Suppressing this ventricular escape pacemaker causes immediate Asystole! In post-MI reperfusion AIVR, simply observe; if bradycardic/hypotensive IVR, give Atropine or TCP.'
+        },
+        afib: {
+            badgeAr: 'تسرع ضيق غير منتظم (AFib)', badgeEn: 'Narrow Irregular (AFib Protocol)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #14): غير مستقر ← ⚡ صدمة كهربائية متزامنة (Synchronized Cardioversion 120–200 J Biphasic). مستقر (ضبط السرعة): إذا كانت كفاءة القلب طبيعية ← Metoprolol (5mg IV كل 5 دقائق حتى 3 جرعات) أو Diltiazem (0.25 mg/kg IV ثم تسريب 5–15 mg/h). إذا كان هناك قصور قلب (Low EF) ← Digoxin IV أو Amiodarone IV. (تحقق من التخثر إذا استمر >48 ساعة!).',
+            en: 'ACLS Protocol (Rhythm #14): Unstable -> ⚡ Synchronized Cardioversion (120–200 J Biphasic). Stable Rate Control: Normal EF -> IV Metoprolol (5 mg q5m x3) or Diltiazem (0.25 mg/kg IV, then 5–15 mg/h). Heart Failure (Low EF) -> IV Digoxin (#16) or Amiodarone (#2).'
+        },
+        aflutter: {
+            badgeAr: 'رفرفة أذينية (Sawtooth 2:1)', badgeEn: 'Atrial Flutter (Sync 50–100J / BB / CCB)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #15): غير مستقر ← ⚡ صدمة كهربائية متزامنة (Synchronized Cardioversion 50–100 J، تستجيب لطاقة منخفضة!). مستقر ← ضبط السرعة بواسطة حاصرات بيتا (Metoprolol) أو Diltiazem، أو التقويم الدوائي بواسطة Ibutilide (1 mg IV على مدى 10 دقائق).',
+            en: 'ACLS Protocol (Rhythm #15): Unstable -> ⚡ Synchronized Cardioversion (50–100 J). Stable -> Rate control with Beta-Blocker or Diltiazem, or chemical conversion with Ibutilide (#15) 1 mg IV over 10 min.'
+        },
+        mat: {
+            badgeAr: 'تسرع أذيني متعدد البؤر (COPD/Hypoxia)', badgeEn: 'MAT (Treat Hypoxia + MgSO4 + CCB)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #16): (1) عالج السبب الرئوي ونقص الأكسجة (COPD / Hypoxia) + أعطِ كبريتات المغنيسيوم (MgSO4 2 g IV) وعوّض البوتاسيوم ← (2) ضبط السرعة بواسطة Verapamil أو Diltiazem IV (مع تجنب حاصرات بيتا في التشنج القصبي الشديد). ⛔ ملاحظة: الصدمة الكهربائية والأدينوزين غير فعالين في MAT!',
+            en: 'ACLS Protocol (Rhythm #16): (1) Treat underlying hypoxia/COPD + give IV MgSO4 2 g & K+ -> (2) Rate control with IV Verapamil or Diltiazem (#11). Note: Cardioversion and Adenosine are INEFFECTIVE in MAT!'
+        },
+        svt: {
+            badgeAr: 'تسرع فوق بطيني منتظم (SVT)', badgeEn: 'Regular Narrow SVT (Vagal -> Adenosine)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #13): غير مستقر ← ⚡ صدمة كهربائية متزامنة (Synchronized Cardioversion 50–100 J). مستقر ← (1) مناورات العصب الحائر المعدلة (Modified Valsalva Maneuver) ← (2) Adenosine: الجرعة الأولى 6 mg IV دفعاً سريعاً جداً في وريد كبير يتبعها فوراً 20mL محلول ملحي؛ إن لم يستجب خلال 1–2 دقيقة أعطِ الجرعة الثانية 12 mg IV ← (3) Diltiazem أو Metoprolol.',
+            en: 'ACLS Protocol (Rhythm #13): Unstable -> ⚡ Synchronized Cardioversion (50–100 J). Stable -> (1) Modified Valsalva maneuver -> (2) Adenosine (#4) 6 mg rapid IVP (two-syringe flush technique), followed by 12 mg rapid IVP if needed -> (3) Diltiazem (#11) or Metoprolol (#12).'
+        },
+        wpw_afib: {
+            badgeAr: '⛔ خطر قاتل: ممنوع قافلات عقدة AV!', badgeEn: '⛔ LETHAL TRAP: No AV Nodal Blockers!', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #17): ⛔ يُمنع منعاً باتاً إعطاء قافلات عقدة AV (يمنع Adenosine, Beta-Blockers, Diltiazem/Verapamil, Digoxin, Amiodarone) لأنها تحول الإيقاع فوراً إلى رجفان بطيني قاتل (VFib)! إذا كان غير مستقر ← ⚡ صدمة كهربائية متزامنة فورية (Sync Cardioversion). إذا كان مستقراً ← Procainamide (20–50 mg/min IV) أو Ibutilide (1 mg IV).',
+            en: 'ACLS Protocol (Rhythm #17): ⛔ NEVER give AV Nodal Blockers (NO Adenosine, BB, CCB, Digoxin, or Amiodarone)—they force conduction down the accessory pathway and trigger lethal VFib! Unstable -> ⚡ Immediate Sync Cardioversion. Stable -> Procainamide (#13) or Ibutilide (#15).'
+        },
+        pvc_ront: {
+            badgeAr: 'خوارج بطينية خبيثة (R-on-T)', badgeEn: 'Malignant PVCs (MgSO4 + K+ + BB/Lido)', col: 'amber',
+            ar: 'بروتوكول ACLS (Rhythm #18): ظاهرة R-on-T قد تطلق الرجفان البطيني أو Torsades في أي لحظة! عوّض فوراً المغنيسيوم (MgSO4 1–2 g IV) والبوتاسيوم (ليكون >4.0 mEq/L)، عالج نقص التروية القلبية، وأعطِ حاصرات بيتا (#12) أو Lidocaine (1–1.5 mg/kg IV) أو Amiodarone إذا ترافقت مع جلطة أو نوبات VT.',
+            en: 'ACLS Protocol (Rhythm #18): R-on-T can precipitate VF or Torsades! Immediately replete MgSO4 (1–2 g IV) and K+ (>4.0 mEq/L), treat ischemia, and give Beta-Blockers (#12) or Lidocaine (#3) / Amiodarone (#2) if post-MI or non-sustained VT runs.'
+        },
+        vt: {
+            badgeAr: '⚡ تسرع بطيني أحادي الشكل (VT)', badgeEn: '⚡ Monomorphic VT (Pulse Check First!)', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #2 & #15): افحص النبض أولاً! (أ) بدون نبض (Pulseless VT) ← يعامل كالرجفان البطيني: ⚡ صدمة غير متزامنة (Defibrillation 120–200J) + CPR + Epinephrine + Amiodarone 300mg. (ب) مع نبض وغير مستقر ← ⚡ صدمة متزامنة (Sync 100J). (ج) مع نبض ومستقر ← Procainamide (20–50 mg/min) أو Amiodarone (150mg على مدى 10 دقائق) أو Lidocaine أو Sotalol.',
+            en: 'ACLS Protocol (Rhythm #2 & #15): Check pulse first! (A) Pulseless VT -> ⚡ Unsynchronized Defibrillation (120–200 J) + CPR + Epinephrine + Amiodarone 300 mg. (B) With pulse & Unstable -> ⚡ Sync Cardioversion (100 J). (C) With pulse & Stable -> Procainamide (#13), Amiodarone 150 mg/10m (#2), Lidocaine (#3), or Sotalol (#14).'
+        },
+        tdp: {
+            badgeAr: '⚡ تورساد دي بوانت (MgSO4 + Defib!)', badgeEn: '⚡ Torsades de Pointes (MgSO4 1–2g IV!)', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #3): غير مستقر أو بلا نبض ← ⚡ صدمة كهربائية غير متزامنة فورية (Unsynchronized Defibrillation 200J) + الدواء النوعي الأول: كبريتات المغنيسيوم (MgSO4 1–2 g IV/IO bolus) لإخماد التفريغات المبكرة (EADs)! في الحالات المعندة: تسريع النبض عبر ناظم الخطى (Overdrive Pacing) أو Isoproterenol (2–10 mcg/min) لتقصير فترة QT. ⛔ تجنب الأميودارون والسوتالول لأنهما يطيلان QT!',
+            en: 'ACLS Protocol (Rhythm #3): Unstable/Pulseless -> ⚡ Unsynchronized Defibrillation (200 J) + Drug of Choice: Magnesium Sulfate (#10) 1–2 g IV/IO bolus! If refractory: Overdrive Pacing or Isoproterenol (#15) 2–10 mcg/min to shorten QT. ⛔ Avoid Amiodarone & Sotalol (prolong QT)!'
+        },
+        vfib: {
+            badgeAr: '⚡ توقف قلب قابل للصدمة (DEFIBRILLATE!)', badgeEn: '⚡ Shockable Arrest (Immediate Defib!)', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #1): ⚡ الصدمة الكهربائية الفورية هي العلاج المنقذ للحياة! الصدمة 1 (120–200J Biphasic) ← دقيقتان CPR ← الصدمة 2 ← دقيقتان CPR + Epinephrine 1 mg IV/IO (كل 3–5 دقائق) ← الصدمة 3 ← دقيقتان CPR + Amiodarone 300 mg IV/IO bolus (والجرعة الثانية 150 mg) أو Lidocaine (1–1.5 mg/kg).',
+            en: 'ACLS Protocol (Rhythm #1): ⚡ Immediate Unsynchronized Defibrillation! Shock 1 (120–200 J) -> 2m CPR -> Shock 2 -> 2m CPR + Epinephrine 1 mg IV/IO q3–5m -> Shock 3 -> 2m CPR + Amiodarone 300 mg IV/IO (then 150 mg) or Lidocaine 1–1.5 mg/kg.'
+        },
+        asystole: {
+            badgeAr: '🚫 توقف قلب غير قابل للصدمة (NO SHOCK!)', badgeEn: '🚫 Non-Shockable Flatline (CPR + Epi!)', col: 'rose',
+            ar: 'بروتوكول ACLS (Rhythm #4): 🚫 يُمنع الصدم الكهربائي! (1) تأكد من الخط المستقيم في اتجاهين لاستبعاد الرجفان البطيني الناعم (Fine VF) ← (2) إنعاش قلبي رئوي عالي الجودة (CPR 100–120/min) ← (3) Epinephrine 1 mg IV/IO بأسرع وقت ممكن (يكرر كل 3–5 دقائق) ← (4) عالج الأسباب العكسية (5 H\'s & 5 T\'s).',
+            en: 'ACLS Protocol (Rhythm #4): 🚫 NO SHOCK! (1) Confirm flatline in 2 leads -> (2) High-quality CPR (2 min cycles) -> (3) Epinephrine 1 mg IV/IO ASAP (repeat q3–5m) -> (4) Airway with capnography & treat reversible 5 H\'s & 5 T\'s.'
+        }
+    };
+
+    // =========================================================================
+    // 4. UNIFIED ECG MEASUREMENTS TABLE (P, PR, QRS, ST, QT) — ZERO FRAME OVERWRITE BUGS
+    // =========================================================================
+    const UNIFIED_MEAS = {
+        normal:        { ar: ['0.09s (<2.5 مربع صغير)', '0.16s (4 مربعات صغيرة)', '0.08s (2 مربع صغير)', '0.0 mV (خط السواء)', 'QT = 0.38s (~2 مربع كبير)'],
+                         en: ['0.09s (<2.5 small squares)', '0.16s (4 small squares)', '0.08s (2 small squares)', '0.0 mV (isoelectric)', 'QT = 0.38s (~2 large squares)'] },
+        sinus_brady:   { ar: ['0.09s (جيبية منتظمة)', '0.17s (طبيعية 1:1)', '0.08s (ضيق)', '0.0 mV (خط السواء)', 'QT = 0.42s (مع بطء النبض 42/د)'],
+                         en: ['0.09s (regular sinus)', '0.17s (normal 1:1)', '0.08s (narrow)', '0.0 mV (isoelectric)', 'QT = 0.42s (at 42 bpm)'] },
+        sinus_tachy:   { ar: ['0.08s (جيبية سريعة 130/د)', '0.14s (طبيعية 1:1)', '0.08s (ضيق)', '0.0 mV (خط السواء)', 'QT = 0.32s (قصيرة مع السرعة)'],
+                         en: ['0.08s (fast sinus 130 bpm)', '0.14s (normal 1:1)', '0.08s (narrow)', '0.0 mV (isoelectric)', 'QT = 0.32s (rate-shortened)'] },
+        pea:           { ar: ['0.09s (كهرباء بلا نبض)', '0.16s (طبيعية)', '0.08s (طبيعي رغم غياب النبض!)', '0.0 mV (انقباض ميكانيكي = 0)', 'QT = 0.38s'],
+                         en: ['0.09s (electrical only)', '0.16s (normal)', '0.08s (normal despite zero pulse!)', '0.0 mV (mechanical output = 0)', 'QT = 0.38s'] },
+        hyperk:        { ar: ['مسطحة ومنخفضة السعة', 'مطولة (>0.20s)', 'متسع (~0.12s)', 'قصيرة وتندمج مع T', 'T عالية ومؤنفة كالخيمة (Peaked T)'],
+                         en: ['Flattened, low amplitude', 'Prolonged (>0.20s)', 'Widened (~0.12s)', 'Short, merges into T', 'Tall tented Peaked T wave'] },
+        sinewave:      { ar: ['غائبة (شلل الأذينين)', 'غير قابلة للقياس', 'عريض جداً (>0.24s) مندمج', 'مدمجة في موجة الجيب', 'موجة جيبية مستمرة (Sine-Wave)'],
+                         en: ['Absent (atrial arrest)', 'Not measurable', 'Extremely wide (>0.24s)', 'Merged into sine wave', 'Continuous Sine-Wave pattern'] },
+        hypok:         { ar: ['0.09s (طبيعية)', '0.17s (طبيعية)', '0.08s (ضيق)', 'انخفاض ST خفيف', 'T مسطحة + موجة U بارزة (QU مطولة)'],
+                         en: ['0.09s (normal)', '0.17s (normal)', '0.08s (narrow)', 'Mild ST depression', 'Flat T + prominent U wave'] },
+        hypona:        { ar: ['0.10s (أبطأ قليلاً)', '0.20s (إطالة طفيفة)', '0.11s (اتساع طفيف وفولتية أقل)', 'بروز J/ST طفيف في V1-V2', 'QT = 0.40s (طبيعية)'],
+                         en: ['0.10s (mildly slowed)', '0.20s (borderline long)', '0.11s (mildly wide, lower mV)', 'Subtle V1–V2 J-point elevation', 'QT = 0.40s (normal)'] },
+        hyperna:       { ar: ['0.08s (واضحة)', '0.14s (سريعة)', '0.07s (حاد وضيق وعالي القمة)', '0.0 mV (طور هضبي أقصر)', 'QT = 0.34s (قصيرة طفيفاً)'],
+                         en: ['0.08s (distinct)', '0.14s (brisk)', '0.07s (sharp, narrow, tall R)', '0.0 mV (shorter plateau)', 'QT = 0.34s (mildly shortened)'] },
+        stemi_ant:     { ar: ['0.09s (طبيعية)', '0.16s (طبيعية)', 'Q مرضية ≥0.04s في V1–V4', 'ارتفاع ST حاد في V1–V4 (الحاجز والأمامي)', 'T فائقة الحدة مندمجة مع ST'],
+                         en: ['0.09s (normal)', '0.16s (normal)', 'Pathological Q ≥0.04s in V1–V4', 'Marked ST elevation V1–V4 (Septal+Ant)', 'Hyperacute T merged with ST'] },
+        stemi_ant_pure:{ ar: ['0.09s (طبيعية)', '0.16s (طبيعية)', 'Q مرضية في V3–V4 (وسلامة r في V1–V2!)', 'ارتفاع ST في V3–V4 (و V1–V2 مستوية سليمة!)', 'T فائقة الحدة في V3–V4'],
+                         en: ['0.09s (normal)', '0.16s (normal)', 'Pathological Q in V3–V4 (V1–V2 r spared!)', 'ST elevation V3–V4 (V1–V2 flat/spared!)', 'Hyperacute T in V3–V4'] },
+        stemi_inf:     { ar: ['0.09s (طبيعية)', '0.18s (قد تطول قليلاً)', 'Q مرضية في II, III, aVF', 'ارتفاع ST في II, III, aVF (انخفاض I, aVL)', 'T عالية/مقلوبة في السفلية'],
+                         en: ['0.09s (normal)', '0.18s (may prolong)', 'Pathological Q in II, III, aVF', 'ST elevation II, III, aVF (depressed I, aVL)', 'Hyperacute/inverted T inferiorly'] },
+        stemi_lat:     { ar: ['0.09s (طبيعية)', '0.16s (طبيعية)', 'Q مرضية في I, aVL, V5, V6', 'ارتفاع ST في I, aVL, V5, V6', 'تغيرات ST-T في الجانبية'],
+                         en: ['0.09s (normal)', '0.16s (normal)', 'Pathological Q in I, aVL, V5, V6', 'ST elevation in I, aVL, V5, V6', 'Hyperacute T in lateral leads'] },
+        lvh:           { ar: ['عريضة (إجهاد أذيني أيسر)', '0.16s (طبيعية)', 'R شاهقة (>2.2mV) في V5-V6 و S عميقة في V1', 'انخفاض ST منحدر (LV Strain)', 'انقلاب T غير متناظر في V5-V6'],
+                         en: ['Broad (LA abnormality)', '0.16s (normal)', 'Tall R (>2.2mV) V5–V6, deep S in V1', 'Downsloping ST depression (Strain)', 'Asymmetric inverted T in V5–V6'] },
+        tamponade:     { ar: ['صغيرة (فولتية منخفضة)', '0.16s (طبيعية)', 'فولتية منخفضة + تناوب كهربائي (Alternans)', '0.0 mV (منخفضة)', 'تتناوب سعتها من نبضة لأخرى'],
+                         en: ['Low amplitude', '0.16s (normal)', 'Low voltage + Electrical Alternans', '0.0 mV (low voltage)', 'Alternating T amplitude'] },
+        avb1:          { ar: ['0.09s (طبيعية)', '>0.28s (إطالة ثابتة > مربع كبير)', '0.08s (ضيق 1:1)', '0.0 mV (خط السواء)', 'QT = 0.38s (طبيعية)'],
+                         en: ['0.09s (normal)', '>0.28s (fixed >1 large box)', '0.08s (narrow 1:1)', '0.0 mV (isoelectric)', 'QT = 0.38s (normal)'] },
+        avb2_1:        { ar: ['0.09s (منتظمة)', 'تطول تدريجياً (0.16s ➔ 0.28s ➔ حجب)', '0.08s ثم يسقط مركب QRS في النبضة 3', '0.0 mV (خط السواء)', 'تغيب في النبضة المحجوبة'],
+                         en: ['0.09s (regular)', 'Lengthens (0.16s ➔ 0.28s ➔ blocked)', '0.08s then dropped QRS on beat 3', '0.0 mV (isoelectric)', 'Absent on dropped beat'] },
+        avb2_2:        { ar: ['0.09s (منتظمة)', 'ثابتة تماماً (0.16s) في النبضات الموصلة', 'يسقط فجأة بدون إطالة مسبقة (نمط 3:2)', '0.0 mV (خط السواء)', 'تظهر بعد QRS الموصل فقط'],
+                         en: ['0.09s (regular)', 'Fixed (0.16s) on conducted beats', 'Sudden dropped QRS (3:2 pattern)', '0.0 mV (isoelectric)', 'After conducted QRS only'] },
+        avb_highgrade: { ar: ['0.09s (منتظمة)', 'ثابتة في النبضة الموصلة فقط', 'توصيل 3:1 (حجب موجتي P متتاليتين)', '0.0 mV (خط السواء)', 'بعد QRS الموصل فقط'],
+                         en: ['0.09s (regular)', 'Fixed on conducted beat only', '3:1 conduction (2 consecutive P blocked)', '0.0 mV (isoelectric)', 'After conducted QRS only'] },
+        avb3:          { ar: ['0.09s (منتظمة ~80/د مستقلة)', 'متغيرة عشوائياً (انفصال AV كامل)', 'عريض ≥0.14s (نظم هروب بطيني 36/د)', 'تغير ثانوي معاكس لـ QRS', 'QT مطولة تبعاً لعرض QRS'],
+                         en: ['0.09s (independent ~80 bpm)', 'Completely variable (AV dissociation)', 'Wide ≥0.14s (ventricular escape 36 bpm)', 'Secondary discordant ST', 'Prolonged with wide escape QRS'] },
+        lbbb:          { ar: ['0.09s (طبيعية)', '0.16s (طبيعية)', 'عريض ≥0.13s (نمط M-shape R-R\' في V5-V6)', 'انخفاض ST معاكس في V5-V6 وارتفاع في V1', 'انقلاب T معاكس لاتجاه QRS'],
+                         en: ['0.09s (normal)', '0.16s (normal)', 'Wide ≥0.13s (M-shaped R-R\' in V5–V6)', 'Discordant ST changes', 'Discordant T-wave inversion'] },
+        rbbb:          { ar: ['0.09s (طبيعية)', '0.16s (طبيعية)', 'عريض ≥0.13s (أذنا الأرنب rsR\' في V1–V2)', 'انخفاض ST ثانوي في V1–V2', 'انقلاب T ثانوي في V1–V2'],
+                         en: ['0.09s (normal)', '0.16s (normal)', 'Wide ≥0.13s (rsR\' rabbit ears in V1–V2)', 'Secondary ST depression in V1–V2', 'Discordant T inversion in V1–V2'] },
+        junctional:    { ar: ['رجعية مقلوبة (في II,III,aVF) أو مخفية', 'قصيرة (<0.12s) أو غائبة', '0.08s (ضيق ومنتظم 48/د)', '0.0 mV (خط السواء)', 'QT = 0.40s (طبيعية)'],
+                         en: ['Retrograde inverted (II,III,aVF) or hidden', 'Short (<0.12s) or absent', '0.08s (narrow regular 48 bpm)', '0.0 mV (isoelectric)', 'QT = 0.40s (normal)'] },
+        ivr:           { ar: ['غائبة (نظم بطيني ذاتي)', 'غير موجودة', 'عريض ≥0.14s ومنتظم بمعدل بطيء (36/د)', 'تغير ثانوي معاكس', 'موجة T معاكسة لـ QRS العريض'],
+                         en: ['Absent (ventricular pacemaker)', 'None', 'Wide ≥0.14s regular slow rate (36 bpm)', 'Secondary discordant ST', 'Discordant T wave'] },
+        afib:          { ar: ['غائبة (تموجات رجفانية f-waves)', 'غير قابلة للقياس', '0.08s (ضيق وغير منتظم المسافات R-R)', '0.0 mV (خط متموج)', 'متغيرة حسب طول R-R'],
+                         en: ['Absent (fibrillatory f-waves)', 'Not measurable', '0.08s (narrow, irregularly irregular R-R)', '0.0 mV (undulating baseline)', 'Varies with R-R interval'] },
+        aflutter:      { ar: ['موجات رفرفة F بأسنان المنشار (300/د)', 'توصيل AV بنسبة 2:1', '0.08s (ضيق ومنتظم عند 150/د)', 'تتداخل مع موجات أسنان المنشار', 'تتداخل مع موجات F'],
+                         en: ['Sawtooth F-waves (~300/min)', '2:1 AV conduction ratio', '0.08s (narrow regular at 150 bpm)', 'Superimposed on F-waves', 'Blends with sawtooth F-waves'] },
+        mat:           { ar: ['≥ 3 أشكال مختلفة لموجة P!', 'متغيرة من نبضة لأخرى!', '0.08s (ضيق وغير منتظم >100/د)', '0.0 mV (خط السواء)', 'متغيرة حسب سرعة البؤر'],
+                         en: ['≥3 distinct P-wave morphologies!', 'Varies beat-to-beat!', '0.08s (narrow irregular >100 bpm)', '0.0 mV (isoelectric)', 'Varies with cycle length'] },
+        svt:           { ar: ['مخفية داخل QRS (أو رجعية بعده)', 'غير قابلة للقياس', '0.08s (ضيق وسريع جداً 190/د)', 'انخفاض طفيف مرتبط بالسرعة', 'قصيرة بسبب التسرع الشديد'],
+                         en: ['Buried inside QRS (or pseudo-s\')', 'Not measurable', '0.08s (narrow, very fast 190 bpm)', 'Rate-related mild depression', 'Shortened due to rapid rate'] },
+        wpw_afib:      { ar: ['غائبة (رجفان أذيني)', 'موجة دلتا (Delta Wave) بدون PR', 'عريض ومتغير العرض وسريع وغير منتظم (FBI)!', 'تغيرات ثانوية معاكسة', 'غير قابلة للقياس'],
+                         en: ['Absent (AFib)', 'Slurred Delta wave (no PR)', 'Fast, Broad (varying width) & Irregular (FBI)!', 'Discordant ST changes', 'Not measurable'] },
+        pvc_ront:      { ar: ['طبيعية في الجيبية وغائبة في الـ PVC', '0.16s في الجيبية فقط', 'تناوب QRS ضيق مع PVC عريض ومبكر', 'معاكسة في الـ PVC', 'ضربة PVC تسقط فوق موجة T (R-on-T)!'],
+                         en: ['Normal on sinus; absent on PVC', '0.16s on sinus beats', 'Alternating narrow sinus & wide premature PVC', 'Discordant in PVC', 'PVC strikes peak of T wave (R-on-T)!'] },
+        vt:            { ar: ['غائبة أو منفصلة (AV Dissociation)', 'غير قابلة للقياس', 'عريض جداً (≥0.14s) وأحادي الشكل', 'معاكسة لاتجاه QRS', 'غير قابلة للقياس'],
+                         en: ['Absent or dissociated', 'Not measurable', 'Very wide (≥0.14s) monomorphic', 'Discordant to wide QRS', 'Not measurable'] },
+        tdp:           { ar: ['غائبة', 'غير قابلة للقياس', 'عريض متعدد الأشكال يلتف حول خط السواء', 'غير قابلة للتمييز', 'استطالة QT شديدة قبل النوبة (>0.50s)'],
+                         en: ['Absent', 'Not measurable', 'Wide polymorphic twisting around baseline', 'Indistinguishable', 'Marked QT prolongation (>0.50s)'] },
+        vfib:          { ar: ['غير موجودة', 'غير موجودة', 'تموجات رجفانية فوضوية بلا QRS', 'غير موجودة', 'غير قابلة للقياس (توقف قلب)'],
+                         en: ['None', 'None', 'Chaotic fibrillatory waves (no QRS)', 'None', 'Not measurable (cardiac arrest)'] },
+        asystole:      { ar: ['غائبة تماماً (Flatline)', 'غير موجودة', 'خط مستقيم (غياب كامل للنشاط البطيني)', 'خط مستقيم (0.0 mV)', 'غير موجودة (توقف قلب كامل)'],
+                         en: ['Absent (Flatline)', 'None', 'Flatline (absent ventricular activity)', 'Flatline (0.0 mV)', 'None (complete arrest)'] }
+    };
+
+    window.updateDynamicECGMetrics = function () {
+        const L = (typeof currentLang === 'string' && currentLang === 'en') ? 'en' : 'ar';
+        const row = (UNIFIED_MEAS[currentScenario] || UNIFIED_MEAS.normal)[L];
+        const ids = ['meas-p', 'meas-pr', 'meas-qrs', 'meas-st', 'meas-qt'];
+        ids.forEach((id, idx) => {
+            const el = document.getElementById(id);
+            if (el && row[idx]) el.textContent = row[idx];
+        });
+    };
+
+    // =========================================================================
+    // 5. ANATOMICAL EPICARDIAL CORONARY ARTERIES + 3D THROMBUS/CLOT MARKER
+    // =========================================================================
+    let meshMI_Septal = null;
+    let thrombusGroup3D = null;
+    let clotSphere3D = null;
+    let clotRing3D = null;
+    let coronarySegments3D = {};
+
+    function rebuildAnatomicalCoronariesAndClot() {
+        if (typeof THREE === 'undefined' || !heartGroup || !coronaryGroup) return;
+
+        // Clear old floating coronary tubes
+        while (coronaryGroup.children.length > 0) {
+            coronaryGroup.remove(coronaryGroup.children[0]);
+        }
+
+        // Helper to build epicardial artery segment with stored material for upstream/downstream ischemia coloring
+        function makeArterySeg(pts, radius, baseHex, emHex) {
+            const vecs = pts.map(p => new THREE.Vector3(p[0], p[1], p[2]));
+            const curve = new THREE.CatmullRomCurve3(vecs);
+            const geom = new THREE.TubeGeometry(curve, 32, radius, 14, false);
+            const mat = new THREE.MeshPhysicalMaterial({
+                color: baseHex,
+                emissive: emHex,
+                emissiveIntensity: 0.45,
+                roughness: 0.28,
+                metalness: 0.12,
+                clearcoat: 0.65
+            });
+            const mesh = new THREE.Mesh(geom, mat);
+            mesh.renderOrder = 4;
+            coronaryGroup.add(mesh);
+            return { mesh, mat, baseHex, emHex };
+        }
+
+        // 1. Left Main Coronary Artery (LMCA) arising from Left Aortic Sinus & coursing to Anterior Interventricular Sulcus
+        coronarySegments3D.lmca = makeArterySeg([
+            [0.24, 0.68, 0.48],
+            [0.34, 0.56, 0.82],
+            [0.32, 0.38, 1.05]
+        ], 0.068, 0xfb7185, 0x9f1239);
+
+        // 2. Proximal LAD (in Anterior Interventricular Groove before Septal Perforator S1)
+        coronarySegments3D.lad_prox = makeArterySeg([
+            [0.32, 0.38, 1.05],
+            [0.24, 0.16, 1.18],
+            [0.20, -0.08, 1.24]
+        ], 0.062, 0xfb7185, 0x9f1239);
+
+        // 3. Septal Perforator Branches (S1 & S2 diving from Proximal LAD into Interventricular Septum!)
+        coronarySegments3D.septal_s1 = makeArterySeg([
+            [0.20, -0.08, 1.24],
+            [0.12, -0.22, 0.92],
+            [0.06, -0.38, 0.52]
+        ], 0.040, 0xfda4af, 0xbe123c);
+        coronarySegments3D.septal_s2 = makeArterySeg([
+            [0.19, -0.32, 1.25],
+            [0.11, -0.48, 0.90],
+            [0.05, -0.66, 0.50]
+        ], 0.036, 0xfda4af, 0xbe123c);
+
+        // 4. Mid & Distal LAD (hugging Anterior Interventricular Groove down to the Apex)
+        coronarySegments3D.lad_mid_dist = makeArterySeg([
+            [0.20, -0.08, 1.24],
+            [0.19, -0.45, 1.26],
+            [0.22, -0.92, 1.22],
+            [0.30, -1.42, 1.06],
+            [0.42, -1.86, 0.72]
+        ], 0.056, 0xfb7185, 0x9f1239);
+
+        // 5. Diagonal Branches (D1 & D2 coursing obliquely across the Anterior LV Free Wall)
+        coronarySegments3D.diag_d1 = makeArterySeg([
+            [0.20, -0.38, 1.25],
+            [0.72, -0.62, 1.18],
+            [1.18, -0.98, 0.94],
+            [1.42, -1.32, 0.62]
+        ], 0.044, 0xfb7185, 0x9f1239);
+
+        // 6. Left Circumflex (LCx) in Left Atrioventricular Sulcus + Obtuse Marginal (OM1) on Lateral LV Wall
+        coronarySegments3D.lcx_prox = makeArterySeg([
+            [0.32, 0.38, 1.05],
+            [0.82, 0.34, 0.92],
+            [1.28, 0.20, 0.62]
+        ], 0.058, 0x38bdf8, 0x0369a1);
+        coronarySegments3D.lcx_dist_om = makeArterySeg([
+            [1.28, 0.20, 0.62],
+            [1.66, -0.15, 0.32],
+            [1.72, -0.68, 0.14],
+            [1.56, -1.24, -0.08]
+        ], 0.052, 0x38bdf8, 0x0369a1);
+        coronarySegments3D.lcx_post = makeArterySeg([
+            [1.28, 0.20, 0.62],
+            [1.62, 0.02, 0.02],
+            [1.45, -0.22, -0.58]
+        ], 0.044, 0x38bdf8, 0x0369a1);
+
+        // 7. Right Coronary Artery (RCA) in Right Atrioventricular Sulcus + Posterior Descending Artery (PDA) on Inferior Wall
+        coronarySegments3D.rca_prox = makeArterySeg([
+            [-0.12, 0.64, 0.62],
+            [-0.68, 0.42, 0.92],
+            [-1.18, 0.06, 0.86]
+        ], 0.058, 0xfbbf24, 0x92400e);
+        coronarySegments3D.rca_dist_pda = makeArterySeg([
+            [-1.18, 0.06, 0.86],
+            [-1.36, -0.52, 0.64],
+            [-1.12, -1.18, 0.28],
+            [-0.58, -1.64, -0.06],
+            [0.12, -1.84, -0.16]
+        ], 0.054, 0xfbbf24, 0x92400e);
+
+        // Add Separate Septal Infarct Patch (for Anteroseptal STEMI vs Pure Anterior STEMI distinction!)
+        if (!meshMI_Septal) {
+            const matSeptalNec = new THREE.MeshStandardMaterial({
+                color: 0x111827, emissive: 0x7f1d1d, emissiveIntensity: 0.48, roughness: 0.8
+            });
+            meshMI_Septal = new THREE.Mesh(new THREE.SphereGeometry(0.54, 24, 24), matSeptalNec);
+            meshMI_Septal.scale.set(0.75, 1.25, 0.42);
+            meshMI_Septal.position.set(0.05, -0.52, 1.04);
+            meshMI_Septal.visible = false;
+            heartGroup.add(meshMI_Septal);
+        }
+        // Adjust meshMI_Ant to sit cleanly over the Anterior LV Free Wall (V3-V4 territory)
+        if (meshMI_Ant) {
+            meshMI_Ant.position.set(0.76, -0.86, 0.96);
+            meshMI_Ant.scale.set(0.88, 1.18, 0.38);
+        }
+
+        // 8. 3D Thrombus / Occlusion Clot Marker + Stenosis Ring
+        thrombusGroup3D = new THREE.Group();
+        thrombusGroup3D.visible = false;
+        thrombusGroup3D.renderOrder = 15;
+        heartGroup.add(thrombusGroup3D);
+
+        // Dark red-crimson blood clot sphere inside the narrowed artery
+        clotSphere3D = new THREE.Mesh(
+            new THREE.SphereGeometry(0.13, 20, 20),
+            new THREE.MeshPhysicalMaterial({
+                color: 0x450a0a,
+                emissive: 0xdc2626,
+                emissiveIntensity: 0.95,
+                roughness: 0.35,
+                clearcoat: 0.8
+            })
+        );
+        thrombusGroup3D.add(clotSphere3D);
+
+        // Glowing golden-red stenosis / occlusion ring around the artery blockage
+        clotRing3D = new THREE.Mesh(
+            new THREE.TorusGeometry(0.19, 0.032, 14, 28),
+            new THREE.MeshBasicMaterial({
+                color: 0xfef08a,
+                transparent: true,
+                opacity: 0.92,
+                depthTest: false
+            })
+        );
+        clotRing3D.renderOrder = 25;
+        thrombusGroup3D.add(clotRing3D);
+
+        // Update 3D label anchors for coronary branches and add thrombus anchor
+        if (Array.isArray(labelAnchors3D)) {
+            const ladLbl = labelAnchors3D.find(l => l.id === 'LAD');
+            if (ladLbl) ladLbl.pos.set(0.24, -0.65, 1.32);
+            const rcaLbl = labelAnchors3D.find(l => l.id === 'RCA');
+            if (rcaLbl) rcaLbl.pos.set(-1.38, -0.45, 0.72);
+            const lcxLbl = labelAnchors3D.find(l => l.id === 'LCx');
+            if (lcxLbl) lcxLbl.pos.set(1.68, -0.15, 0.38);
+            if (!labelAnchors3D.some(l => l.id === 'Septal Perforator (S1)')) {
+                labelAnchors3D.push({
+                    type: 'anat',
+                    id: 'Septal Perforator (S1)',
+                    ar: 'الفرع الحاجزي الثاقب (S1)',
+                    pos: new THREE.Vector3(0.08, -0.25, 0.85),
+                    isCor: true,
+                    isHeartLocal: true
+                });
+            }
+        }
+    }
+
+    // =========================================================================
+    // 6. ENHANCED computeLeadVoltage FOR ALL 30 SCENARIOS & REALISTIC R-WAVE PROGRESSION
+    // =========================================================================
+    const origComputeLeadVoltage = window.computeLeadVoltage;
+    window.computeLeadVoltage = function (absMs, scenario, leadId) {
+        const leadObj = LEADS_12.find(l => l.id === leadId) || LEADS_12[1];
+        const angle = leadObj.angle;
+        const grp = leadObj.group;
+        const proj = Math.cos((angle - 45) * Math.PI / 180);
+        const pProj = leadId === 'V1' ? 0.12 : (leadId === 'aVR' ? -0.85 : (leadId.startsWith('V') ? 0.72 : proj));
+
+        const beatIdx = Math.floor(absMs / 800);
+        const t = ((absMs % 800) + 800) % 800;
+
+        // 1. Asystole (Flatline with ultra-subtle baseline wander)
+        if (scenario === 'asystole') {
+            return (0.012 * Math.sin(absMs * 0.008) + 0.006 * Math.cos(absMs * 0.019)) * (grp === 'avr' ? -1 : 1);
+        }
+
+        // 2. Hyperkalemic Sine-Wave (Critical K+ > 7.5 mEq/L: absent P, continuous wide sine wave merging QRS & T)
+        if (scenario === 'sinewave') {
+            const pol = (grp === 'avr' || leadId === 'V1') ? -0.85 : (proj >= -0.1 ? 1.0 : -0.75);
+            const w1 = 1.15 * Math.sin(((absMs % 800) / 800) * Math.PI * 2);
+            const w2 = 0.22 * Math.sin(((absMs % 800) / 800) * Math.PI * 4 - 0.6);
+            return (w1 + w2) * pol;
+        }
+
+        // 3. Sinus Bradycardia (<50 bpm: slow cycle with wide TP segment)
+        if (scenario === 'sinus_brady') {
+            const period = 1200; // 50 bpm in strip
+            const tb = ((absMs % period) + period) % period;
+            let v = 0;
+            if (leadId === 'V1') {
+                v += gPulse(tb, 115, 17, 0.14) - gPulse(tb, 140, 19, 0.10);
+                v += gPulse(tb, 255, 9, 0.28) - gPulse(tb, 278, 13, 0.92) + gPulse(tb, 540, 44, 0.08);
+            } else if (leadId === 'V2') {
+                v += gPulse(tb, 125, 20, 0.15);
+                v += gPulse(tb, 255, 10, 0.45) - gPulse(tb, 280, 13, 0.78) + gPulse(tb, 540, 44, 0.22);
+            } else {
+                v += gPulse(tb, 125, 21, 0.18) * pProj;
+                v += (-gPulse(tb, 240, 7, 0.12) + gPulse(tb, 265, 12, 1.18) - gPulse(tb, 288, 9, 0.24) + gPulse(tb, 540, 45, 0.36)) * proj;
+            }
+            return v;
+        }
+
+        // 4. Sinus Tachycardia (130 bpm: 2 rapid regular sinus beats per 920ms / ~460ms cycle)
+        if (scenario === 'sinus_tachy') {
+            const period = 460;
+            const tb = ((absMs % period) + period) % period;
+            let v = 0;
+            if (leadId === 'V1') {
+                v += gPulse(tb, 65, 14, 0.15) - gPulse(tb, 85, 15, 0.10);
+                v += gPulse(tb, 175, 8, 0.28) - gPulse(tb, 195, 12, 0.90) + gPulse(tb, 330, 30, 0.10);
+            } else {
+                v += gPulse(tb, 72, 16, 0.20) * pProj;
+                v += (-gPulse(tb, 162, 6, 0.12) + gPulse(tb, 182, 10, 1.18) - gPulse(tb, 200, 8, 0.24) + gPulse(tb, 330, 32, 0.35)) * proj;
+            }
+            return v;
+        }
+
+        // 5. Severe Hyponatremia ([Na+] < 120 mEq/L: slower Phase 0 -> mildly widened QRS ~0.11s, lower amplitude, subtle V1-V2 Brugada-like J elevation)
+        if (scenario === 'hypona') {
+            let v = gPulse(t, 105, 24, 0.14) * pProj;
+            if (leadId === 'V1' || leadId === 'V2') {
+                v += gPulse(t, 238, 12, 0.22) - gPulse(t, 268, 18, 0.68);
+                // Brugada-like coved J-point elevation in V1-V2 from INa reduction
+                v += gPulse(t, 310, 45, 0.24) - gPulse(t, 495, 42, 0.16);
+            } else {
+                v += (-gPulse(t, 220, 10, 0.09) + gPulse(t, 250, 18, 0.78) - gPulse(t, 282, 14, 0.20) + gPulse(t, 515, 44, 0.26)) * proj;
+            }
+            return v;
+        }
+
+        // 6. Severe Hypernatremia ([Na+] > 155 mEq/L: steep Phase 0 overshoot -> sharp narrow tall QRS ~0.07s, shorter QT)
+        if (scenario === 'hyperna') {
+            let v = gPulse(t, 120, 19, 0.21) * pProj;
+            if (leadId === 'V1') {
+                v += gPulse(t, 240, 7, 0.36) - gPulse(t, 256, 10, 1.18) + gPulse(t, 470, 34, 0.10);
+            } else {
+                v += (-gPulse(t, 228, 5, 0.16) + gPulse(t, 245, 8.5, 1.52) - gPulse(t, 261, 6.5, 0.28) + gPulse(t, 470, 36, 0.42)) * proj;
+            }
+            return v;
+        }
+
+        // 7. Localized Anterior STEMI without Septum (stemi_ant_pure: Mid-LAD occlusion sparing V1-V2, infarcting V3-V4!)
+        if (scenario === 'stemi_ant_pure') {
+            let v = (leadId === 'V1')
+                ? (gPulse(t, 105, 17, 0.15) - gPulse(t, 130, 19, 0.10))
+                : gPulse(t, 115, 21, 0.19) * pProj;
+
+            if (leadId === 'V1' || leadId === 'V2') {
+                // SEPTUM IS SPARED! Normal initial r wave, deep S wave, and ISOELECTRIC (flat) ST segment!
+                const rAmp = (leadId === 'V1') ? 0.30 : 0.52;
+                const sAmp = (leadId === 'V1') ? 0.90 : 0.78;
+                v += gPulse(t, 236, 9, rAmp) - gPulse(t, 258, 13, sAmp) + gPulse(t, 510, 42, 0.14);
+                return v;
+            }
+            if (leadId === 'V3' || leadId === 'V4') {
+                // PRIMARY INFARCT ZONE (Anterior Free Wall): Deep Pathological Q wave + Marked ST Elevation!
+                v += -gPulse(t, 230, 17, 0.76);
+                v += gPulse(t, 256, 11, 0.46);
+                if (t >= 250 && t <= 590) {
+                    v += 0.58 * Math.exp(-Math.pow((t - 380) / 115, 2));
+                }
+                v += gPulse(t, 495, 45, 0.40);
+                return v;
+            }
+            if (leadId === 'V5') {
+                // Mild border-zone ST elevation in V5
+                v += -gPulse(t, 226, 12, 0.28) + gPulse(t, 248, 12, 0.92);
+                if (t >= 255 && t <= 570) v += 0.22 * Math.exp(-Math.pow((t - 380) / 110, 2));
+                v += gPulse(t, 500, 42, 0.32);
+                return v;
+            }
+            if (grp === 'inf') {
+                // Mild reciprocal ST depression in II, III, aVF
+                v += (-gPulse(t, 222, 7, 0.10) + gPulse(t, 245, 12, 1.05) - gPulse(t, 268, 9, 0.22)) * proj;
+                if (t >= 270 && t <= 550) v -= 0.16 * Math.exp(-Math.pow((t - 390) / 110, 2));
+                v += gPulse(t, 510, 42, 0.22) * proj;
+                return v;
+            }
+            v += (-gPulse(t, 222, 7, 0.14) + gPulse(t, 245, 12, 1.18) - gPulse(t, 268, 9, 0.24) + gPulse(t, 510, 42, 0.36)) * proj;
+            return v;
+        }
+
+        // 8. Right Bundle Branch Block (RBBB: rsR' M-shape in V1-V2 + wide slurred terminal S in I, aVL, V5, V6)
+        if (scenario === 'rbbb') {
+            let v = (leadId === 'V1')
+                ? (gPulse(t, 105, 17, 0.15) - gPulse(t, 130, 19, 0.10))
+                : gPulse(t, 115, 21, 0.19) * pProj;
+
+            if (leadId === 'V1' || leadId === 'V2') {
+                const scale = (leadId === 'V1') ? 1.0 : 0.82;
+                // r (septal) -> s (LV) -> R' (wide delayed RV) + discordant inverted T
+                v += gPulse(t, 226, 8, 0.38 * scale)
+                   - gPulse(t, 246, 10, 0.45 * scale)
+                   + gPulse(t, 282, 22, 1.18 * scale)
+                   - gPulse(t, 390, 75, 0.18 * scale)
+                   - gPulse(t, 515, 42, 0.32 * scale);
+                return v;
+            }
+            if (['I', 'aVL', 'V5', 'V6'].includes(leadId)) {
+                // q -> R -> wide slurred terminal S + upright T
+                v += -gPulse(t, 222, 7, 0.14)
+                   + gPulse(t, 242, 11, 1.12)
+                   - gPulse(t, 284, 24, 0.52)
+                   + gPulse(t, 510, 42, 0.34);
+                return v;
+            }
+            v += (-gPulse(t, 222, 7, 0.12) + gPulse(t, 244, 12, 0.95) - gPulse(t, 282, 22, 0.36) + gPulse(t, 510, 42, 0.28)) * proj;
+            return v;
+        }
+
+        // 9. Junctional Escape / Accelerated Rhythm (retrograde inverted P in II, III, aVF; narrow QRS)
+        if (scenario === 'junctional') {
+            let v = 0;
+            // Retrograde inverted P wave just before QRS (negative in inferior leads, positive in aVR)
+            const retroP = -gPulse(t, 192, 14, 0.18) * (leadId === 'V1' ? -0.5 : proj);
+            v += retroP;
+            if (leadId === 'V1') {
+                v += gPulse(t, 238, 9, 0.28) - gPulse(t, 260, 13, 0.92) + gPulse(t, 510, 42, 0.08);
+            } else {
+                v += (-gPulse(t, 222, 7, 0.12) + gPulse(t, 245, 11, 1.18) - gPulse(t, 268, 9, 0.24) + gPulse(t, 510, 42, 0.35)) * proj;
+            }
+            return v;
+        }
+
+        // 10. Idioventricular Rhythm (IVR / AIVR: regular wide ventricular complexes without P waves, discordant T)
+        if (scenario === 'ivr') {
+            const pol = (grp === 'avr' || leadId === 'V1' || leadId === 'V2') ? -0.85 : (proj >= 0 ? 1.0 : -0.7);
+            const qrs = gPulse(t, 255, 28, 1.28) - gPulse(t, 310, 24, 0.52);
+            const stT = -gPulse(t, 410, 75, 0.22) - gPulse(t, 525, 48, 0.42);
+            return (qrs + stT) * pol;
+        }
+
+        // 11. Multifocal Atrial Tachycardia (MAT: irregular narrow QRS + >=3 distinct P-wave morphologies & varying PR)
+        if (scenario === 'mat') {
+            const period = 1600;
+            const base = Math.floor(absMs / period) * period;
+            // 4 beats per 1600ms with distinct P morphologies (pAmp, pWidth, prLen, biPhasic)
+            const beats = [
+                { qrsT: 210,  pr: 115, pAmp: 0.26,  pW: 14, bi: 0 },
+                { qrsT: 560,  pr: 155, pAmp: -0.18, pW: 18, bi: 0 },
+                { qrsT: 980,  pr: 95,  pAmp: 0.16,  pW: 12, bi: -0.14 },
+                { qrsT: 1310, pr: 140, pAmp: 0.30,  pW: 20, bi: 0 }
+            ];
+            let v = 0;
+            const pol = (grp === 'avr') ? -0.85 : (leadId === 'V1' ? -0.65 : (proj || 0.7));
+            for (const cb of [base - period, base, base + period]) {
+                for (const b of beats) {
+                    const qt = cb + b.qrsT;
+                    const pt = qt - b.pr;
+                    v += gPulse(absMs, pt, b.pW, b.pAmp) * pProj;
+                    if (b.bi !== 0) v += gPulse(absMs, pt + 18, 12, b.bi) * pProj;
+                    v += (gPulse(absMs, qt, 10, 1.12) - gPulse(absMs, qt + 18, 9, 0.25) + gPulse(absMs, qt + 135, 32, 0.28)) * pol;
+                }
+            }
+            return v;
+        }
+
+        // 12. Pre-Excited AFib in WPW ("FBI": Fast, Broad with slurred Delta wave & varying QRS width, Irregular)
+        if (scenario === 'wpw_afib') {
+            const period = 1600;
+            const base = Math.floor(absMs / period) * period;
+            const beats = [
+                { t: 130,  w: 26, amp: 1.45, delta: 0.55 },
+                { t: 390,  w: 19, amp: 1.20, delta: 0.38 },
+                { t: 690,  w: 32, amp: 1.62, delta: 0.68 },
+                { t: 950,  w: 24, amp: 1.35, delta: 0.48 },
+                { t: 1290, w: 30, amp: 1.55, delta: 0.62 }
+            ];
+            let v = 0.04 * Math.sin(absMs * 0.085) + 0.03 * Math.cos(absMs * 0.14);
+            const pol = (grp === 'avr') ? -0.85 : (leadId === 'V1' ? 0.9 : (proj >= 0 ? 1.0 : -0.75));
+            for (const cb of [base - period, base, base + period]) {
+                for (const b of beats) {
+                    const bt = cb + b.t;
+                    // Slurred Delta wave pre-excitation + wide polymorphic fusion QRS + discordant T
+                    const deltaWave = gPulse(absMs, bt - b.w * 0.85, b.w * 0.75, b.delta);
+                    const mainQRS = gPulse(absMs, bt, b.w, b.amp) - gPulse(absMs, bt + b.w * 1.1, b.w * 0.65, b.amp * 0.28);
+                    const repolT = -gPulse(absMs, bt + 125, 34, b.amp * 0.24);
+                    v += (deltaWave + mainQRS + repolT) * pol;
+                }
+            }
+            return v;
+        }
+
+        // 13. Malignant PVCs (Bigeminy + R-on-T Phenomenon)
+        if (scenario === 'pvc_ront') {
+            const period = 1600;
+            const tb = ((absMs % period) + period) % period;
+            const pol = (grp === 'avr') ? -0.85 : (leadId === 'V1' ? -0.8 : (proj >= 0 ? 1.0 : -0.75));
+            let v = 0;
+            // Beat 1: Normal Sinus Beat (P at 105ms, narrow QRS at 225ms, T wave peaking at 445ms)
+            v += gPulse(tb, 105, 19, 0.19) * pProj;
+            v += (-gPulse(tb, 208, 7, 0.12) + gPulse(tb, 228, 11, 1.15) - gPulse(tb, 248, 9, 0.24) + gPulse(tb, 445, 42, 0.38)) * pol;
+            // Beat 2 (R-on-T Premature PVC!): strikes at 465ms right on the downslope/peak of Beat 1's T wave!
+            v += (gPulse(tb, 472, 28, 1.68) - gPulse(tb, 528, 26, 0.95) - gPulse(tb, 650, 48, 0.52)) * pol;
+            // Beat 3: Second Normal Sinus Beat after compensatory pause (P at 960ms, QRS at 1080ms, T at 1295ms)
+            v += gPulse(tb, 960, 19, 0.19) * pProj;
+            v += (-gPulse(tb, 1062, 7, 0.12) + gPulse(tb, 1082, 11, 1.15) - gPulse(tb, 1102, 9, 0.24) + gPulse(tb, 1295, 42, 0.38)) * pol;
+            // Beat 4: Bigeminal PVC at 1360ms
+            v += (-gPulse(tb, 1365, 27, 1.52) + gPulse(tb, 1420, 25, 0.85) + gPulse(tb, 1525, 44, 0.45)) * pol;
+            return v;
+        }
+
+        // 14. Fix Mobitz I (Wenckebach) so PR lengthening is clearly visible on the ECG grid (160ms -> 280ms -> Dropped Beat!)
+        if (scenario === 'avb2_1') {
+            const pWave = (leadId === 'V1')
+                ? (gPulse(t, 105, 17, 0.15) - gPulse(t, 130, 19, 0.10))
+                : gPulse(t, 105, 21, 0.19) * pProj;
+            const wenckebachStep = ((beatIdx % 3) + 3) % 3;
+            if (wenckebachStep === 2) return pWave; // 3rd P wave is blocked!
+            const delay = wenckebachStep * 95; // Beat 0: QRS at 245ms (PR=140ms); Beat 1: QRS at 340ms (PR=235ms)!
+            const qrsT = (-gPulse(t, 222 + delay, 7, 0.14) + gPulse(t, 245 + delay, 12, 1.22) - gPulse(t, 268 + delay, 9, 0.26) + gPulse(t, 495 + delay, 42, 0.38)) * (leadId === 'V1' ? -0.75 : proj);
+            return pWave + qrsT;
+        }
+
+        return origComputeLeadVoltage(absMs, scenario, leadId);
+    };
+
+    // =========================================================================
+    // 7. LEAD-SPECIFIC CELLULAR ACTION POTENTIAL (Vm) & SARCOMERE TENSION
+    //    (Affected Infarct/Ischemic Lead vs Spared/Healthy Lead!)
+    // =========================================================================
+    window.isSelectedLeadIschemic = function (sc, leadId) {
+        if (!['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_lat'].includes(sc)) return false;
+        return getLeadImpactStatus(sc, leadId) === 'primary';
+    };
+
+    const origGetActionPotential = window.getActionPotential;
+    window.getActionPotential = function (t, sc, forHealthyReference = false) {
+        if (forHealthyReference) {
+            return origGetActionPotential(t, 'normal');
+        }
+        if (sc === 'asystole') return -86;
+        if (sc === 'sinewave') {
+            const absT = continuousCycleCount * 800 + t;
+            return -62 + 34 * Math.sin(((absT % 800) / 800) * Math.PI * 2);
+        }
+        if (sc === 'hypona') {
+            // Reduced extracellular [Na+] -> resting Vm -90mV, slower Phase 0 upstroke (34ms), blunted peak at +5mV!
+            const qrsStart = 218;
+            if (t < qrsStart) return -90;
+            if (t < qrsStart + 34) return -90 + ((t - qrsStart) / 34) * 95; // peaks at +5mV
+            if (t < qrsStart + 52) return 5 - ((t - (qrsStart + 34)) / 18) * 10; // -5mV
+            if (t < 435) return -5 - ((t - (qrsStart + 52)) / (435 - (qrsStart + 52))) * 12;
+            if (t < 565) {
+                const p = (t - 435) / 130;
+                return -17 + (-90 - (-17)) * (0.5 - 0.5 * Math.cos(p * Math.PI));
+            }
+            return -90;
+        }
+        if (sc === 'hyperna') {
+            // Increased extracellular [Na+] -> resting Vm -90mV, ultra-fast Phase 0 upstroke (12ms), high overshoot peak at +30mV!
+            const qrsStart = 218;
+            if (t < qrsStart) return -90;
+            if (t < qrsStart + 12) return -90 + ((t - qrsStart) / 12) * 120; // shoots to +30mV!
+            if (t < qrsStart + 28) return 30 - ((t - (qrsStart + 12)) / 16) * 20; // +10mV
+            if (t < 415) return 10 - ((t - (qrsStart + 28)) / (415 - (qrsStart + 28))) * 14;
+            if (t < 525) {
+                const p = (t - 415) / 110;
+                return -4 + (-90 - (-4)) * (0.5 - 0.5 * Math.cos(p * Math.PI));
+            }
+            return -90;
+        }
+        // Regional STEMI: Lead-dependent cellular Action Potential!
+        if (['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_lat'].includes(sc)) {
+            if (window.isSelectedLeadIschemic(sc, selectedLeadName)) {
+                // Acute Ischemic / Infarcted Myocyte under the affected lead:
+                // 1) Depolarized resting potential (-68 mV due to ATP depletion & extracellular K+ accumulation)
+                // 2) Slow, blunted Phase 0 upstroke peaking at +2 mV
+                // 3) Shortened, depressed Phase 2 plateau (open K_ATP channels -> Current of Injury!)
+                const restV = -68;
+                const qrsStart = 222;
+                if (t < qrsStart) return restV;
+                if (t < qrsStart + 28) return restV + ((t - qrsStart) / 28) * (2 - restV); // peaks at +2mV
+                if (t < 370) {
+                    const p = (t - (qrsStart + 28)) / (370 - (qrsStart + 28));
+                    return 2 - p * 26; // early repolarization slope (-24mV)
+                }
+                if (t < 485) {
+                    const p = (t - 370) / 115;
+                    return -24 + (restV - (-24)) * (0.5 - 0.5 * Math.cos(p * Math.PI));
+                }
+                return restV;
+            } else {
+                // Unaffected / Spared Lead (e.g. V1 in stemi_ant_pure or Lead II in stemi_ant) views healthy myocardium!
+                return origGetActionPotential(t, 'normal');
+            }
+        }
+        return origGetActionPotential(t, sc);
+    };
+
+    const origGetMechanicalTension = window.getMechanicalTension;
+    window.getMechanicalTension = function (t, sc, forLeadSpecific = false) {
+        if (sc === 'asystole' || sc === 'sinewave') return 0;
+        if (forLeadSpecific && ['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_lat'].includes(sc)) {
+            const baseTen = origGetMechanicalTension(t, 'normal');
+            if (window.isSelectedLeadIschemic(sc, selectedLeadName)) {
+                // Infarcted wall under the selected lead is severely hypokinetic/akinetic (~16% tension)
+                return baseTen * 0.16;
+            }
+            return baseTen;
+        }
+        return origGetMechanicalTension(t, sc);
+    };
+
+    // =========================================================================
+    // 8. ENHANCED PANEL 5 (ACTION POTENTIAL & SARCOMERE) WITH LEAD COMPARISON
+    // =========================================================================
+    window.drawAPAndMechanicsPanel = function () {
+        apMechCtx.direction = 'ltr';
+        apMechCtx.textAlign = 'left';
+        const w = apMechCanvas.width / (window.devicePixelRatio || 1);
+        const h = apMechCanvas.height / (window.devicePixelRatio || 1);
+        apMechCtx.clearRect(0, 0, w, h);
+
+        const isAr = (currentLang === 'ar');
+        const leftPad = 46, rightPad = 18, topPad = 24;
+        const plotH = h * 0.54;
+        const plotW = w - leftPad - rightPad;
+        const pxPerMs = plotW / 800;
+        const vToY = (mv) => topPad + ((35 - mv) / 135) * plotH;
+
+        const isRegionalSTEMI = ['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_lat'].includes(currentScenario);
+        const leadIsIschemic = window.isSelectedLeadIschemic(currentScenario, selectedLeadName);
+
+        // Voltage reference grid lines (+30mV, +20mV, 0mV, -68mV if ischemic, -90mV)
+        apMechCtx.strokeStyle = 'rgba(148, 163, 184, 0.16)';
+        apMechCtx.lineWidth = 1;
+        [20, 0, -90].forEach(mv => {
+            const y = vToY(mv);
+            apMechCtx.beginPath(); apMechCtx.moveTo(leftPad, y); apMechCtx.lineTo(w - rightPad, y); apMechCtx.stroke();
+            apMechCtx.fillStyle = '#94a3b8'; apMechCtx.font = 'bold 9.5px monospace';
+            apMechCtx.fillText((mv > 0 ? '+' : '') + mv + 'mV', 4, y + 3);
+        });
+
+        // If a STEMI lead is ischemic, draw the dashed Healthy Reference Curve (-90mV to +20mV) and shade the Current of Injury!
+        if (isRegionalSTEMI && leadIsIschemic) {
+            apMechCtx.save();
+            // Shade difference (Current of Injury ΔVm)
+            apMechCtx.fillStyle = 'rgba(244, 63, 94, 0.16)';
+            apMechCtx.beginPath();
+            for (let t = 0; t <= 800; t += 8) {
+                const x = leftPad + t * pxPerMs;
+                const y = vToY(window.getActionPotential(t, currentScenario, true));
+                if (t === 0) apMechCtx.moveTo(x, y); else apMechCtx.lineTo(x, y);
+            }
+            for (let t = 800; t >= 0; t -= 8) {
+                const x = leftPad + t * pxPerMs;
+                const y = vToY(window.getActionPotential(t, currentScenario, false));
+                apMechCtx.lineTo(x, y);
+            }
+            apMechCtx.closePath();
+            apMechCtx.fill();
+
+            // Dashed healthy curve
+            apMechCtx.setLineDash([4, 4]);
+            apMechCtx.strokeStyle = 'rgba(56, 189, 248, 0.65)';
+            apMechCtx.lineWidth = 1.8;
+            apMechCtx.beginPath();
+            for (let t = 0; t <= 800; t += 4) {
+                const x = leftPad + t * pxPerMs;
+                const y = vToY(window.getActionPotential(t, currentScenario, true));
+                if (t === 0) apMechCtx.moveTo(x, y); else apMechCtx.lineTo(x, y);
+            }
+            apMechCtx.stroke();
+            apMechCtx.restore();
+        }
+
+        // Solid Action Potential Curve for the Selected Lead's Myocardium
+        apMechCtx.beginPath();
+        apMechCtx.strokeStyle = leadIsIschemic ? '#f43f5e' : '#fbbf24';
+        apMechCtx.lineWidth = 2.8;
+        for (let t = 0; t <= 800; t += 4) {
+            const x = leftPad + t * pxPerMs;
+            const y = vToY(window.getActionPotential(t, currentScenario, false));
+            if (t === 0) apMechCtx.moveTo(x, y); else apMechCtx.lineTo(x, y);
+        }
+        apMechCtx.stroke();
+
+        // Mechanical Tension Curve (for Selected Lead's Territory)
+        apMechCtx.beginPath();
+        apMechCtx.strokeStyle = '#10b981';
+        apMechCtx.lineWidth = 2.4;
+        for (let t = 0; t <= 800; t += 4) {
+            const x = leftPad + t * pxPerMs;
+            const ten = window.getMechanicalTension(t, currentScenario, true);
+            const y = topPad + plotH - (ten / 100) * (plotH - 15);
+            if (t === 0) apMechCtx.moveTo(x, y); else apMechCtx.lineTo(x, y);
+        }
+        apMechCtx.stroke();
+
+        // Top Legend inside Canvas
+        apMechCtx.font = 'bold 10px Cairo, Inter';
+        apMechCtx.fillStyle = leadIsIschemic ? '#fda4af' : '#fde047';
+        apMechCtx.fillText(
+            leadIsIschemic
+                ? (isAr ? `● جهد الخلية المصابة تحت (${selectedLeadName})` : `● Ischemic Vm (${selectedLeadName})`)
+                : (isAr ? `● جهد الغشاء (Vm - ${selectedLeadName})` : `● Action Potential Vm (${selectedLeadName})`),
+            leftPad + 4, 14
+        );
+        apMechCtx.fillStyle = '#6ee7b7';
+        apMechCtx.fillText(
+            isAr ? '● قوة انقباض الساركومير' : '● Sarcomere Tension',
+            leftPad + (w > 420 ? 195 : 145), 14
+        );
+
+        // Live scanning dots
+        const curX = leftPad + currentTime * pxPerMs;
+        const curMV = window.getActionPotential(currentTime, currentScenario, false);
+        const curTen = window.getMechanicalTension(currentTime, currentScenario, true);
+
+        apMechCtx.fillStyle = leadIsIschemic ? '#f43f5e' : '#facc15';
+        apMechCtx.beginPath(); apMechCtx.arc(curX, vToY(curMV), 5.5, 0, Math.PI * 2); apMechCtx.fill();
+        apMechCtx.fillStyle = '#34d399';
+        apMechCtx.beginPath(); apMechCtx.arc(curX, topPad + plotH - (curTen / 100) * (plotH - 15), 5.5, 0, Math.PI * 2); apMechCtx.fill();
+
+        // Responsive Sarcomere Actin-Myosin Sliding Filaments
+        const sarcY = h * 0.82;
+        const cx = w * 0.5;
+        const maxHalfSpan = Math.min(135, w * 0.38);
+        const shorten = (curTen / 100) * (maxHalfSpan * 0.28);
+        const zL = cx - (maxHalfSpan - shorten);
+        const zR = cx + (maxHalfSpan - shorten);
+        const actinLen = maxHalfSpan * 0.68;
+        const myosinHalf = maxHalfSpan * 0.52;
+
+        // Z-Discs
+        apMechCtx.strokeStyle = '#38bdf8'; apMechCtx.lineWidth = 4;
+        apMechCtx.beginPath();
+        apMechCtx.moveTo(zL, sarcY - 16); apMechCtx.lineTo(zL, sarcY + 16);
+        apMechCtx.moveTo(zR, sarcY - 16); apMechCtx.lineTo(zR, sarcY + 16);
+        apMechCtx.stroke();
+
+        // Thin Actin Filaments
+        apMechCtx.strokeStyle = '#94a3b8'; apMechCtx.lineWidth = 2.5;
+        [-9, 9].forEach(dy => {
+            apMechCtx.beginPath();
+            apMechCtx.moveTo(zL, sarcY + dy); apMechCtx.lineTo(zL + actinLen, sarcY + dy);
+            apMechCtx.moveTo(zR, sarcY + dy); apMechCtx.lineTo(zR - actinLen, sarcY + dy);
+            apMechCtx.stroke();
+        });
+        // Thick Myosin Filament
+        apMechCtx.strokeStyle = leadIsIschemic ? '#f43f5e' : '#f59e0b'; apMechCtx.lineWidth = 5.5;
+        apMechCtx.beginPath(); apMechCtx.moveTo(cx - myosinHalf, sarcY); apMechCtx.lineTo(cx + myosinHalf, sarcY); apMechCtx.stroke();
+
+        // Update Live Vm & Sarcomere DOM Values + Lead Territory Note
+        document.getElementById('live-vm-val').textContent = `${Math.round(curMV)} mV (${selectedLeadName})`;
+        document.getElementById('live-sarc-val').textContent = curTen > 12
+            ? (isAr
+                ? (leadIsIschemic ? `ضعف انقباض إقفاري (${Math.round(curTen)}%)` : `انقباض نشط (${Math.round(curTen)}%)`)
+                : (leadIsIschemic ? `Ischemic Hypokinesis (${Math.round(curTen)}%)` : `Active Systole (${Math.round(curTen)}%)`))
+            : (isAr ? 'ارتخاء (Diastole)' : 'Relaxed (Diastole)');
+
+        const noteEl = document.getElementById('ap-lead-territory-note');
+        if (noteEl) {
+            if (isRegionalSTEMI && leadIsIschemic) {
+                noteEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-lg bg-rose-950/60 border border-rose-500/50 text-rose-200';
+                noteEl.textContent = isAr
+                    ? `⚠️ القطب المختار (${selectedLeadName}) يواجه الجدار المحتشي مباشرًة: جهد الراحة مرتفع (-68mV بدلاً من -90mV) وقمة الطور 0 منخفضة (+2mV) مع ضعف انقباض الساركومير، والفرق مع الخط المتقطع السليم يولّد "تيار الإصابة" الرافع لقطعة ST!`
+                    : `⚠️ Selected lead (${selectedLeadName}) faces the infarcted wall: resting Vm is depolarized (-68mV vs -90mV), Phase 0 peaks at +2mV with severe hypokinesis, and the voltage gradient against the dashed healthy curve drives ST Elevation!`;
+            } else if (isRegionalSTEMI) {
+                const isRecip = getLeadImpactStatus(currentScenario, selectedLeadName) === 'secondary';
+                noteEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-lg bg-emerald-950/40 border border-emerald-500/40 text-emerald-200';
+                noteEl.textContent = isAr
+                    ? `✅ القطب المختار (${selectedLeadName}) يرصد جداراً عضلياً سليماً غير محتشي${isRecip ? ' (يرى تيار الإصابة مبتعداً عنه فيرسم انخفاض ST مرآتياً)' : ''}: جهد الفعل طبيعي تماماً (-90mV إلى +20mV) وانقباض الأكتين والميوسين 100%!`
+                    : `✅ Selected lead (${selectedLeadName}) views viable non-infarcted myocardium${isRecip ? ' (recording reciprocal ST depression)' : ''}: normal cellular Action Potential (-90mV to +20mV) and 100% Sarcomere contraction!`;
+            } else if (currentScenario === 'hypona') {
+                noteEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-lg bg-sky-950/50 border border-sky-500/40 text-sky-200';
+                noteEl.textContent = isAr
+                    ? `نقص الصوديوم خارج الخلية يقلل اندفاع Na+ في الطور 0 فتصل ذروة جهد الفعل إلى +5mV فقط بدلاً من +20mV مع تباطؤ الصعود.`
+                    : `Low extracellular [Na+] weakens Phase 0 Na+ influx, blunting the Action Potential peak to +5mV (instead of +20mV) and slowing conduction.`;
+            } else if (currentScenario === 'hyperna') {
+                noteEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-lg bg-amber-950/50 border border-amber-500/40 text-amber-200';
+                noteEl.textContent = isAr
+                    ? `فرط الصوديوم خارج الخلية يزيد القوة الدافعة لاندفاع Na+ في الطور 0 فتقفز ذروة جهد الفعل إلى +30mV (Overshoot) بسرعة فائقة!`
+                    : `High extracellular [Na+] amplifies Phase 0 Na+ driving force, shooting the Action Potential peak to +30mV with a steeper upstroke!`;
+            } else {
+                noteEl.className = 'text-[11px] font-bold px-2.5 py-1 rounded-lg bg-slate-950/80 border border-slate-800 text-sky-300';
+                noteEl.textContent = isAr
+                    ? `القطب المختار (${selectedLeadName}): يعرض التزامن اللحظي بين جهد غشاء الخلية البطينية (الأطوار 0–4) وانزلاق خيوط الأكتين والميوسين.`
+                    : `Selected Lead (${selectedLeadName}): displays real-time ventricular transmembrane Action Potential (Phases 0–4) and Sarcomere sliding mechanics.`;
+            }
+        }
+    };
+
+    // =========================================================================
+    // 9. ENHANCED 2D BODY MAP + LIVE LEAD VECTOR PROJECTION COMPASS & THROMBUS SITE
+    // =========================================================================
+    window.getInstantaneousCardiacVector = function (t, sc) {
+        const phaseIdx = getPhaseIndex(t);
+        // Returns { angleDeg, mag, nameAr, nameEn, col }
+        if (sc === 'asystole') {
+            return { angleDeg: 60, mag: 0, nameAr: 'انعدام المتجه الكهربائي (Asystole = 0 mV)', nameEn: 'Zero Electrical Vector (Asystole = 0 mV)', col: '#64748b' };
+        }
+        if (sc === 'vfib') {
+            const ang = Math.round((t * 1.7) % 360 - 180);
+            return { angleDeg: ang, mag: 0.45, nameAr: 'متجهات حلزونية فوضوية متقلبة (VFib)', nameEn: 'Chaotic Shifting Fibrillatory Vectors (VFib)', col: '#f43f5e' };
+        }
+        if (phaseIdx === 0) {
+            if (sc === 'junctional') {
+                return { angleDeg: -75, mag: 0.45, nameAr: 'متجه موجة P الرجعية (يتجه للأعلى -75° بعيداً عن II, III, aVF)', nameEn: 'Retrograde P Vector (Superiorly -75° away from II, III, aVF)', col: '#fb923c' };
+            }
+            if (sc === 'afib' || sc === 'wpw_afib') {
+                return { angleDeg: 45, mag: 0.20, nameAr: 'موجات رجفانية أذينية متعددة (لا يوجد متجه P موحد)', nameEn: 'Multiple chaotic atrial wavelets (no unified P vector)', col: '#fbbf24' };
+            }
+            return { angleDeg: 55, mag: 0.55, nameAr: 'متجه موجة P الأذيني (+55° من SA نحو اليسار والأسفل)', nameEn: 'Atrial P-Wave Vector (+55° from SA node inferior-left)', col: '#fbbf24' };
+        }
+        if (phaseIdx === 1) {
+            return { angleDeg: 55, mag: 0.12, nameAr: 'تأخير عقدة AV (تيار ضئيل جداً = خط سواء PR)', nameEn: 'AV Nodal Delay (negligible surface vector = isoelectric PR)', col: '#fb923c' };
+        }
+        if (phaseIdx === 2) {
+            // QRS sequential vectors: Septal (215-232ms) -> Main Ventricular (232-262ms) -> Basal (262-285ms)
+            if (sc === 'stemi_ant' && t < 242) {
+                return { angleDeg: -120, mag: 0.85, nameAr: 'متجه موجة Q المرضية: موت الجدار الأمامي والحاجز يجعل المتجه يبتعد للخلف (-120°) فيرسم Q عميقة في V1–V4', nameEn: 'Pathological Q Vector: necrotic anteroseptal wall leaves unopposed posterior forces moving AWAY from V1–V4', col: '#f43f5e' };
+            }
+            if (sc === 'stemi_ant_pure' && t < 242) {
+                if (t < 230) {
+                    return { angleDeg: 135, mag: 0.45, nameAr: 'متجه الحاجز السليم (+135° نحو V1–V2): يرسم موجة r طبيعية في V1–V2 لأن الفرع الحاجزي سليم!', nameEn: 'Intact Septal Vector (+135° toward V1–V2): draws normal r wave in V1–V2 because septal perforator is spared!', col: '#34d399' };
+                }
+                return { angleDeg: -130, mag: 0.85, nameAr: 'متجه النافذة الكهربائية للأمامي (يبتعد عن V3–V4 فيرسم Q مرضية في V3–V4 فقط)', nameEn: 'Anterior Electrical Window Vector (moves away from V3–V4, drawing pathological Q in V3–V4)', col: '#f43f5e' };
+            }
+            if (sc === 'lbbb') {
+                return { angleDeg: -15, mag: 0.95, nameAr: 'متجه LBBB: استقطاب من اليمين لليسار ببطء (-15° نحو I, aVL, V5, V6 وبعيداً عن V1)', nameEn: 'LBBB Vector: slow right-to-left activation (-15° toward I, V5, V6 and away from V1)', col: '#38bdf8' };
+            }
+            if (sc === 'rbbb' && t >= 262) {
+                return { angleDeg: 150, mag: 0.88, nameAr: 'متجه RBBB المتأخر (+150° نحو البطين الأيمن V1–V2): يرسم R\' في V1 وموجة S عريضة في V6', nameEn: 'Terminal RBBB Vector (+150° toward RV / V1–V2): draws R\' in V1 and wide S in V6', col: '#38bdf8' };
+            }
+            if (sc === 'lvh') {
+                return { angleDeg: 15, mag: 1.35, nameAr: 'متجه تضخم البطين الأيسر الضخم (+15° نحو V5–V6): يرسم R شاهقة في V5–V6 و S عميقة في V1', nameEn: 'Massive LVH Vector (+15° toward V5–V6): draws tall R in V5–V6 and deep S in V1', col: '#38bdf8' };
+            }
+            if (t < 232) {
+                return { angleDeg: 135, mag: 0.42, nameAr: 'المتجه الأول (الحاجز من اليسار لليمين +135°): يقترب من V1 (موجة r) ويبتعد عن V6/I (موجة q الصغيرة)', nameEn: 'Vector 1 (Left-to-Right Septum +135°): moves TOWARD V1 (small r) and AWAY from I/V6 (septal q)', col: '#38bdf8' };
+            }
+            if (t < 262) {
+                return { angleDeg: 52, mag: 1.0, nameAr: 'المتجه الرئيسي للبطينين (+52° نحو الأسفل واليسار): يقترب من II, V4–V6 (موجة R) ويبتعد عن aVR و V1 (موجة S)', nameEn: 'Main Ventricular Vector (+52° Inferior-Left): moves TOWARD II, V4–V6 (tall R) and AWAY from aVR & V1 (deep S)', col: '#38bdf8' };
+            }
+            return { angleDeg: -115, mag: 0.38, nameAr: 'المتجه الثالث (قاعدة البطينين -115°): يبتعد للأعلى والخلف فيرسم موجة S النهائية', nameEn: 'Vector 3 (Basal Ventricles -115°): points posterosuperiorly, drawing terminal s wave', col: '#38bdf8' };
+        }
+        if (phaseIdx === 3) {
+            if (sc === 'stemi_ant') {
+                return { angleDeg: 95, mag: 0.82, nameAr: 'متجه تيار الإصابة (Injury Vector) يتجه للأمام نحو V1–V4 فيرفع قطعة ST فيها ويخفضها مرآتياً في السفلية!', nameEn: 'Injury Current Vector points anteriorly toward V1–V4 (ST Elevation) and away from inferior leads (Reciprocal Depression)!', col: '#f43f5e' };
+            }
+            if (sc === 'stemi_ant_pure') {
+                return { angleDeg: 60, mag: 0.78, nameAr: 'متجه تيار الإصابة يتجه نحو الجدار الأمامي الحر (V3–V4) مع تعادل الحاجز (V1–V2 مستوية)!', nameEn: 'Injury Current Vector points toward anterior free wall (V3–V4 ST elevation) while sparing V1–V2!', col: '#f43f5e' };
+            }
+            if (sc === 'stemi_inf') {
+                return { angleDeg: 95, mag: 0.82, nameAr: 'متجه تيار الإصابة يتجه للأسفل (+95° نحو II, III, aVF) فيرفع ST فيها ويخفضها مرآتياً في I و aVL!', nameEn: 'Injury Current Vector points inferiorly (+95° toward II, III, aVF -> ST Elevation) and away from I, aVL!', col: '#f43f5e' };
+            }
+            if (sc === 'stemi_lat') {
+                return { angleDeg: -10, mag: 0.82, nameAr: 'متجه تيار الإصابة يتجه لليسار (-10° نحو I, aVL, V5, V6) فيرفع قطعة ST فيها!', nameEn: 'Injury Current Vector points left-laterally (-10° toward I, aVL, V5, V6 -> ST Elevation)!', col: '#f43f5e' };
+            }
+            return { angleDeg: 50, mag: 0.08, nameAr: 'الطور الهضبي 2: جميع خلايا البطين بنفس الجهد (+5mV) فلا يوجد فرق جهد (خط سواء ST)', nameEn: 'Phase 2 Plateau: uniform ventricular depolarization -> zero net dipole (isoelectric ST segment)', col: '#34d399' };
+        }
+        if (phaseIdx === 4) {
+            if (sc === 'lvh' || sc === 'lbbb') {
+                return { angleDeg: 165, mag: 0.55, nameAr: 'متجه إعادة الاستقطاب المعاكس (Discordant T Vector): يتجه عكس QRS فيقلب موجة T', nameEn: 'Discordant Repolarization Vector: points opposite to QRS, inverting the T wave', col: '#c084fc' };
+            }
+            return { angleDeg: 50, mag: 0.62, nameAr: 'متجه موجة T (+50°): يبدأ الاستقطاب من التامور للشغاف فيكون المتجه بنفس اتجاه QRS', nameEn: 'T-Wave Vector (+50°): epicardium-to-endocardium repolarization shares the same polarity as QRS', col: '#c084fc' };
+        }
+        return { angleDeg: 50, mag: 0.05, nameAr: 'الطور 4 (الراحة الانبساطية -90mV): خط السواء الكهربائي (TP)', nameEn: 'Phase 4 Diastolic Rest (-90mV): isoelectric TP baseline', col: '#94a3b8' };
+    };
+
+    window.updateLeadVectorInspectorBanner = function () {
+        const isAr = (currentLang === 'ar');
+        const leadObj = LEADS_12.find(l => l.id === selectedLeadName) || LEADS_12[1];
+        const vec = window.getInstantaneousCardiacVector(currentTime, currentScenario);
+        const diffRad = (leadObj.angle - vec.angleDeg) * Math.PI / 180;
+        const cosVal = vec.mag > 0.12 ? Math.cos(diffRad) : 0;
+
+        const leadBadge = document.getElementById('vec-insp-lead-badge');
+        const projBadge = document.getElementById('vec-insp-proj-badge');
+        const clotBadge = document.getElementById('vec-insp-clot-badge');
+        const expEl = document.getElementById('vec-insp-explanation');
+        if (!leadBadge || !projBadge || !expEl) return;
+
+        leadBadge.textContent = isAr
+            ? `الاتجاه المختار: ${leadObj.id} (زاوية القطب ${leadObj.angle >= 0 ? '+' : ''}${leadObj.angle}°)`
+            : `Selected Lead: ${leadObj.id} (Axis ${leadObj.angle >= 0 ? '+' : ''}${leadObj.angle}°)`;
+
+        const dirTxtAr = cosVal > 0.22 ? 'موجة إيجابية للأعلى ↑ (المتجه يقترب من القطب)'
+                       : cosVal < -0.22 ? 'موجة سلبية للأسفل ↓ (المتجه يبتعد عن القطب)'
+                       : 'خط سواء / ثنائي الطور ⟷ (المتجه عمودي أو متعادل)';
+        const dirTxtEn = cosVal > 0.22 ? 'Positive Upward Wave ↑ (Vector approaches lead)'
+                       : cosVal < -0.22 ? 'Negative Downward Wave ↓ (Vector recedes from lead)'
+                       : 'Isoelectric / Biphasic ⟷ (Perpendicular or zero dipole)';
+        projBadge.textContent = isAr
+            ? `إسقاط المتجه على ${leadObj.id}: cos(Δθ) = ${cosVal >= 0 ? '+' : ''}${cosVal.toFixed(2)} ➔ ${dirTxtAr}`
+            : `Projection on ${leadObj.id}: cos(Δθ) = ${cosVal >= 0 ? '+' : ''}${cosVal.toFixed(2)} ➔ ${dirTxtEn}`;
+
+        // Clot badge for STEMI scenarios
+        const clotInfo = {
+            stemi_ant:      { ar: '🩸 موقع الخثرة: بداية شريان LAD قبل الفرع الحاجزي (يصيب V1–V4)', en: '🩸 Thrombus Site: Proximal LAD before Septal S1 (infarcts V1–V4)' },
+            stemi_ant_pure: { ar: '🩸 موقع الخثرة: منتصف شريان LAD بعد الفرع الحاجزي (ينجو الحاجز V1–V2 ويصاب V3–V4!)', en: '🩸 Thrombus Site: Mid-LAD distal to Septal S1 (V1–V2 spared, V3–V4 infarcted!)' },
+            stemi_inf:      { ar: '🩸 موقع الخثرة: الشريان التاجي الأيمن الأوسط Mid-RCA (يصيب II, III, aVF)', en: '🩸 Thrombus Site: Mid-RCA (infarcts Inferior wall II, III, aVF)' },
+            stemi_lat:      { ar: '🩸 موقع الخثرة: الشريان المنعطف الأيسر LCx / OM1 (يصيب I, aVL, V5, V6)', en: '🩸 Thrombus Site: Proximal LCx / OM1 (infarcts Lateral wall I, aVL, V5, V6)' }
+        }[currentScenario];
+        if (clotBadge) {
+            if (clotInfo) {
+                clotBadge.classList.remove('hidden');
+                clotBadge.textContent = isAr ? clotInfo.ar : clotInfo.en;
+            } else {
+                clotBadge.classList.add('hidden');
+            }
+        }
+
+        // Why this lead looks different from the others
+        let whyLeadAr = '';
+        let whyLeadEn = '';
+        if (leadObj.id === 'aVR') {
+            whyLeadAr = 'لماذا يختلف aVR؟ يقع قطب aVR في الكتف الأيمن العلوي (-150°)، أي عكس اتجاه كهرباء القلب تماماً (+52°)، لذلك يرى جميع متجهات P و QRS و T تبتعد عنه فيرسمها مقلوبة (سالبة)!';
+            whyLeadEn = 'Why does aVR look inverted? Positioned at the right upper shoulder (-150°), aVR looks directly opposite the heart\'s +52° axis—so P, QRS, and T vectors all travel AWAY from aVR!';
+        } else if (leadObj.id === 'V1' || leadObj.id === 'V2') {
+            whyLeadAr = `لماذا يظهر ${leadObj.id} بنمط (rS)؟ لأنه يقع فوق الحاجز والبطين الأيمن أمامياً؛ فيقترب منه متجه الحاجز الأول (يرسم r صغيرة) ثم يبتعد عنه متجه البطين الأيسر الضخم نحو اليسار والخلف (يرسم S عميقة).`;
+            whyLeadEn = `Why does ${leadObj.id} show an rS complex? Placed anteriorly over the septum/RV, it sees the initial left-to-right septal vector approaching (small r) and the massive LV vector receding posteriorly (deep S).`;
+        } else if (leadObj.id === 'V5' || leadObj.id === 'V6' || leadObj.id === 'I' || leadObj.id === 'aVL') {
+            whyLeadAr = `لماذا يظهر ${leadObj.id} بنمط (qRs)؟ لأنه ينظر من الجانب الأيسر للبطين الأيسر؛ يرى متجه الحاجز الأول يبتعد لليمين (يرسم q صغيرة) ثم يرى كتلة البطين الأيسر تقترب منه مباشرة (يرسم R عالية).`;
+            whyLeadEn = `Why does ${leadObj.id} show a qRs complex? Looking from the left lateral aspect, it sees initial septal activation move away rightward (small q) and main LV activation approach directly (tall R).`;
+        } else {
+            whyLeadAr = `لماذا يتميز ${leadObj.id}؟ ينظر من الزاوية (${leadObj.angle >= 0 ? '+' : ''}${leadObj.angle}°) بموازاة المحور الطبيعي للقلب، فيسجل أعلى إسقاط إيجابي لموجة P ومركب QRS.`;
+            whyLeadEn = `Why does ${leadObj.id} stand out? Aligned at ${leadObj.angle >= 0 ? '+' : ''}${leadObj.angle}° parallel to the heart's anatomical axis, it captures the strongest positive projection of P and QRS.`;
+        }
+        expEl.textContent = `${isAr ? vec.nameAr : vec.nameEn} • ${isAr ? whyLeadAr : whyLeadEn}`;
+    };
+
+    // Replace drawBodyMapPanel so it cleanly renders:
+    // Top half: Torso + Coronary Arteries + Clot Marker + Electrodes (with non-overlapping labels!)
+    // Bottom half: Interactive Hexaxial & Lead Vector Projection Compass for `selectedLeadName`!
+    window.drawBodyMapPanel = function () {
+        if (!show2DBodyMap) return;
+        bodyMapCtx.direction = 'ltr';
+        bodyMapCtx.textAlign = 'left';
+        const w = bodyMapCanvas.width / (window.devicePixelRatio || 1);
+        const h = bodyMapCanvas.height / (window.devicePixelRatio || 1);
+        bodyMapCtx.clearRect(0, 0, w, h);
+
+        const isAr = (currentLang === 'ar');
+        const cx = w * 0.5;
+        const torsoY = h * 0.30;
+        const torsoW = Math.min(148, w * 0.46);
+        const torsoH = Math.min(130, h * 0.36);
+
+        // 1. Torso Outline
+        bodyMapCtx.strokeStyle = '#334155';
+        bodyMapCtx.fillStyle = 'rgba(15, 23, 42, 0.72)';
+        bodyMapCtx.lineWidth = 1.8;
+        bodyMapCtx.beginPath();
+        bodyMapCtx.roundRect(cx - torsoW / 2, torsoY - torsoH / 2, torsoW, torsoH, 22);
+        bodyMapCtx.fill(); bodyMapCtx.stroke();
+
+        // 2. Heart Silhouette & Coronary Tree + Thrombus Marker inside Torso
+        bodyMapCtx.fillStyle = 'rgba(244, 63, 94, 0.22)';
+        bodyMapCtx.strokeStyle = '#f43f5e';
+        bodyMapCtx.lineWidth = 1.5;
+        bodyMapCtx.beginPath();
+        bodyMapCtx.ellipse(cx + 8, torsoY - 4, 28, 36, -0.28, 0, Math.PI * 2);
+        bodyMapCtx.fill(); bodyMapCtx.stroke();
+
+        // Mini 2D Coronary Tree (LAD, LCx, RCA) on Heart Silhouette
+        // RCA (amber)
+        bodyMapCtx.strokeStyle = '#fbbf24'; bodyMapCtx.lineWidth = 2;
+        bodyMapCtx.beginPath();
+        bodyMapCtx.moveTo(cx + 2, torsoY - 24);
+        bodyMapCtx.quadraticCurveTo(cx - 18, torsoY - 5, cx - 4, torsoY + 24);
+        bodyMapCtx.stroke();
+        // LAD + Septal S1 (rose)
+        bodyMapCtx.strokeStyle = '#fb7185'; bodyMapCtx.lineWidth = 2.2;
+        bodyMapCtx.beginPath();
+        bodyMapCtx.moveTo(cx + 6, torsoY - 24);
+        bodyMapCtx.lineTo(cx + 12, torsoY + 24);
+        bodyMapCtx.stroke();
+        // Septal branch S1
+        bodyMapCtx.beginPath();
+        bodyMapCtx.moveTo(cx + 8, torsoY - 10);
+        bodyMapCtx.lineTo(cx - 2, torsoY - 2);
+        bodyMapCtx.stroke();
+        // LCx (sky)
+        bodyMapCtx.strokeStyle = '#38bdf8'; bodyMapCtx.lineWidth = 2;
+        bodyMapCtx.beginPath();
+        bodyMapCtx.moveTo(cx + 6, torsoY - 24);
+        bodyMapCtx.quadraticCurveTo(cx + 30, torsoY - 12, cx + 28, torsoY + 12);
+        bodyMapCtx.stroke();
+
+        // 2D Thrombus / Clot Point on the Coronary Tree in STEMI!
+        const clot2D = {
+            stemi_ant:      { x: cx + 7,  y: torsoY - 17, lbl: 'Prox LAD Clot' },
+            stemi_ant_pure: { x: cx + 10, y: torsoY + 3,  lbl: 'Mid-LAD Clot' },
+            stemi_inf:      { x: cx - 12, y: torsoY + 2,  lbl: 'Mid-RCA Clot' },
+            stemi_lat:      { x: cx + 24, y: torsoY - 8,  lbl: 'LCx Clot' }
+        }[currentScenario];
+        if (clot2D) {
+            bodyMapCtx.fillStyle = '#dc2626';
+            bodyMapCtx.beginPath(); bodyMapCtx.arc(clot2D.x, clot2D.y, 5.5, 0, Math.PI * 2); bodyMapCtx.fill();
+            bodyMapCtx.strokeStyle = '#fef08a'; bodyMapCtx.lineWidth = 2; bodyMapCtx.stroke();
+        }
+
+        // 3. Limb Lead Nodes (anchored cleanly next to torso corners so labels NEVER clip or float away)
+        const limbOffset = torsoW / 2 + 12;
+        const limbNodes = [
+            { id: 'RA', x: cx - limbOffset, y: torsoY - torsoH * 0.38, col: '#f43f5e', align: 'right', dx: -8 },
+            { id: 'LA', x: cx + limbOffset, y: torsoY - torsoH * 0.38, col: '#facc15', align: 'left',  dx: 8 },
+            { id: 'RL', x: cx - limbOffset, y: torsoY + torsoH * 0.38, col: '#22c55e', align: 'right', dx: -8 },
+            { id: 'LL', x: cx + limbOffset, y: torsoY + torsoH * 0.38, col: '#38bdf8', align: 'left',  dx: 8 }
+        ];
+        limbNodes.forEach(n => {
+            bodyMapCtx.fillStyle = n.col;
+            bodyMapCtx.beginPath(); bodyMapCtx.arc(n.x, n.y, 5.5, 0, Math.PI * 2); bodyMapCtx.fill();
+            bodyMapCtx.fillStyle = '#e2e8f0'; bodyMapCtx.font = 'bold 10px monospace';
+            bodyMapCtx.textAlign = n.align;
+            bodyMapCtx.fillText(n.id, n.x + n.dx, n.y + 4);
+        });
+        bodyMapCtx.textAlign = 'left';
+
+        // 4. Chest Leads V1–V6
+        const vLeads = [
+            { id: 'V1', x: cx - 14, y: torsoY - 12, col: '#fb7185' },
+            { id: 'V2', x: cx + 10, y: torsoY - 12, col: '#fb7185' },
+            { id: 'V3', x: cx + 18, y: torsoY - 1,  col: '#fb7185' },
+            { id: 'V4', x: cx + 27, y: torsoY + 10, col: '#fb7185' },
+            { id: 'V5', x: cx + 42, y: torsoY + 8,  col: '#38bdf8' },
+            { id: 'V6', x: cx + 56, y: torsoY + 4,  col: '#38bdf8' }
+        ];
+        vLeads.forEach(v => {
+            const isSel = (selectedLeadName === v.id);
+            bodyMapCtx.fillStyle = v.col;
+            bodyMapCtx.beginPath(); bodyMapCtx.arc(v.x, v.y, isSel ? 7 : 4.5, 0, Math.PI * 2); bodyMapCtx.fill();
+            if (isSel) { bodyMapCtx.strokeStyle = '#fff'; bodyMapCtx.lineWidth = 2; bodyMapCtx.stroke(); }
+            bodyMapCtx.fillStyle = '#fff'; bodyMapCtx.font = 'bold 8.5px monospace';
+            bodyMapCtx.fillText(v.id, v.x - 6, v.y + 13);
+        });
+
+        // 5. LIVE VECTOR PROJECTION COMPASS (Bottom Half of Panel)
+        const compY = h * 0.74;
+        const compR = Math.min(54, h * 0.17, w * 0.22);
+        const leadObj = LEADS_12.find(l => l.id === selectedLeadName) || LEADS_12[1];
+        const vec = window.getInstantaneousCardiacVector(currentTime, currentScenario);
+
+        // Compass Circle
+        bodyMapCtx.save();
+        bodyMapCtx.strokeStyle = 'rgba(148, 163, 184, 0.28)';
+        bodyMapCtx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+        bodyMapCtx.lineWidth = 1.5;
+        bodyMapCtx.beginPath(); bodyMapCtx.arc(cx, compY, compR, 0, Math.PI * 2); bodyMapCtx.fill(); bodyMapCtx.stroke();
+
+        // Selected Lead Axis Line
+        const leadRad = (leadObj.angle * Math.PI) / 180;
+        const lx = cx + Math.cos(leadRad) * compR;
+        const ly = compY + Math.sin(leadRad) * compR;
+        bodyMapCtx.strokeStyle = 'rgba(56, 189, 248, 0.55)';
+        bodyMapCtx.setLineDash([3, 3]);
+        bodyMapCtx.beginPath();
+        bodyMapCtx.moveTo(cx - Math.cos(leadRad) * compR, compY - Math.sin(leadRad) * compR);
+        bodyMapCtx.lineTo(lx, ly);
+        bodyMapCtx.stroke();
+        bodyMapCtx.setLineDash([]);
+
+        // Positive Electrode Pole Marker on Compass
+        bodyMapCtx.fillStyle = '#38bdf8';
+        bodyMapCtx.beginPath(); bodyMapCtx.arc(lx, ly, 5, 0, Math.PI * 2); bodyMapCtx.fill();
+        bodyMapCtx.font = 'bold 10px monospace';
+        bodyMapCtx.textAlign = 'center';
+        bodyMapCtx.fillText(`+${leadObj.id} (${leadObj.angle}°)`, cx + Math.cos(leadRad) * (compR + 18), compY + Math.sin(leadRad) * (compR + 14));
+
+        // Instantaneous Cardiac Vector Arrow (Gold) & Projected Lead Component (Green/Rose)
+        if (vec.mag > 0.06) {
+            const vRad = (vec.angleDeg * Math.PI) / 180;
+            const vLen = Math.min(compR * 0.92, vec.mag * compR * 0.85);
+            const vx = cx + Math.cos(vRad) * vLen;
+            const vy = compY + Math.sin(vRad) * vLen;
+
+            // Projected component along Selected Lead Axis
+            const projScalar = Math.cos(vRad - leadRad) * vLen;
+            const px = cx + Math.cos(leadRad) * projScalar;
+            const py = compY + Math.sin(leadRad) * projScalar;
+
+            bodyMapCtx.strokeStyle = projScalar >= 0 ? '#10b981' : '#f43f5e';
+            bodyMapCtx.lineWidth = 3.5;
+            bodyMapCtx.beginPath(); bodyMapCtx.moveTo(cx, compY); bodyMapCtx.lineTo(px, py); bodyMapCtx.stroke();
+
+            // Main Cardiac Vector Arrow
+            bodyMapCtx.strokeStyle = '#facc15';
+            bodyMapCtx.fillStyle = '#facc15';
+            bodyMapCtx.lineWidth = 2.5;
+            bodyMapCtx.beginPath(); bodyMapCtx.moveTo(cx, compY); bodyMapCtx.lineTo(vx, vy); bodyMapCtx.stroke();
+            bodyMapCtx.beginPath(); bodyMapCtx.arc(vx, vy, 4, 0, Math.PI * 2); bodyMapCtx.fill();
+        }
+
+        bodyMapCtx.fillStyle = '#bae6fd';
+        bodyMapCtx.font = 'bold 10.5px Cairo, Inter';
+        bodyMapCtx.textAlign = 'center';
+        bodyMapCtx.fillText(
+            isAr ? `بوصلة المتجهات اللحظية للقطب (${leadObj.id})` : `Live Vector Projection Compass (${leadObj.id})`,
+            cx, compY - compR - 16
+        );
+        bodyMapCtx.restore();
+    };
+
+    // =========================================================================
+    // 10. CONTINUOUS MULTI-BEAT STRIP IN MAIN ECG & 12-LEAD GRID
+    // =========================================================================
+    const MULTI_BEAT_SCENARIOS = [
+        'sinus_brady', 'sinus_tachy', 'sinewave', 'tamponade',
+        'avb2_1', 'avb2_2', 'avb_highgrade', 'avb3', 'junctional', 'ivr',
+        'afib', 'aflutter', 'mat', 'svt', 'wpw_afib', 'pvc_ront', 'vt', 'tdp', 'vfib', 'asystole'
+    ];
+
+    // Upgrade drawECGPanel so stripMode shows 3200ms (4 to 10+ continuous repeating beats!)
+    // and calipers/labels never collide with top overlay badges
+    const origDrawECGPanel = window.drawECGPanel;
+    window.drawECGPanel = function () {
+        if (!stripMode) {
+            origDrawECGPanel();
+            window.updateLeadVectorInspectorBanner();
+            return;
+        }
+        ecgCtx.direction = 'ltr';
+        ecgCtx.textAlign = 'left';
+        const w = ecgCanvas.width / (window.devicePixelRatio || 1);
+        const h = ecgCanvas.height / (window.devicePixelRatio || 1);
+        ecgCtx.clearRect(0, 0, w, h);
+
+        const leftPad = 66;
+        const rightPad = 14;
+        const plotW = w - leftPad - rightPad;
+
+        // 3200 ms continuous multi-beat strip (4 full 800ms cycles = 4 to 12+ beats!)
+        const totalMsSpan = 3200;
+        const pxPerMs = plotW / totalMsSpan;
+        const scanTime = ((continuousCycleCount % 4) * 800) + currentTime;
+
+        const smallSqX = 40 * pxPerMs;
+        const largeSqX = 200 * pxPerMs;
+        const baselineY = h * 0.64;
+        const mVHeight = h * 0.21;
+        const smallSqY = mVHeight / 10;
+        const largeSqY = smallSqY * 5;
+
+        // 1. Small Grid
+        ecgCtx.lineWidth = 0.55;
+        ecgCtx.strokeStyle = 'rgba(244, 63, 94, 0.18)';
+        for (let x = leftPad; x <= w - rightPad + 1; x += smallSqX) {
+            ecgCtx.beginPath(); ecgCtx.moveTo(x, 6); ecgCtx.lineTo(x, h - 20); ecgCtx.stroke();
+        }
+        for (let y = baselineY; y >= 6; y -= smallSqY) {
+            ecgCtx.beginPath(); ecgCtx.moveTo(leftPad, y); ecgCtx.lineTo(w - rightPad, y); ecgCtx.stroke();
+        }
+        for (let y = baselineY; y <= h - 20; y += smallSqY) {
+            ecgCtx.beginPath(); ecgCtx.moveTo(leftPad, y); ecgCtx.lineTo(w - rightPad, y); ecgCtx.stroke();
+        }
+
+        // 2. Large 5x5 Squares
+        ecgCtx.lineWidth = 1.25;
+        ecgCtx.strokeStyle = 'rgba(244, 63, 94, 0.45)';
+        let boxIdx = 0;
+        for (let x = leftPad; x <= w - rightPad + 2; x += largeSqX) {
+            ecgCtx.beginPath(); ecgCtx.moveTo(x, 6); ecgCtx.lineTo(x, h - 20); ecgCtx.stroke();
+            if (boxIdx % 2 === 0) {
+                ecgCtx.fillStyle = '#fda4af';
+                ecgCtx.font = 'bold 9px monospace';
+                ecgCtx.fillText((boxIdx * 0.20).toFixed(1) + 's', x - 10, h - 6);
+            }
+            boxIdx++;
+        }
+        for (let y = baselineY - largeSqY * 5; y <= h - 20; y += largeSqY) {
+            if (y < 6) continue;
+            ecgCtx.beginPath(); ecgCtx.moveTo(leftPad, y); ecgCtx.lineTo(w - rightPad, y); ecgCtx.stroke();
+        }
+
+        // 3. 1mV Calibration Pulse & Voltage Axis
+        ecgCtx.strokeStyle = '#fb7185';
+        ecgCtx.lineWidth = 1.8;
+        ecgCtx.beginPath();
+        ecgCtx.moveTo(6, baselineY); ecgCtx.lineTo(12, baselineY);
+        ecgCtx.lineTo(12, baselineY - mVHeight); ecgCtx.lineTo(26, baselineY - mVHeight);
+        ecgCtx.lineTo(26, baselineY); ecgCtx.lineTo(32, baselineY);
+        ecgCtx.stroke();
+
+        ecgCtx.save();
+        const voltageAxisX = leftPad - 5;
+        ecgCtx.strokeStyle = 'rgba(254, 205, 211, 0.82)';
+        ecgCtx.lineWidth = 1.1;
+        ecgCtx.beginPath();
+        ecgCtx.moveTo(voltageAxisX, baselineY - mVHeight * 1.08);
+        ecgCtx.lineTo(voltageAxisX, baselineY + mVHeight * 1.08);
+        ecgCtx.stroke();
+        ecgCtx.fillStyle = '#fecdd3';
+        ecgCtx.font = '10px monospace';
+        ecgCtx.textAlign = 'right';
+        ecgCtx.textBaseline = 'middle';
+        [1, 0.5, 0, -0.5, -1].forEach(mv => {
+            const tickY = baselineY - mv * mVHeight;
+            ecgCtx.beginPath();
+            ecgCtx.moveTo(voltageAxisX - 4, tickY);
+            ecgCtx.lineTo(voltageAxisX, tickY);
+            ecgCtx.stroke();
+            ecgCtx.fillText((mv > 0 ? '+' : '') + mv.toFixed(1), voltageAxisX - 7, tickY);
+        });
+        ecgCtx.restore();
+
+        // 4. Continuous Multi-Beat Waveform Trace
+        ecgCtx.save();
+        ecgCtx.beginPath();
+        ecgCtx.strokeStyle = 'rgba(56, 189, 248, 0.30)';
+        ecgCtx.lineWidth = 2.0;
+        for (let t = 0; t <= totalMsSpan; t += 3) {
+            const x = leftPad + t * pxPerMs;
+            const v = window.computeLeadVoltage(t, currentScenario, selectedLeadName);
+            const y = baselineY - v * mVHeight;
+            if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+        }
+        ecgCtx.stroke();
+
+        ecgCtx.beginPath();
+        ecgCtx.strokeStyle = '#38bdf8';
+        ecgCtx.lineWidth = 2.8;
+        ecgCtx.shadowColor = '#38bdf8';
+        ecgCtx.shadowBlur = 8;
+        for (let t = 0; t <= scanTime; t += 3) {
+            const x = leftPad + t * pxPerMs;
+            const v = window.computeLeadVoltage(t, currentScenario, selectedLeadName);
+            const y = baselineY - v * mVHeight;
+            if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+        }
+        ecgCtx.stroke();
+        ecgCtx.restore();
+
+        // 5. Scanning Cursor
+        const curX = leftPad + scanTime * pxPerMs;
+        const curV = window.computeLeadVoltage(scanTime, currentScenario, selectedLeadName);
+        const curY = baselineY - curV * mVHeight;
+        ecgCtx.strokeStyle = 'rgba(250, 204, 21, 0.45)';
+        ecgCtx.setLineDash([4, 4]);
+        ecgCtx.beginPath(); ecgCtx.moveTo(curX, 6); ecgCtx.lineTo(curX, h - 20); ecgCtx.stroke();
+        ecgCtx.setLineDash([]);
+        ecgCtx.fillStyle = '#facc15';
+        ecgCtx.beginPath(); ecgCtx.arc(curX, curY, 5.5, 0, Math.PI * 2); ecgCtx.fill();
+        ecgCtx.strokeStyle = '#fff'; ecgCtx.lineWidth = 2; ecgCtx.stroke();
+
+        window.updateLeadVectorInspectorBanner();
+    };
+
+    // Upgrade draw12LeadPanel so multi-beat scenarios display 2400ms (3+ continuous beats) in every lead cell!
+    window.draw12LeadPanel = function () {
+        twelveCtx.direction = 'ltr';
+        twelveCtx.textAlign = 'left';
+        const w = twelveCanvas.width / (window.devicePixelRatio || 1);
+        const h = twelveCanvas.height / (window.devicePixelRatio || 1);
+        twelveCtx.clearRect(0, 0, w, h);
+
+        const cols = w < 520 ? 2 : (w < 850 ? 3 : 4);
+        const isMulti = MULTI_BEAT_SCENARIOS.includes(currentScenario) || stripMode;
+        const leadStripSpan = isMulti ? 2400 : 800;
+        const leadCursorTime = isMulti ? ((continuousCycleCount % 3) * 800 + currentTime) : currentTime;
+        const rows = Math.ceil(LEADS_12.length / cols);
+        const cellW = w / cols;
+        const cellH = h / rows;
+
+        twelveCtx.strokeStyle = 'rgba(244, 63, 94, 0.13)';
+        twelveCtx.lineWidth = 0.5;
+        for (let x = 0; x <= w; x += 6) { twelveCtx.beginPath(); twelveCtx.moveTo(x, 0); twelveCtx.lineTo(x, h); twelveCtx.stroke(); }
+        for (let y = 0; y <= h; y += 6) { twelveCtx.beginPath(); twelveCtx.moveTo(0, y); twelveCtx.lineTo(w, y); twelveCtx.stroke(); }
+
+        twelveCtx.strokeStyle = 'rgba(244, 63, 94, 0.30)';
+        twelveCtx.lineWidth = 1.0;
+        for (let x = 0; x <= w; x += 30) { twelveCtx.beginPath(); twelveCtx.moveTo(x, 0); twelveCtx.lineTo(x, h); twelveCtx.stroke(); }
+        for (let y = 0; y <= h; y += 30) { twelveCtx.beginPath(); twelveCtx.moveTo(0, y); twelveCtx.lineTo(w, y); twelveCtx.stroke(); }
+
+        LEADS_12.forEach((lead, idx) => {
+            const c = idx % cols;
+            const r = Math.floor(idx / cols);
+            const x0 = c * cellW;
+            const y0 = r * cellH;
+            const baseY = y0 + cellH * 0.64;
+            const scaleMV = cellH * (currentScenario === 'lvh' ? 0.19 : 0.24);
+
+            const leadStatus = getLeadImpactStatus(currentScenario, lead.id);
+            const baseCellColor = leadStatus === 'primary' ? '#f43f5e' : leadStatus === 'secondary' ? '#f59e0b' : 'rgba(148, 163, 184, 0.22)';
+            twelveCtx.strokeStyle = (selectedLeadName === lead.id) ? '#38bdf8' : baseCellColor;
+            twelveCtx.lineWidth = (selectedLeadName === lead.id) ? 2.4 : (leadStatus === 'none' ? 1 : 1.6);
+            twelveCtx.strokeRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+
+            let badgeCol = '#38bdf8';
+            if (lead.group === 'ant') badgeCol = '#fb7185';
+            else if (lead.group === 'inf') badgeCol = '#fbbf24';
+            else if (lead.group === 'avr') badgeCol = '#94a3b8';
+            if (leadStatus === 'primary') badgeCol = '#f43f5e';
+            else if (leadStatus === 'secondary') badgeCol = '#f59e0b';
+
+            twelveCtx.fillStyle = badgeCol;
+            twelveCtx.font = 'bold 11.5px monospace';
+            twelveCtx.fillText(lead.id, x0 + 8, y0 + 16);
+
+            twelveCtx.beginPath();
+            twelveCtx.strokeStyle = leadStatus === 'primary' ? '#f43f5e' : (leadStatus === 'secondary' ? '#f59e0b' : '#38bdf8');
+            twelveCtx.lineWidth = leadStatus === 'primary' ? 2.0 : 1.75;
+
+            const padX = 8;
+            const plotCW = cellW - padX * 2;
+            const stepMs = isMulti ? 8 : 5;
+            for (let ms = 0; ms <= leadStripSpan; ms += stepMs) {
+                const px = x0 + padX + (ms / leadStripSpan) * plotCW;
+                const v = window.computeLeadVoltage(ms, currentScenario, lead.id);
+                const py = Math.max(y0 + 6, Math.min(y0 + cellH - 6, baseY - v * scaleMV));
+                if (ms === 0) twelveCtx.moveTo(px, py); else twelveCtx.lineTo(px, py);
+            }
+            twelveCtx.stroke();
+
+            const curPx = x0 + padX + (leadCursorTime / leadStripSpan) * plotCW;
+            const curV = window.computeLeadVoltage(leadCursorTime, currentScenario, lead.id);
+            const curPy = Math.max(y0 + 6, Math.min(y0 + cellH - 6, baseY - curV * scaleMV));
+            twelveCtx.fillStyle = '#facc15';
+            twelveCtx.beginPath(); twelveCtx.arc(curPx, curPy, 3.5, 0, Math.PI * 2); twelveCtx.fill();
+        });
+    };
+
+    // =========================================================================
+    // 11. 3D HEART CORONARY THROMBUS, ISCHEMIA COLORING & LEAD VECTOR PROJECTION
+    // =========================================================================
+    let leadProjArrow3D = null;
+    const prevRenderThreeJSHeart = window.renderThreeJSHeart;
+    let coronariesRebuilt = false;
+
+    window.renderThreeJSHeart = function () {
+        if (!coronariesRebuilt && typeof THREE !== 'undefined' && heartGroup && coronaryGroup) {
+            rebuildAnatomicalCoronariesAndClot();
+            coronariesRebuilt = true;
+        }
+        prevRenderThreeJSHeart();
+
+        if (typeof THREE === 'undefined' || !scene || !heartGroup) return;
+
+        const sc = currentScenario;
+        const isSTEMI = ['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_lat'].includes(sc);
+
+        // Separate Septal vs Anterior Free-Wall Infarct Patches
+        if (meshMI_Septal && meshMI_Ant) {
+            meshMI_Septal.visible = (sc === 'stemi_ant'); // Proximal LAD affects Septum + Anterior
+            meshMI_Ant.visible = (sc === 'stemi_ant' || sc === 'stemi_ant_pure'); // Both affect Anterior LV wall
+        }
+
+        // Auto-show Coronary Arteries + 3D Thrombus/Clot Marker in STEMI scenarios
+        if (coronaryGroup && isSTEMI) {
+            coronaryGroup.visible = true;
+        }
+        if (thrombusGroup3D && clotSphere3D && clotRing3D) {
+            thrombusGroup3D.visible = isSTEMI;
+            const pulse = 1 + 0.22 * Math.sin(performance.now() * 0.008);
+            clotRing3D.scale.set(pulse, pulse, pulse);
+
+            // Reset all coronary segments to healthy oxygenated color first
+            Object.values(coronarySegments3D).forEach(seg => {
+                if (!seg || !seg.mat) return;
+                seg.mat.color.setHex(seg.baseHex);
+                seg.mat.emissive.setHex(seg.emHex);
+                seg.mat.emissiveIntensity = 0.45;
+            });
+
+            // Helper to darken ischemic downstream segments beyond the thrombus
+            const darkenSeg = (seg) => {
+                if (!seg || !seg.mat) return;
+                seg.mat.color.setHex(0x1e293b);
+                seg.mat.emissive.setHex(0x450a0a);
+                seg.mat.emissiveIntensity = 0.25;
+            };
+
+            if (sc === 'stemi_ant') {
+                // Proximal LAD Clot (BEFORE Septal Perforator S1 & Diagonal D1)
+                thrombusGroup3D.position.set(0.24, 0.16, 1.18);
+                darkenSeg(coronarySegments3D.septal_s1);
+                darkenSeg(coronarySegments3D.septal_s2);
+                darkenSeg(coronarySegments3D.lad_mid_dist);
+                darkenSeg(coronarySegments3D.diag_d1);
+            } else if (sc === 'stemi_ant_pure') {
+                // Mid-LAD Clot (AFTER Septal Perforator S1 -> S1 stays bright oxygenated pink, distal LAD darkens!)
+                thrombusGroup3D.position.set(0.20, -0.45, 1.26);
+                darkenSeg(coronarySegments3D.lad_mid_dist);
+                darkenSeg(coronarySegments3D.diag_d1);
+            } else if (sc === 'stemi_inf') {
+                // Mid-RCA Clot
+                thrombusGroup3D.position.set(-1.32, -0.35, 0.72);
+                darkenSeg(coronarySegments3D.rca_dist_pda);
+            } else if (sc === 'stemi_lat') {
+                // Proximal LCx / OM1 Clot
+                thrombusGroup3D.position.set(1.38, 0.12, 0.54);
+                darkenSeg(coronarySegments3D.lcx_dist_om);
+                darkenSeg(coronarySegments3D.lcx_post);
+            }
+        }
+
+        // Lead-Compatible 3D Projected Vector Arrow along Selected Lead Axis
+        if (!leadProjArrow3D && heartGroup) {
+            leadProjArrow3D = new THREE.ArrowHelper(
+                new THREE.Vector3(1, 0, 0),
+                new THREE.Vector3(0, -0.3, 0.2),
+                1.8,
+                0x10b981,
+                0.45,
+                0.30
+            );
+            heartGroup.add(leadProjArrow3D);
+        }
+        if (leadProjArrow3D) {
+            const leadObj = LEADS_12.find(l => l.id === selectedLeadName) || LEADS_12[1];
+            const vecInfo = window.getInstantaneousCardiacVector(currentTime, sc);
+            const showVec = layers3D.vectors && vecInfo.mag > 0.10;
+            leadProjArrow3D.visible = showVec;
+            if (showVec) {
+                const leadDir = new THREE.Vector3(leadObj.pos3D[0], leadObj.pos3D[1] + 0.3, leadObj.pos3D[2] - 0.2).normalize();
+                const diffRad = (leadObj.angle - vecInfo.angleDeg) * Math.PI / 180;
+                const cosProj = Math.cos(diffRad);
+                const dirSign = cosProj >= 0 ? 1 : -1;
+                leadProjArrow3D.setDirection(leadDir.clone().multiplyScalar(dirSign));
+                leadProjArrow3D.setLength(Math.max(0.55, Math.abs(cosProj) * 2.4), 0.42, 0.28);
+                leadProjArrow3D.setColor(new THREE.Color(cosProj >= 0 ? 0x10b981 : 0xf43f5e));
+            }
+        }
+
+        if (renderer && scene && camera) {
+            renderer.render(scene, camera);
+        }
+    };
+
+    // =========================================================================
+    // 12. MASTER "SHOW NAME" CONTROL (TOGGLE ALL NAMES OR INDIVIDUAL GROUPS)
+    // =========================================================================
+    function syncAllNameButtonsUI() {
+        const anyOn = !!(labels3D.chambers || labels3D.vessels || labels3D.conduction);
+        const allOn = !!(labels3D.chambers && labels3D.vessels && labels3D.conduction);
+        const allBtn = document.getElementById('btn-3d-labels-all');
+        const headingSpan = document.getElementById('ui-3d-labels-heading');
+        const isAr = (currentLang === 'ar');
+
+        if (allBtn) {
+            allBtn.classList.toggle('toggle-pill-active', allOn || anyOn);
+            allBtn.setAttribute('aria-pressed', String(allOn));
+        }
+        if (headingSpan) {
+            headingSpan.textContent = isAr
+                ? (allOn ? 'إخفاء الأسماء (Hide Name)' : 'إظهار الأسماء (Show Name)')
+                : (allOn ? 'Hide Name' : 'Show Name');
+        }
+        ['chambers', 'vessels', 'conduction'].forEach(k => {
+            const b = document.getElementById('btn-3d-labels-' + k);
+            if (b) {
+                b.classList.toggle('toggle-pill-active', !!labels3D[k]);
+                b.setAttribute('aria-pressed', String(!!labels3D[k]));
+            }
+        });
+    }
+
+    window.toggleAll3DNames = function () {
+        const allOn = !!(labels3D.chambers && labels3D.vessels && labels3D.conduction);
+        const nextState = !allOn;
+        labels3D.chambers = nextState;
+        labels3D.vessels = nextState;
+        labels3D.conduction = nextState;
+        if (nextState && !layers3D.coronary) {
+            layers3D.coronary = true;
+            if (coronaryGroup) coronaryGroup.visible = true;
+            const corBtn = document.getElementById('btn-3d-coronary');
+            if (corBtn) corBtn.classList.add('toggle-pill-active');
+        }
+        syncAllNameButtonsUI();
+        renderThreeJSHeart();
+    };
+
+    const origToggle3DLabels = window.toggle3DLabels;
+    window.toggle3DLabels = function (labelName) {
+        if (!Object.prototype.hasOwnProperty.call(labels3D, labelName)) return;
+        labels3D[labelName] = !labels3D[labelName];
+        if (labelName === 'vessels' && labels3D.vessels && !layers3D.coronary) {
+            layers3D.coronary = true;
+            if (coronaryGroup) coronaryGroup.visible = true;
+            const corBtn = document.getElementById('btn-3d-coronary');
+            if (corBtn) corBtn.classList.add('toggle-pill-active');
+        }
+        syncAllNameButtonsUI();
+        renderThreeJSHeart();
+    };
+
+    // =========================================================================
+    // 13. UPDATE ACLS PROTOCOL BOX & ROUTE BAR (/ECGStimulation)
+    // =========================================================================
+    function updateACLSProtocolBox() {
+        const box = document.getElementById('acls-protocol-box');
+        const titleEl = document.getElementById('ui-acls-box-title');
+        const badgeEl = document.getElementById('acls-triage-badge');
+        const textEl = document.getElementById('acls-protocol-text');
+        if (!box || !textEl) return;
+
+        const isAr = (currentLang === 'ar');
+        const proto = ACLS_PROTOCOLS[currentScenario] || ACLS_PROTOCOLS.normal;
+        if (titleEl) {
+            titleEl.textContent = isAr
+                ? 'البروتوكول العلاجي السريري وأدوية الطوارئ (AHA ACLS Protocol):'
+                : 'AHA ACLS Clinical Protocol & Emergency Pharmacology:';
+        }
+        if (badgeEl) {
+            badgeEl.textContent = isAr ? proto.badgeAr : proto.badgeEn;
+            const cMap = {
+                rose: 'px-2 py-0.5 rounded-md bg-rose-500/20 text-rose-300 border border-rose-500/40 text-[10px] font-extrabold',
+                amber: 'px-2 py-0.5 rounded-md bg-amber-500/20 text-amber-300 border border-amber-500/40 text-[10px] font-extrabold',
+                emerald: 'px-2 py-0.5 rounded-md bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-extrabold',
+                sky: 'px-2 py-0.5 rounded-md bg-sky-500/20 text-sky-300 border border-sky-500/40 text-[10px] font-extrabold'
+            };
+            badgeEl.className = cMap[proto.col] || cMap.sky;
+        }
+        textEl.textContent = isAr ? proto.ar : proto.en;
+    }
+
+    const origUpdatePhaseBoard = window.updatePhaseExplanationBoard;
+    window.updatePhaseExplanationBoard = function () {
+        origUpdatePhaseBoard();
+        updateACLSProtocolBox();
+        window.updateLeadVectorInspectorBanner();
+    };
+
+    const origSetScenario2 = window.setScenario;
+    window.setScenario = function (key) {
+        if (key === 'stemi_ant_pure') {
+            selectedLeadName = 'V3';
+        } else if (key === 'rbbb') {
+            selectedLeadName = 'V1';
+        } else if (key === 'hypona') {
+            selectedLeadName = 'V1';
+        }
+        if ( ['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_lat'].includes(key) ) {
+            layers3D.coronary = true;
+            if (coronaryGroup) coronaryGroup.visible = true;
+            const corBtn = document.getElementById('btn-3d-coronary');
+            if (corBtn) corBtn.classList.add('toggle-pill-active');
+        }
+        origSetScenario2(key);
+        updateACLSProtocolBox();
+        window.updateDynamicECGMetrics();
+        window.updateLeadVectorInspectorBanner();
+    };
+
+    // =========================================================================
+    // 14. /ECGStimulation URL ROUTING (HISTORY PUSHSTATE + HASH FALLBACK)
+    // =========================================================================
+    function updateRouteDisplay(pathStr) {
+        const el = document.getElementById('clinix-live-url-path');
+        if (!el) return;
+        const host = (window.location && window.location.host && !window.location.host.startsWith('127.'))
+            ? window.location.host
+            : 'clinixlab.github.io';
+        el.textContent = host + pathStr;
+    }
+
+    const origLaunchModule = window.launchModule;
+    window.launchModule = function (mod, skipPush) {
+        origLaunchModule(mod);
+        if (mod === 'ecg') {
+            updateRouteDisplay('/ECGStimulation');
+            if (!skipPush && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+                try {
+                    const base = window.location.pathname.replace(/\/ECGStimulation\/?$/, '').replace(/\/index\.html$/, '').replace(/\/$/, '');
+                    window.history.pushState({ clinixRoute: '/ECGStimulation' }, '', (base || '') + '/ECGStimulation');
+                } catch (e) {
+                    try { window.history.pushState({ clinixRoute: '/ECGStimulation' }, '', '#/ECGStimulation'); } catch (_) {}
+                }
+            }
+            requestAnimationFrame(() => {
+                if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
+                if (typeof drawAll2D === 'function') drawAll2D();
+                if (typeof renderThreeJSHeart === 'function') renderThreeJSHeart();
+            });
+        }
+    };
+
+    const origReturnToHub = window.returnToHub;
+    window.returnToHub = function (skipPush) {
+        origReturnToHub();
+        updateRouteDisplay('/');
+        if (!skipPush && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
+            try {
+                const base = window.location.pathname.replace(/\/ECGStimulation\/?$/, '').replace(/\/$/, '') || '/';
+                window.history.pushState({ clinixRoute: '/' }, '', base);
+            } catch (e) {
+                try { window.history.pushState({ clinixRoute: '/' }, '', '#/'); } catch (_) {}
+            }
+        }
+    };
+
+    window.addEventListener('popstate', function (e) {
+        const p = (window.location.pathname || '') + (window.location.hash || '');
+        if (/ECGStimulation/i.test(p) || (e.state && e.state.clinixRoute === '/ECGStimulation')) {
+            window.launchModule('ecg', true);
+        } else {
+            window.returnToHub(true);
+        }
+    });
+    window.addEventListener('hashchange', function () {
+        if (/ECGStimulation/i.test(window.location.hash || '')) {
+            window.launchModule('ecg', true);
+        } else if (window.location.hash === '#/' || window.location.hash === '') {
+            window.returnToHub(true);
+        }
+    });
+
+    // GitHub Architecture Modal & 1-Click Split File Exporter
+    window.openGitHubArchModal = function () {
+        const m = document.getElementById('github-arch-modal');
+        if (m) m.classList.remove('hidden');
+    };
+    window.closeGitHubArchModal = function () {
+        const m = document.getElementById('github-arch-modal');
+        if (m) m.classList.add('hidden');
+    };
+    window.downloadSplitGitHubFile = function (mode) {
+        const docClone = document.documentElement.cloneNode(true);
+        const modal = docClone.querySelector('#github-arch-modal');
+        if (modal) modal.classList.add('hidden');
+        if (mode === 'ecg') {
+            // Standalone /ECGStimulation/index.html: opens directly into ECG Simulator!
+            const hub = docClone.querySelector('#main-hub-view');
+            const ecg = docClone.querySelector('#ecg-simulator-view');
+            const backBtn = docClone.querySelector('#back-to-hub-btn');
+            if (hub) hub.classList.add('hidden');
+            if (ecg) ecg.classList.remove('hidden');
+            if (backBtn) {
+                backBtn.classList.remove('hidden');
+                backBtn.setAttribute('onclick', "window.location.href='../index.html'");
+            }
+        } else {
+            // Standalone Hub index.html: Card 1 navigates to ./ECGStimulation/
+            const card1 = docClone.querySelector('#main-hub-view .hub-card');
+            if (card1) {
+                card1.setAttribute('onclick', "window.location.href='./ECGStimulation/'");
+            }
+        }
+        const fullHtml = '<!DOCTYPE html>\n' + docClone.outerHTML;
+        const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = mode === 'ecg' ? 'ECGStimulation-index.html' : 'index.html';
+        document.body.appendChild(a);
+        a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+    };
+
+    // Update strip mode button text to reflect Continuous Multi-Beat Strip
+    if (UI_TEXT && UI_TEXT.ar && UI_TEXT.en) {
+        UI_TEXT.ar.stripModeBtn = ['عرض شريط النبض المستمر (Multi-Beat Strip)', 'عرض النبضة المفردة المكبرة (1-Beat Zoom)'];
+        UI_TEXT.en.stripModeBtn = ['Show Continuous Multi-Beat Strip', 'Show Zoomed Single Beat'];
+        UI_TEXT.ar.labelsHeading = 'إظهار الأسماء (Show Name)';
+        UI_TEXT.en.labelsHeading = 'Show Name';
+    }
+
+    const origToggleLangFinal = window.toggleLanguage;
+    window.toggleLanguage = function () {
+        origToggleLangFinal();
+        syncAllNameButtonsUI();
+        updateACLSProtocolBox();
+        window.updateDynamicECGMetrics();
+        window.updateLeadVectorInspectorBanner();
+        const isAr = (currentLang === 'ar');
+        const ghBtn = document.getElementById('ui-github-arch-btn');
+        if (ghBtn) ghBtn.textContent = isAr ? 'هيكلة وروابط GitHub (/ECGStimulation) وتصدير الملفات' : 'GitHub (/ECGStimulation) Setup & Split Export';
+    };
+
+    // Initialize UI states cleanly
+    function initUpgradedSimulator() {
+        syncAllNameButtonsUI();
+        if (typeof renderScenarioButtons === 'function') renderScenarioButtons();
+        updateACLSProtocolBox();
+        window.updateDynamicECGMetrics();
+        window.updateLeadVectorInspectorBanner();
+
+        // Check if URL already requests /ECGStimulation
+        const initPath = (window.location.pathname || '') + (window.location.hash || '');
+        if (/ECGStimulation/i.test(initPath)) {
+            window.launchModule('ecg', true);
+        } else {
+            updateRouteDisplay('/');
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initUpgradedSimulator, { once: true });
+    } else {
+        initUpgradedSimulator();
+    }
+})();
+</script>
 
 </body>
 </html>
