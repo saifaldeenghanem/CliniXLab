@@ -1282,7 +1282,7 @@
                         </p>
                     </div>
                     <div class="flex items-center justify-between pt-3 border-t border-slate-800 text-xs font-bold text-sky-400">
-                        <span id="card1-action">فتح المحاكي الشامل (/ECGStimulation)</span>
+                        <span id="card1-action">فتح المحاكي الشامل</span>
                         <i class="fa-solid fa-arrow-left"></i>
                     </div>
                 </div>
@@ -1417,16 +1417,22 @@
 
             <!-- Clinical Categories (Level 1) & Indented Sub-Branch Scenarios (Level 2) -->
             <div class="w-full flex flex-col gap-2.5 mt-1">
-                <!-- LEVEL 1: MAIN CLINICAL CATEGORIES DECK -->
-                <div class="p-2 rounded-xl bg-slate-950/80 border border-slate-800">
-                    <div class="flex flex-wrap items-center justify-between gap-2 mb-1.5">
-                        <span id="ui-cat-label" class="text-xs font-black text-sky-400 flex items-center gap-1.5">
-                            <i class="fa-solid fa-folder-tree"></i> الفئات السريرية الرئيسية (اختر الفئة لعرض أفرعها):
+                <!-- LEVEL 1: MAIN CLINICAL CATEGORIES DECK (CLEAN LIGHT CLINICAL STYLING + COLLAPSE TOGGLE) -->
+                <div id="clinical-categories-deck" class="p-2.5 rounded-xl bg-slate-50 border border-slate-200 shadow-sm">
+                    <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                        <span id="ui-cat-label" class="text-xs font-black text-sky-700 flex items-center gap-1.5">
+                            <i class="fa-solid fa-folder-tree text-sky-600"></i> الفئات السريرية الرئيسية (اختر الفئة لعرض أفرعها):
                         </span>
-                        <button type="button" onclick="selectCategory('all')" id="cat-all" class="cat-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-slate-900 border border-slate-700 text-slate-300 flex items-center gap-1.5 transition">
-                            <i class="fa-solid fa-layer-group text-sky-400"></i>
-                            <span id="ui-cat-all-text">عرض كل الفئات والأفرع (34 حالة)</span>
-                        </button>
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <button type="button" onclick="selectCategory('all')" id="cat-all" class="cat-btn px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-white hover:bg-sky-50 border border-slate-300 text-slate-700 flex items-center gap-1.5 transition shadow-sm">
+                                <i class="fa-solid fa-layer-group text-sky-600"></i>
+                                <span id="ui-cat-all-text">عرض كل الفئات والأفرع (34 حالة)</span>
+                            </button>
+                            <button type="button" onclick="toggleScenarioListCollapse()" id="btn-collapse-scenarios" class="px-2.5 py-1 rounded-lg text-[11px] font-extrabold bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-700 flex items-center gap-1.5 transition shadow-sm">
+                                <i class="fa-solid fa-chevron-up" id="icon-collapse-scenarios"></i>
+                                <span id="ui-collapse-scenarios-text">إخفاء القائمة ▲</span>
+                            </button>
+                        </div>
                     </div>
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
                         <button onclick="selectCategory('normal_elec')" id="cat-normal_elec" data-cat-theme="emerald" class="cat-btn active-cat-btn cat-card-btn px-3 py-2 rounded-xl text-xs font-extrabold bg-slate-900 border-2 border-emerald-500/40 text-right flex items-center justify-between gap-2 transition">
@@ -1479,7 +1485,7 @@
         </div>
     
         <!-- Interactive URL Route Bar (/ECGStimulation) & GitHub Multi-Page Guide -->
-            <div id="clinix-route-bar" class="mt-2.5 pt-2 border-t border-slate-800/80 flex flex-wrap items-center justify-between gap-2 text-xs">
+            <div id="clinix-route-bar" class="hidden" style="display:none!important;" aria-hidden="true">
                 <div class="flex items-center gap-2 bg-slate-950/80 px-3 py-1 rounded-xl border border-sky-500/30 font-mono text-[11px] sm:text-xs">
                     <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
                     <span class="text-slate-400" id="ui-route-prefix">URL Route:</span>
@@ -1603,17 +1609,25 @@
                         </div>
                     </div>
 
-                    <!-- TALL UNCLIPPED ECG CANVAS -->
-                    <div class="relative w-full h-56 sm:h-72 lg:h-80 rounded-xl overflow-hidden border border-rose-500/45 bg-[#12070c]">
-                        <canvas id="ecg-canvas" class="w-full h-full block cursor-ew-resize"></canvas>
-                        <!-- Live Overlay Badges -->
-                        <div class="absolute top-2 left-2 bg-slate-950/90 backdrop-blur px-2.5 py-1 rounded-lg border border-slate-800 flex items-center gap-3 text-xs pointer-events-none">
-                            <span class="text-emerald-400 font-mono font-bold"><i class="fa-solid fa-heart text-rose-500 animate-ping mr-1"></i> HR: <span id="live-hr">75</span> bpm</span>
-                            <span class="text-sky-300 font-mono font-bold" id="live-lead-name">Lead II (Inferior +60°)</span>
+                    <!-- DEDICATED STATUS BAR ABOVE THE ECG PAPER (NEVER COVERS THE P WAVE OR WAVEFORM!) -->
+                    <div id="ecg-top-info-strip" class="flex flex-wrap justify-between items-center gap-2 mb-1.5 px-3 py-1.5 rounded-xl bg-slate-100 border border-slate-300 text-xs shadow-sm">
+                        <div class="flex flex-wrap items-center gap-3">
+                            <span class="text-emerald-700 font-mono font-extrabold flex items-center gap-1">
+                                <i class="fa-solid fa-heart text-rose-500 animate-pulse"></i>
+                                <span>HR:</span>
+                                <span id="live-hr" class="text-sm">75</span>
+                                <span>bpm</span>
+                            </span>
+                            <span class="text-sky-800 font-mono font-extrabold px-2 py-0.5 rounded-md bg-sky-500/10 border border-sky-500/30" id="live-lead-name">Lead II (Inferior +60°)</span>
                         </div>
-                        <div class="absolute top-2 right-2 bg-slate-950/85 px-2.5 py-1 rounded-lg border border-slate-800 text-[11px] font-bold text-amber-300 pointer-events-none" id="ecg-active-segment-tag">
+                        <div class="px-2.5 py-0.5 rounded-md bg-amber-500/15 border border-amber-500/35 text-[11px] font-extrabold text-amber-900" id="ecg-active-segment-tag">
                             الجزء النشط: موجة P
                         </div>
+                    </div>
+
+                    <!-- TALL UNCLIPPED ECG CANVAS ON REAL PINK/RED MILLIMETER PAPER -->
+                    <div id="ecg-paper-viewport" class="relative w-full h-60 sm:h-72 lg:h-80 rounded-xl overflow-hidden border-2 border-rose-400/70 bg-[#fff9f9] shadow-inner">
+                        <canvas id="ecg-canvas" class="w-full h-full block cursor-ew-resize"></canvas>
                     </div>
                 </div>
 
@@ -5435,7 +5449,7 @@
                 const on = layers3D.conduction;
                 const isAr = (currentLang === 'ar');
                 const lbl = document.getElementById('ui-tgl-cond');
-                if (lbl) lbl.textContent = isAr ? (on ? 'إخفاء الأسماء' : 'إظهار الأسماء') : (on ? 'Hide names' : 'Show names');
+                if (lbl) lbl.textContent = isAr ? 'نظام التوصيل الكهربائي' : 'Electrical Conduction';
                 if (namesBtn) {
                     if (on) namesBtn.classList.add('toggle-pill-active');
                     else namesBtn.classList.remove('toggle-pill-active');
@@ -5744,9 +5758,7 @@
                 const mainBtn = document.getElementById('btn-3d-conduction');
                 const mainText = document.getElementById('ui-tgl-cond');
                 const labelBtn = document.getElementById('btn-3d-labels-conduction');
-                if (mainText) mainText.textContent = currentLang === 'ar'
-                    ? (visible ? 'إخفاء الأسماء' : 'إظهار الأسماء')
-                    : (visible ? 'Hide names' : 'Show names');
+                if (mainText) mainText.textContent = currentLang === 'ar' ? 'نظام التوصيل الكهربائي' : 'Electrical Conduction';
                 if (mainBtn) mainBtn.classList.toggle('toggle-pill-active', visible);
                 if (labelBtn) {
                     labelBtn.classList.toggle('toggle-pill-active', visible);
@@ -6393,8 +6405,11 @@ function updateDynamicECGMetrics(){
   #html-root #twelve-lead-col { height:440px!important; min-height:440px!important; }
 }
 /* Ensure measurement values and the 3D status are available on phone, not hidden by utility classes. */
-#html-root .hidden:has(#meas-p), #html-root .hidden:has(#meas-pr),
-#html-root .hidden:has(#meas-qrs), #html-root .hidden:has(#meas-st), #html-root .hidden:has(#meas-qt) { display:grid!important; }
+#html-root div.grid-cols-5:has(#meas-p) { display:grid!important; }
+#html-root #ecg-simulator-view.hidden,
+#html-root #main-hub-view.hidden,
+#html-root #hub-footer.hidden,
+#html-root #back-to-hub-btn.hidden { display:none!important; }
 #html-root #heart3d-statusbar { display:flex!important; flex-wrap:wrap!important; }
 /* Phase buttons and time title honor theme instead of retaining high-glare pale colors. */
 #html-root.dark .sticky-master-timeline button[id^="jmp-"] { background:#17263a!important;color:#dbeafe!important;border-color:#334155!important; }
@@ -6532,7 +6547,7 @@ function updateDynamicECGMetrics(){
 <!-- =========================================================================
      GITHUB MULTI-PAGE ARCHITECTURE & EXPORT MODAL (/ECGStimulation)
      ========================================================================= -->
-<div id="github-arch-modal" class="fixed inset-0 z-[200] hidden flex items-center justify-center p-3 sm:p-6 bg-slate-950/80 backdrop-blur-md">
+<div id="github-arch-modal" class="hidden" style="display:none!important;" aria-hidden="true">
     <div class="panel-card w-full max-w-3xl rounded-2xl p-4 sm:p-6 border border-sky-500/50 shadow-2xl max-h-[90vh] overflow-y-auto">
         <div class="flex items-center justify-between gap-2 pb-3 mb-3 border-b border-slate-800">
             <div class="flex items-center gap-2.5">
@@ -10653,6 +10668,1429 @@ function updateDynamicECGMetrics(){
         document.addEventListener('DOMContentLoaded', initPhase2Upgrades, { once: true });
     } else {
         setTimeout(initPhase2Upgrades, 50);
+    }
+})();
+</script>
+
+
+<style id="clinix-phase3-comprehensive-styles">
+  /* 1. Strict visibility for Main Hub vs ECG Simulator (never show both at once!) */
+  #html-root #ecg-simulator-view.hidden,
+  #html-root #main-hub-view.hidden,
+  #html-root #hub-footer.hidden,
+  #html-root #back-to-hub-btn.hidden,
+  #html-root #clinix-route-bar,
+  #html-root #github-arch-modal {
+    display: none !important;
+  }
+
+  /* 2. Smooth Page, Card, and Accordion Animations Across the Entire Site */
+  @keyframes clinixSmoothViewIn {
+    0% { opacity: 0; transform: translateY(14px) scale(0.992); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes clinixSubBranchSlide {
+    0% { opacity: 0; transform: translateY(-6px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  #html-root #main-hub-view:not(.hidden),
+  #html-root #ecg-simulator-view:not(.hidden) {
+    animation: clinixSmoothViewIn 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  #html-root .hub-card {
+    transition: transform 0.26s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.26s ease, border-color 0.22s ease !important;
+  }
+  #html-root .hub-card:hover {
+    transform: translateY(-5px) scale(1.01) !important;
+  }
+  #html-root .panel-card {
+    transition: box-shadow 0.25s ease, border-color 0.25s ease;
+  }
+  #html-root #scenario-subbranch-box {
+    transition: max-height 0.35s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.25s ease, padding 0.25s ease, margin 0.25s ease !important;
+    overflow: hidden;
+  }
+  #html-root #scenario-subbranch-box.collapsed-list {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    border-width: 0 !important;
+    pointer-events: none !important;
+  }
+  #html-root #scenario-list-container .scenario-sub-btn {
+    animation: clinixSubBranchSlide 0.24s cubic-bezier(0.22, 1, 0.36, 1) both;
+    transition: transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease, border-color 0.16s ease !important;
+  }
+  #html-root #scenario-list-container .scenario-sub-btn:hover {
+    transform: translateY(-2px);
+  }
+
+  /* 3. Always Clean Light Surface for Clinical Categories & Sub-Branch Box (No Black Box!) */
+  #html-root:not(.dark) #clinical-categories-deck {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%) !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+  #html-root:not(.dark) #clinical-categories-deck .cat-card-btn {
+    background: #ffffff !important;
+    color: #1e293b !important;
+    border: 1.5px solid #cbd5e1 !important;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.04) !important;
+  }
+  #html-root:not(.dark) #clinical-categories-deck .cat-card-btn.active-cat-btn {
+    background: linear-gradient(135deg, #e0f2fe 0%, #f0fdf4 100%) !important;
+    color: #0f172a !important;
+    border-color: #0284c7 !important;
+    outline: 2px solid rgba(2, 132, 199, 0.25) !important;
+  }
+  #html-root:not(.dark) #scenario-subbranch-box {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-right-width: 4px !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04) !important;
+  }
+  #html-root:not(.dark) .scenario-sub-btn:not(.active-sc-btn) {
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+  #html-root:not(.dark) .scenario-sub-btn:not(.active-sc-btn):hover {
+    background: #e0f2fe !important;
+    border-color: #38bdf8 !important;
+  }
+
+  /* 4. Unobstructed Top Info Strip Above #ecg-canvas (Never overlaps P wave!) */
+  #html-root #ecg-top-info-strip #ecg-active-segment-tag {
+    position: static !important;
+    max-width: none !important;
+    top: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    left: auto !important;
+  }
+  #html-root.dark #ecg-top-info-strip {
+    background: #0f172a !important;
+    border-color: #334155 !important;
+  }
+
+  /* 5. Sticky Mini-ECG & Mini-Heart: Hidden until user scrolls down past the main ECG! */
+  #html-root #sticky-mini-monitor-wrapper {
+    display: none !important;
+  }
+  #html-root #sticky-mini-monitor-wrapper.scrolled-past-main-ecg {
+    display: block !important;
+    animation: clinixSubBranchSlide 0.26s ease both;
+  }
+
+  /* 6. Glitch-Free Fullscreen 3D Heart Mode (Normal Flow with Sticky Master Timeline!) */
+  body.clinix-heart-fullscreen-mode {
+    overflow-y: auto !important;
+  }
+  body.clinix-heart-fullscreen-mode #ecg-simulator-view {
+    animation: none !important;
+    transform: none !important;
+  }
+  body.clinix-heart-fullscreen-mode > div > header,
+  body.clinix-heart-fullscreen-mode #ecg-simulator-view > header,
+  body.clinix-heart-fullscreen-mode #ecg-simulator-view > section:not(.sticky-master-timeline),
+  body.clinix-heart-fullscreen-mode #ecg-simulator-view > footer,
+  body.clinix-heart-fullscreen-mode #hub-footer,
+  body.clinix-heart-fullscreen-mode #ecg-simulator-view > div.max-w-\[1650px\] > div.grid > div:first-child {
+    display: none !important;
+  }
+  body.clinix-heart-fullscreen-mode .sticky-master-timeline {
+    position: sticky !important;
+    top: 4px !important;
+    z-index: 500 !important;
+    max-width: 100% !important;
+    margin-bottom: 8px !important;
+  }
+  body.clinix-heart-fullscreen-mode #sticky-mini-monitor-wrapper {
+    display: block !important;
+  }
+  body.clinix-heart-fullscreen-mode #ecg-simulator-view > div.max-w-\[1650px\] {
+    max-width: 100% !important;
+    margin: 0 !important;
+  }
+  body.clinix-heart-fullscreen-mode #ecg-simulator-view > div.max-w-\[1650px\] > div.grid {
+    display: block !important;
+  }
+  body.clinix-heart-fullscreen-mode #panel-2-heart-card {
+    position: relative !important;
+    top: auto !important;
+    left: auto !important;
+    right: auto !important;
+    bottom: auto !important;
+    width: 100% !important;
+    min-height: calc(100vh - 185px) !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+  body.clinix-heart-fullscreen-mode #heart3d-container {
+    height: calc(100vh - 295px) !important;
+    min-height: 380px !important;
+    max-height: none !important;
+  }
+</style>
+
+<script id="clinix-phase3-comprehensive-engine">
+(function () {
+    // =========================================================================
+    // 1. ADD INFERIOR STEMI DUE TO LCx OCCLUSION (`stemi_inf_lcx`) &
+    //    CLEAN ALL CLINICAL TEXTS OF POSTER REFERENCE NUMBERS (`Rhythm #...`)
+    // =========================================================================
+    SCENARIOS.stemi_inf_lcx = {
+        cat: 'mi_struct',
+        hr: 76,
+        stripDefault: false,
+        ar: {
+            name: 'جلطة الجدار السفلي بسبب الشريان المنعطف الأيسر (Inferior STEMI - LCx Occlusion)',
+            summary: 'احتشاء الجدار السفلي والخلفي-الجانبي الناتج عن انسداد الشريان المنعطف الأيسر (Distal LCx في الدوران الأيسر السائد): يتميز بارتفاع قطعة ST في الاتجاهات السفلية (II, III, aVF) بحيث يكون الارتفاع في Lead II مساوياً أو أكبر من Lead III (STE II ≥ III)، مع عدم وجود انخفاض مرآتي في Lead I (أو وجود ارتفاع مرافق في I, aVL, V5–V6)!',
+            phases: [
+                'المرحلة 1 (موجة P): تنطلق الشرارة من العقدة الجيبية بشكل طبيعي (لأن عقدة SA و AV غالباً تروى من RCA، فلا يحدث بطء قلب شديد كما في جلطة RCA).',
+                'المرحلة 2 (قطعة PR): توصيل أذيني بطيني طبيعي دون حصار عقدي.',
+                'المرحلة 3 (موجة Q المرضية في II, III, aVF و V5–V6): نخر عضلة الجدار السفلي والجانبي يترك نافذة كهربائية ترسم موجات Q عميقة في الاتجاهات السفلية والجانبية.',
+                'المرحلة 4 (ارتفاع ST في السفلية II ≥ III والجانبية V5–V6): يتجه متجه تيار الإصابة نحو الأسفل واليسار (+60° نحو Lead II)، فيرفع ST في II أكثر أو مساوياً لـ III ويرفع ST في V5–V6 دون انخفاض مرآتي في Lead I!',
+                'المرحلة 5 (موجة T): موجات T عالية (Hyperacute) تندمج مع قطعة ST المرتفعة.',
+                'المرحلة 6 (التدبير السريري): قسطرة قلبية تداخلية عاجلة لفتح الشريان المنعطف الأيسر (LCx) مع مضادات الصفيحات المزدوجة ومضادات التخثر. • للاطلاع على التفاصيل الدوائية راجع قسم أدوية الطوارئ.'
+            ]
+        },
+        en: {
+            name: 'Inferior STEMI due to LCx Occlusion (Left-Dominant Inferior-Lateral MI)',
+            summary: 'Inferior/inferolateral myocardial infarction caused by distal Left Circumflex (LCx) occlusion: distinguished from RCA Inferior STEMI by ST elevation in Lead II ≥ Lead III, an isoelectric or elevated ST segment in Lead I, and concomitant lateral ST elevation in V5–V6!',
+            phases: [
+                'Phase 1 (P Wave): Normal sinus P wave (SA & AV nodes are usually spared compared to RCA occlusion).',
+                'Phase 2 (PR Segment): Normal AV nodal conduction.',
+                'Phase 3 (Pathological Q Waves in II, III, aVF, V5–V6): Inferior-lateral wall necrosis produces pathological Q waves.',
+                'Phase 4 (ST Elevation with II ≥ III & V5–V6 Involvement): Because the injury vector points inferiorly and leftward (+60° toward Lead II), ST elevation in II ≥ III without reciprocal ST depression in Lead I!',
+                'Phase 5 (T Wave): Hyperacute T waves merging with elevated ST segments.',
+                'Phase 6 (Clinical Management): Emergent Primary PCI of the Left Circumflex (LCx) artery + dual antiplatelet therapy and anticoagulation. • See the ACLS Pharmacology section for drug details.'
+            ]
+        }
+    };
+
+    // Place `stemi_inf_lcx` right after `stemi_inf` in SCENARIOS order
+    const reordered = {};
+    Object.keys(SCENARIOS).forEach(k => {
+        reordered[k] = SCENARIOS[k];
+        if (k === 'stemi_inf' && SCENARIOS.stemi_inf_lcx) {
+            reordered.stemi_inf_lcx = SCENARIOS.stemi_inf_lcx;
+        }
+    });
+    Object.keys(SCENARIOS).forEach(k => delete SCENARIOS[k]);
+    Object.keys(reordered).forEach(k => { SCENARIOS[k] = reordered[k]; });
+
+    // Make sure `pea` has a clear, concise name and appears in BOTH Category 1 (`normal_elec`) AND Category 4 (`acls`)!
+    if (SCENARIOS.pea) {
+        SCENARIOS.pea.ar.name = 'النشاط الكهربائي بلا نبض (PEA - فك الاقتران الكهروميكانيكي)';
+        SCENARIOS.pea.en.name = 'Pulseless Electrical Activity (PEA — Electromechanical Dissociation)';
+    }
+
+    // Add Lead Impact definition for `stemi_inf_lcx`
+    if (typeof CLINIX_LEAD_IMPACTS !== 'undefined') {
+        CLINIX_LEAD_IMPACTS.stemi_inf_lcx = {
+            primary: ['II', 'III', 'aVF', 'V5', 'V6'],
+            secondary: ['I', 'aVL', 'V1', 'V2'],
+            summary: {
+                ar: 'جلطة الجدار السفلي بسبب انسداد الشريان المنعطف الأيسر (LCx): ارتفاع ST في الاتجاهات السفلية (II, III, aVF بحيث II ≥ III) مع امتداد جانبي في V5–V6، وغياب الانخفاض المرآتي العميق في Lead I (قد يظهر انخفاض مرآتي أمامي في V1–V2).',
+                en: 'Inferior STEMI from Left Circumflex (LCx) occlusion: ST elevation in II, III, aVF (with STE in II ≥ III) plus lateral ST elevation in V5–V6, without deep reciprocal depression in Lead I (reciprocal depression often in V1–V2).'
+            },
+            primaryText: { ar: 'ارتفاع ST حاد وموجة Q مرضية (مع كون الارتفاع في II ≥ III وامتداد لـ V5–V6).', en: 'Marked ST elevation and Q wave (STE in II ≥ III with V5–V6 lateral extension).' },
+            secondaryText: { ar: 'انخفاض ST مرآتي في V1–V2 (بينما يبقى Lead I مستوياً أو مرتفعاً قليلاً).', en: 'Reciprocal ST depression in V1–V2 (while Lead I remains isoelectric or mildly elevated).' },
+            otherText: { ar: 'لا يوجد تغير بؤري مباشر.', en: 'No direct focal change.' },
+            perLead: {
+                II:  { ar: 'متأثر رئيسي: ارتفاع ST بارز في Lead II مساوٍ أو أكبر من Lead III (علامة انسداد LCx!).', en: 'Primary Infarct Lead: Prominent ST elevation in Lead II ≥ Lead III (hallmark of LCx culprit!).' },
+                III: { ar: 'متأثر رئيسي: ارتفاع ST في الجدار السفلي (أقل قليلاً من Lead II).', en: 'Primary Infarct Lead: Inferior ST elevation (slightly less than or equal to Lead II).' },
+                aVF: { ar: 'متأثر رئيسي: ارتفاع ST وموجة Q مرضية في الجدار السفلي.', en: 'Primary Infarct Lead: Inferior ST elevation and pathological Q wave.' },
+                V5:  { ar: 'متأثر رئيسي: ارتفاع ST مرافق نتيجة مشاركة الجدار الجانبي من شريان LCx.', en: 'Primary Infarct Lead: Concomitant lateral ST elevation from LCx territory.' },
+                V6:  { ar: 'متأثر رئيسي: ارتفاع ST في الجدار الجانبي السفلي.', en: 'Primary Infarct Lead: Inferolateral ST elevation.' },
+                I:   { ar: 'محتمل/مرجعي تفريقي: يبقى خط ST مستوياً أو مرتفعاً قليلاً (عكس جلطة RCA التي تسبب انخفاضاً مرآتياً حاداً في I).', en: 'Key Differential Lead: ST remains isoelectric or mildly elevated (unlike RCA MI which causes deep reciprocal depression in I).' },
+                V1:  { ar: 'تغير مرآتي (محتمل): انخفاض ST مرآتي يعكس إصابة الجدار الخلفي-السفلي.', en: 'Reciprocal Change: ST depression reflecting inferoposterior wall involvement.' },
+                V2:  { ar: 'تغير مرآتي (محتمل): انخفاض ST مرآتي أمامي.', en: 'Reciprocal Change: Anterior reciprocal ST depression.' }
+            }
+        };
+    }
+
+    // Add ACLS Protocol & Measurement entry for `stemi_inf_lcx`
+    if (typeof ACLS_PROTOCOLS !== 'undefined') {
+        ACLS_PROTOCOLS.stemi_inf_lcx = {
+            badgeAr: '🚨 جلطة سفلية-جانبية (شريان LCx)',
+            badgeEn: '🚨 Inferior-Lateral STEMI (LCx Culprit)',
+            col: 'rose',
+            ar: 'التدبير السريري: انسداد الشريان المنعطف الأيسر (LCx) المسبب لاحتشاء سفلي-جانبي (يرتفع ST في II ≥ III مع V5–V6). يتطلب قسطرة قلبية تداخلية عاجلة (Primary PCI) + أسبرين ومثبط P2Y12 وهيبارين. • للاطلاع على التفاصيل الدوائية راجع قسم أدوية الطوارئ.',
+            en: 'Clinical Management: Left Circumflex (LCx) occlusion causing inferolateral STEMI (STE in II ≥ III plus V5–V6). Requires emergent Primary PCI + dual antiplatelet therapy and anticoagulation. • See the ACLS Pharmacology section for drug details.'
+        };
+    }
+
+    // Strip all "(Rhythm #...)", "(Drug #...)", "(#...)" references from SCENARIOS and ACLS_PROTOCOLS
+    function cleanReferenceNumbers(str) {
+        if (!str || typeof str !== 'string') return str;
+        let s = str
+            .replace(/\s*\((?:ACLS\s*Poster\s*)?Rhythm\s*#\d+[^)]*\)/gi, '')
+            .replace(/\s*\(Rhythm\s*#\d+[^)]*\)/gi, '')
+            .replace(/\s*\(Drug\s*#\d+[^)]*\)/gi, '')
+            .replace(/\s*\(#\d+\)/g, '')
+            .replace(/بروتوكول\s*ACLS\s*\(Rhythm\s*#\d+\)\s*:/gi, 'البروتوكول السريري:')
+            .replace(/ACLS\s*Protocol\s*\(Rhythm\s*#\d+\)\s*:/gi, 'Clinical Protocol:')
+            .replace(/بروتوكول\s*ACLS\s*:/gi, 'البروتوكول السريري:')
+            .replace(/ACLS\s*Protocol\s*:/gi, 'Clinical Protocol:');
+        return s;
+    }
+
+    Object.keys(SCENARIOS).forEach(k => {
+        const sc = SCENARIOS[k];
+        ['ar', 'en'].forEach(lang => {
+            if (sc[lang]) {
+                sc[lang].summary = cleanReferenceNumbers(sc[lang].summary);
+                if (Array.isArray(sc[lang].phases)) {
+                    sc[lang].phases = sc[lang].phases.map(cleanReferenceNumbers);
+                }
+            }
+        });
+    });
+
+    if (typeof ACLS_PROTOCOLS !== 'undefined') {
+        Object.keys(ACLS_PROTOCOLS).forEach(k => {
+            const p = ACLS_PROTOCOLS[k];
+            p.ar = cleanReferenceNumbers(p.ar);
+            p.en = cleanReferenceNumbers(p.en);
+            if (k !== 'normal' && !p.ar.includes('قسم أدوية الطوارئ')) {
+                p.ar += ' • للاطلاع على التفاصيل والجرعات راجع قسم أدوية الطوارئ.';
+            }
+            if (k !== 'normal' && !p.en.includes('ACLS Pharmacology')) {
+                p.en += ' • See the ACLS Pharmacology section for full drug details.';
+            }
+        });
+    }
+
+    // =========================================================================
+    // 2. COLLAPSIBLE SCENARIO LIST ("إخفاء القائمة ▲ / إظهار القائمة ▼") + PEA IN BOTH CAT 1 & CAT 4
+    // =========================================================================
+    let scenarioListCollapsed = false;
+    window.toggleScenarioListCollapse = function (forceState) {
+        const subBox = document.getElementById('scenario-subbranch-box');
+        const icon = document.getElementById('icon-collapse-scenarios');
+        const txt = document.getElementById('ui-collapse-scenarios-text');
+        const isAr = (currentLang === 'ar');
+        if (!subBox) return;
+
+        scenarioListCollapsed = (typeof forceState === 'boolean') ? forceState : !scenarioListCollapsed;
+        subBox.classList.toggle('collapsed-list', scenarioListCollapsed);
+        if (icon) icon.className = scenarioListCollapsed ? 'fa-solid fa-chevron-down' : 'fa-solid fa-chevron-up';
+        if (txt) txt.textContent = scenarioListCollapsed
+            ? (isAr ? 'إظهار القائمة ▼' : 'Show List ▼')
+            : (isAr ? 'إخفاء القائمة ▲' : 'Hide List ▲');
+    };
+
+    const origSelectCategoryP2 = window.selectCategory;
+    window.selectCategory = function (cat) {
+        // If user clicks "عرض كل الفئات" while already in 'all' and expanded, toggle collapse!
+        if (cat === 'all' && currentCategory === 'all' && !scenarioListCollapsed) {
+            window.toggleScenarioListCollapse(true);
+            return;
+        }
+        window.toggleScenarioListCollapse(false);
+        origSelectCategoryP2(cat);
+        // Ensure `pea` also appears in Category 4 (`acls`) so the user always finds PEA in both Normal/Ions and ACLS!
+        if (cat === 'acls') {
+            const container = document.getElementById('scenario-list-container');
+            if (container && SCENARIOS.pea && !Array.from(container.querySelectorAll('button')).some(b => b.textContent.includes('PEA'))) {
+                const isSel = (currentScenario === 'pea');
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `scenario-sub-btn bg-slate-950 border border-slate-700 text-slate-200 hover:border-sky-400 ${isSel ? 'active-sc-btn' : ''}`;
+                btn.innerHTML = `
+                    <span class="w-2 h-2 rounded-full shrink-0" style="background:${isSel ? '#fff' : '#38bdf8'}"></span>
+                    <span>${SCENARIOS.pea[currentLang].name}</span>
+                    <span class="px-1.5 py-0.2 rounded bg-slate-900/90 text-[10px] font-mono ${isSel ? 'text-sky-100' : 'text-slate-400'}">70 bpm (No Pulse)</span>
+                `;
+                btn.onclick = () => window.setScenario('pea');
+                container.appendChild(btn);
+            }
+        }
+    };
+
+    // =========================================================================
+    // 3. FIX URL ROUTING SO REFRESH (F5) ON GITHUB PAGES NEVER TRIGGERS 404!
+    // =========================================================================
+    window.launchModule = function (mod) {
+        if (mod !== 'ecg') return;
+        document.getElementById('main-hub-view').classList.add('hidden');
+        document.getElementById('hub-footer').classList.add('hidden');
+        document.getElementById('ecg-simulator-view').classList.remove('hidden');
+        document.getElementById('back-to-hub-btn').classList.remove('hidden');
+        try { sessionStorage.setItem('clinixActivePage', 'ecg'); } catch (_) {}
+        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+            try { window.history.replaceState({ clinixPage: 'ecg' }, '', '#/ECGStimulation'); } catch (_) {}
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        requestAnimationFrame(() => {
+            if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
+            if (typeof drawAll2D === 'function') drawAll2D();
+            if (typeof renderThreeJSHeart === 'function') renderThreeJSHeart();
+            if (!isPlaying && typeof togglePlay === 'function') togglePlay();
+        });
+    };
+
+    window.returnToHub = function () {
+        if (isPlaying && typeof togglePlay === 'function') togglePlay();
+        if (document.body.classList.contains('clinix-heart-fullscreen-mode') && typeof window.toggleHeartFullscreenMode === 'function') {
+            window.toggleHeartFullscreenMode();
+        }
+        document.getElementById('ecg-simulator-view').classList.add('hidden');
+        document.getElementById('main-hub-view').classList.remove('hidden');
+        document.getElementById('hub-footer').classList.remove('hidden');
+        document.getElementById('back-to-hub-btn').classList.add('hidden');
+        try { sessionStorage.setItem('clinixActivePage', 'hub'); } catch (_) {}
+        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
+            try { window.history.replaceState({ clinixPage: 'hub' }, '', window.location.pathname || './'); } catch (_) {}
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    };
+
+    // =========================================================================
+    // 4. WAVEFORM IMPROVEMENTS:
+    //    - Hyperkalemia (`hyperk`) sharp narrow-based tented T wave (distinct from VT!)
+    //    - Sine-Wave (`sinewave`) smooth wide sinusoidal wave (distinct from VT!)
+    //    - Inferior STEMI due to LCx (`stemi_inf_lcx`: STE in II >= III + V5-V6, no deep depression in I!)
+    //    - Torsades de Pointes (`tdp`) spindle-node twisting waveform
+    // =========================================================================
+    const prevComputeV = window.computeLeadVoltage;
+    window.computeLeadVoltage = function (absMs, scenario, leadId) {
+        const leadObj = LEADS_12.find(l => l.id === leadId) || LEADS_12[1];
+        const angle = leadObj.angle;
+        const grp = leadObj.group;
+        const proj = Math.cos((angle - 45) * Math.PI / 180);
+        const pProj = leadId === 'V1' ? 0.12 : (leadId === 'aVR' ? -0.85 : (leadId.startsWith('V') ? 0.72 : proj));
+        const t = ((absMs % 800) + 800) % 800;
+
+        // 1. Hyperkalemia (K+ 6.5–7.5 mEq/L): Diminished flat P, prolonged PR, slightly wide R-S, and
+        //    a SHARP, SYMMETRIC, NARROW-BASED "PINCHED TENT" T WAVE (looks nothing like VT!)
+        if (scenario === 'hyperk') {
+            const pol = (grp === 'avr') ? -0.85 : (leadId === 'V1' ? 0.35 : (leadId === 'V2' ? 0.95 : proj));
+            // Diminished flat P wave at 95ms
+            const flatP = gPulse(t, 95, 26, 0.045) * pProj;
+            // Distinct QRS: small q, sharp R peak at 245ms, deep S wave at 272ms
+            const qrs = (-gPulse(t, 224, 8, 0.12) + gPulse(t, 245, 11, 1.05) - gPulse(t, 270, 12, 0.38)) * (leadId === 'V1' ? -0.75 : pol);
+            // Tented Peaked T Wave at 445ms: sharp pointed apex using exponential tent profile + narrow Gaussian base!
+            const distFromT = Math.abs(t - 445);
+            const tentPeak = (distFromT < 85) ? (1.28 * Math.exp(-distFromT / 20) * Math.exp(-Math.pow(distFromT / 42, 2))) : 0;
+            const tPol = (grp === 'avr') ? -0.85 : (leadId.startsWith('V') ? 1.05 : Math.sign(proj || 1) * Math.max(0.65, Math.abs(proj)));
+            return flatP + qrs + tentPeak * tPol;
+        }
+
+        // 2. Hyperkalemic Sine-Wave (K+ > 8.5 mEq/L): Smooth, wide, lower-frequency sinusoidal oscillation
+        if (scenario === 'sinewave') {
+            const pol = (grp === 'avr' || leadId === 'V1') ? -0.85 : 1.0;
+            const phase = ((absMs % 800) / 800) * Math.PI * 2;
+            return (0.95 * Math.sin(phase) - 0.12 * Math.sin(2 * phase)) * pol;
+        }
+
+        // 3. Inferior STEMI due to LCx Occlusion (`stemi_inf_lcx`: STE in II >= III, STE in V5-V6, flat/mild STE in I/aVL, reciprocal depression in V1-V2!)
+        if (scenario === 'stemi_inf_lcx') {
+            let v = (leadId === 'V1')
+                ? (gPulse(t, 105, 16, 0.13) - gPulse(t, 128, 16, 0.09))
+                : gPulse(t, 115, 19, 0.17) * pProj;
+
+            if (['II', 'III', 'aVF', 'V5', 'V6'].includes(leadId)) {
+                // LCx Inferior-Lateral STEMI: STE in Lead II (0.62mV) >= Lead III (0.46mV)!
+                const steAmp = (leadId === 'II') ? 0.62 : (leadId === 'aVF' ? 0.54 : (leadId === 'III' ? 0.45 : 0.42));
+                v += -gPulse(t, 230, 15, 0.62);
+                v += gPulse(t, 254, 10, 0.65);
+                if (t >= 250 && t <= 585) {
+                    v += steAmp * Math.exp(-Math.pow((t - 380) / 115, 2));
+                }
+                v += gPulse(t, 495, 44, 0.38);
+                return v;
+            }
+            if (leadId === 'V1' || leadId === 'V2') {
+                // Posterior/Inferior reciprocal ST depression in V1-V2 + tall R wave (posterior mirror image)
+                v += gPulse(t, 240, 10, 0.78) - gPulse(t, 264, 11, 0.45);
+                if (t >= 265 && t <= 550) v -= 0.28 * Math.exp(-Math.pow((t - 385) / 108, 2));
+                v += gPulse(t, 505, 40, 0.18);
+                return v;
+            }
+            if (leadId === 'I' || leadId === 'aVL') {
+                // Key differential vs RCA: NO deep reciprocal ST depression in Lead I (isoelectric/slightly elevated)!
+                v += -gPulse(t, 224, 6, 0.10) + gPulse(t, 244, 9.5, 1.05) - gPulse(t, 263, 7.5, 0.18);
+                if (t >= 260 && t <= 540) v += 0.08 * Math.exp(-Math.pow((t - 380) / 105, 2));
+                v += gPulse(t, 495, 42, 0.28);
+                return v;
+            }
+        }
+
+        // 4. Torsades de Pointes (`tdp`): Rapid polymorphic QRS complexes (~240 bpm, period = 250ms) twisting around baseline every 1600ms!
+        if (scenario === 'tdp') {
+            const twistEnv = Math.sin(((absMs % 1600) / 1600) * Math.PI * 2);
+            const pol = (grp === 'avr') ? -0.85 : (leadId === 'V1' ? -0.8 : (proj >= 0 ? 1 : -0.8));
+            return (1.35 * twistEnv * Math.sin((absMs / 250) * Math.PI * 2) + 0.30 * Math.cos((absMs / 125) * Math.PI * 2)) * pol;
+        }
+
+        return prevComputeV(absMs, scenario, leadId);
+    };
+
+    // Update `isSelectedLeadIschemic` to include `stemi_inf_lcx`
+    window.isSelectedLeadIschemic = function (sc, leadId) {
+        if (!['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_inf_lcx', 'stemi_lat'].includes(sc)) return false;
+        return getLeadImpactStatus(sc, leadId) === 'primary';
+    };
+
+    // =========================================================================
+    // 5. TRUE 1:1 SQUARE MILLIMETER GRID IN BOTH SINGLE-BEAT & MULTI-BEAT MODES
+    //    + FIXED CALIPERS & PATHOLOGICAL WAVE LABELS (U WAVE, DELTA, SAWTOOTH, STE)
+    // =========================================================================
+    window.drawECGPanel = function () {
+        ecgCtx.direction = 'ltr';
+        ecgCtx.textAlign = 'left';
+        const w = ecgCanvas.width / (window.devicePixelRatio || 1);
+        const h = ecgCanvas.height / (window.devicePixelRatio || 1);
+
+        const leftPad = 52;
+        const rightPad = 12;
+        const availW = Math.max(120, w - leftPad - rightPad);
+
+        // Enforce TRUE 1:1 SQUARE Millimeter Grid (smallSqX === smallSqY ALWAYS!)
+        const smallSqY = stripMode ? Math.max(5.5, h / 28) : Math.max(7.5, h / 22);
+        const smallSqX = smallSqY; // 100% geometric square!
+        const largeSqY = smallSqY * 5;
+        const largeSqX = smallSqX * 5;
+        const baselineY = h * 0.63;
+        const mVHeight = smallSqY * 10; // Standard 10mm = 1mV (2 large squares)
+
+        // Draw continuous 1:1 Square Pink/Red Millimeter Paper across the entire canvas
+        ecgCtx.fillStyle = '#fff9f9';
+        ecgCtx.fillRect(0, 0, w, h);
+
+        ecgCtx.lineWidth = 0.65;
+        ecgCtx.strokeStyle = 'rgba(244, 63, 94, 0.27)';
+        ecgCtx.beginPath();
+        for (let x = leftPad; x <= w; x += smallSqX) { ecgCtx.moveTo(x, 0); ecgCtx.lineTo(x, h); }
+        for (let x = leftPad - smallSqX; x >= 0; x -= smallSqX) { ecgCtx.moveTo(x, 0); ecgCtx.lineTo(x, h); }
+        for (let y = baselineY; y >= 0; y -= smallSqY) { ecgCtx.moveTo(0, y); ecgCtx.lineTo(w, y); }
+        for (let y = baselineY + smallSqY; y <= h; y += smallSqY) { ecgCtx.moveTo(0, y); ecgCtx.lineTo(w, y); }
+        ecgCtx.stroke();
+
+        ecgCtx.lineWidth = 1.35;
+        ecgCtx.strokeStyle = 'rgba(225, 29, 72, 0.56)';
+        ecgCtx.beginPath();
+        for (let x = leftPad; x <= w; x += largeSqX) { ecgCtx.moveTo(x, 0); ecgCtx.lineTo(x, h); }
+        for (let x = leftPad - largeSqX; x >= 0; x -= largeSqX) { ecgCtx.moveTo(x, 0); ecgCtx.lineTo(x, h); }
+        for (let y = baselineY; y >= 0; y -= largeSqY) { ecgCtx.moveTo(0, y); ecgCtx.lineTo(w, y); }
+        for (let y = baselineY + largeSqY; y <= h; y += largeSqY) { ecgCtx.moveTo(0, y); ecgCtx.lineTo(w, y); }
+        ecgCtx.stroke();
+
+        // Standard 40ms per small square (25 mm/s paper speed) -> pxPerMs = smallSqX / 40!
+        // In Single-Beat Mode (!stripMode), we magnify the 800ms beat with true square boxes (1.5x zoom) and center it cleanly!
+        const pxPerMs = stripMode ? (smallSqX / 40) : ((smallSqX * 1.35) / 40);
+        const totalMsSpan = stripMode ? Math.max(2400, Math.min(3600, Math.round(availW / pxPerMs))) : 800;
+        const traceWidthPx = totalMsSpan * pxPerMs;
+        const startX = stripMode ? leftPad : Math.max(leftPad, leftPad + (availW - traceWidthPx) * 0.5);
+
+        // If Single-Beat Mode is centered, subtly shade the non-active margins and frame the Square 1-Beat Diagnostic Window
+        if (!stripMode && startX > leftPad + 8) {
+            ecgCtx.fillStyle = 'rgba(15, 23, 42, 0.045)';
+            ecgCtx.fillRect(leftPad, 0, startX - leftPad, h);
+            ecgCtx.fillRect(startX + traceWidthPx, 0, w - (startX + traceWidthPx), h);
+            ecgCtx.strokeStyle = 'rgba(2, 132, 199, 0.45)';
+            ecgCtx.lineWidth = 1.5;
+            ecgCtx.strokeRect(startX, 2, traceWidthPx, h - 20);
+        }
+
+        const numCyclesInStrip = Math.max(1, Math.round(totalMsSpan / 800));
+        const scanTime = stripMode ? (((continuousCycleCount % numCyclesInStrip) * 800) + currentTime) : currentTime;
+
+        // Time labels along bottom
+        ecgCtx.fillStyle = '#9f1239';
+        ecgCtx.font = 'bold 9.5px monospace';
+        const stepSecMs = stripMode ? 400 : 200;
+        for (let ms = 0; ms <= totalMsSpan; ms += stepSecMs) {
+            const lx = startX + ms * pxPerMs;
+            if (lx <= w - 18) {
+                ecgCtx.fillText((ms / 1000).toFixed(stripMode ? 1 : 2) + 's', lx - 10, h - 4);
+            }
+        }
+
+        // Standard 1mV Calibration Pulse on Left Margin
+        ecgCtx.strokeStyle = '#111827';
+        ecgCtx.lineWidth = 2.0;
+        ecgCtx.beginPath();
+        ecgCtx.moveTo(6, baselineY); ecgCtx.lineTo(12, baselineY);
+        ecgCtx.lineTo(12, baselineY - mVHeight); ecgCtx.lineTo(24, baselineY - mVHeight);
+        ecgCtx.lineTo(24, baselineY); ecgCtx.lineTo(30, baselineY);
+        ecgCtx.stroke();
+        ecgCtx.fillStyle = '#111827';
+        ecgCtx.font = 'bold 9px monospace';
+        ecgCtx.fillText('1mV', 6, baselineY - mVHeight - 4);
+
+        // Voltage Axis Ticks
+        ecgCtx.save();
+        const voltageAxisX = leftPad - 4;
+        ecgCtx.strokeStyle = '#be123c';
+        ecgCtx.lineWidth = 1.1;
+        ecgCtx.beginPath();
+        ecgCtx.moveTo(voltageAxisX, baselineY - mVHeight * 1.1);
+        ecgCtx.lineTo(voltageAxisX, baselineY + mVHeight * 1.1);
+        ecgCtx.stroke();
+        ecgCtx.fillStyle = '#881337';
+        ecgCtx.font = 'bold 9px monospace';
+        ecgCtx.textAlign = 'right';
+        ecgCtx.textBaseline = 'middle';
+        [1, 0.5, 0, -0.5, -1].forEach(mv => {
+            const tickY = baselineY - mv * mVHeight;
+            ecgCtx.beginPath();
+            ecgCtx.moveTo(voltageAxisX - 3, tickY);
+            ecgCtx.lineTo(voltageAxisX, tickY);
+            ecgCtx.stroke();
+            ecgCtx.fillText((mv > 0 ? '+' : '') + mv.toFixed(1), voltageAxisX - 5, tickY);
+        });
+        ecgCtx.restore();
+
+        // Waveform Trace (Ghost full trace + Crisp Black Thermal Ink active trace)
+        const stepMs = stripMode ? 2.5 : 1.5;
+        ecgCtx.save();
+        ecgCtx.beginPath();
+        ecgCtx.strokeStyle = 'rgba(15, 23, 42, 0.28)';
+        ecgCtx.lineWidth = 1.8;
+        for (let t = 0; t <= totalMsSpan; t += stepMs) {
+            const x = startX + t * pxPerMs;
+            const v = window.computeLeadVoltage(t, currentScenario, selectedLeadName);
+            const y = baselineY - v * mVHeight;
+            if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+        }
+        ecgCtx.stroke();
+
+        ecgCtx.beginPath();
+        ecgCtx.strokeStyle = '#0f172a';
+        ecgCtx.lineWidth = 2.5;
+        ecgCtx.lineJoin = 'round';
+        ecgCtx.lineCap = 'round';
+        for (let t = 0; t <= Math.min(totalMsSpan, scanTime); t += stepMs) {
+            const x = startX + t * pxPerMs;
+            const v = window.computeLeadVoltage(t, currentScenario, selectedLeadName);
+            const y = baselineY - v * mVHeight;
+            if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+        }
+        ecgCtx.stroke();
+        ecgCtx.restore();
+
+        // FIXED CALIPERS & PATHOLOGICAL WAVE ANNOTATIONS (Works in BOTH Single-Beat & Multi-Beat Strip Mode!)
+        const caliperToggle = document.getElementById('toggle-calipers');
+        if (caliperToggle && caliperToggle.checked && currentScenario !== 'asystole' && currentScenario !== 'vfib') {
+            const isAr = (currentLang === 'ar');
+            const drawTag = (ms, labelTxt, bgCol, dy) => {
+                if (ms > totalMsSpan) return;
+                const tx = startX + ms * pxPerMs;
+                const tv = window.computeLeadVoltage(ms, currentScenario, selectedLeadName);
+                const ty = Math.max(16, Math.min(h - 24, baselineY - tv * mVHeight + dy));
+                ecgCtx.save();
+                ecgCtx.font = '900 10px Cairo, Inter, monospace';
+                const tw = ecgCtx.measureText(labelTxt).width + 10;
+                ecgCtx.fillStyle = bgCol;
+                ecgCtx.beginPath();
+                ecgCtx.roundRect(tx - tw / 2, ty - 9, tw, 17, 4);
+                ecgCtx.fill();
+                ecgCtx.fillStyle = '#ffffff';
+                ecgCtx.textAlign = 'center';
+                ecgCtx.textBaseline = 'middle';
+                ecgCtx.fillText(labelTxt, tx, ty - 0.5);
+                ecgCtx.restore();
+            };
+
+            // Standard PR / QRS / QT brackets anchored fixedly on Beat 1
+            if (!['afib', 'vt', 'tdp', 'aflutter', 'svt', 'sinewave', 'wpw_afib', 'mat'].includes(currentScenario)) {
+                const pStart = (currentScenario === 'avb1') ? 40 : 75;
+                const qrsStart = 215;
+                const qrsEnd = (currentScenario === 'lbbb' || currentScenario === 'rbbb' || currentScenario === 'ivr') ? 315 : 275;
+                drawBracket(ecgCtx, startX + pStart * pxPerMs, startX + qrsStart * pxPerMs, 18, isAr ? 'فترة PR' : 'PR', '#c2410c');
+                drawBracket(ecgCtx, startX + qrsStart * pxPerMs, startX + qrsEnd * pxPerMs, 34, 'QRS', '#0369a1');
+                drawBracket(ecgCtx, startX + qrsStart * pxPerMs, startX + 545 * pxPerMs, h - 22, isAr ? 'فترة QT' : 'QT', '#6d28d9');
+                drawTag(115, 'P', '#d97706', -18);
+                drawTag(244, 'R', '#0284c7', -18);
+                drawTag(495, 'T', '#7c3aed', -18);
+            }
+
+            // Pathological Wave Markers (U Wave, Peaked T, Sawtooth F, Delta Wave, R-on-T, ST Elevation, Dropped QRS)
+            if (currentScenario === 'hypok') {
+                drawTag(640, isAr ? 'موجة U البارزة (U Wave)' : 'Prominent U Wave', '#be123c', -20);
+                if (stripMode && totalMsSpan >= 1600) {
+                    drawTag(1440, isAr ? 'موجة U' : 'U Wave', '#be123c', -20);
+                }
+            } else if (currentScenario === 'hyperk') {
+                drawTag(445, isAr ? 'موجة T المؤنفة (Peaked T)' : 'Peaked Tented T', '#be123c', -20);
+            } else if (currentScenario === 'aflutter') {
+                drawTag(100, isAr ? 'أسنان المنشار (F)' : 'Sawtooth F', '#d97706', 22);
+                drawTag(300, 'F', '#d97706', 22);
+                drawTag(500, 'F', '#d97706', 22);
+                drawTag(200, 'QRS', '#0284c7', -18);
+            } else if (currentScenario === 'svt') {
+                drawTag(75, 'QRS (210/m)', '#0284c7', -18);
+                drawTag(342, 'QRS', '#0284c7', -18);
+                drawTag(608, 'QRS', '#0284c7', -18);
+            } else if (currentScenario === 'wpw_afib') {
+                drawTag(115, isAr ? 'موجة دلتا (Delta)' : 'Delta Wave', '#be123c', -20);
+            } else if (currentScenario === 'pvc_ront') {
+                drawTag(472, isAr ? 'ظاهرة R-on-T الخبيثة!' : 'R-on-T PVC!', '#be123c', -20);
+            } else if (['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_inf_lcx', 'stemi_lat'].includes(currentScenario)) {
+                if (window.isSelectedLeadIschemic(currentScenario, selectedLeadName)) {
+                    drawTag(230, isAr ? 'Q مرضية' : 'Path Q', '#9f1239', 22);
+                    drawTag(365, isAr ? 'ارتفاع ST (STE)' : 'ST Elevation', '#e11d48', -20);
+                }
+            } else if (currentScenario === 'avb2_1' || currentScenario === 'avb2_2') {
+                if (stripMode && totalMsSpan >= 2000) {
+                    drawTag(1705, isAr ? 'P محجوبة (سقوط QRS!)' : 'Blocked P (Dropped QRS!)', '#e11d48', -22);
+                }
+            }
+        }
+
+        // Scanning Red Playhead Cursor
+        const curX = startX + Math.min(totalMsSpan, scanTime) * pxPerMs;
+        const curV = window.computeLeadVoltage(scanTime, currentScenario, selectedLeadName);
+        const curY = baselineY - curV * mVHeight;
+        ecgCtx.strokeStyle = 'rgba(225, 29, 72, 0.70)';
+        ecgCtx.lineWidth = 1.5;
+        ecgCtx.setLineDash([4, 4]);
+        ecgCtx.beginPath(); ecgCtx.moveTo(curX, 0); ecgCtx.lineTo(curX, h - 18); ecgCtx.stroke();
+        ecgCtx.setLineDash([]);
+        ecgCtx.fillStyle = '#e11d48';
+        ecgCtx.beginPath(); ecgCtx.arc(curX, curY, 5, 0, Math.PI * 2); ecgCtx.fill();
+        ecgCtx.strokeStyle = '#ffffff'; ecgCtx.lineWidth = 2; ecgCtx.stroke();
+
+        window.updateLeadVectorInspectorBanner();
+        updateAndDrawStickyMiniMonitor(totalMsSpan, scanTime);
+    };
+
+    // Make scrubbing on `#ecg-canvas` match the exact `startX` and `totalMsSpan`!
+    ecgCanvas.onpointerdown = null;
+    let isScrubbingV3 = false;
+    function scrubMainECG(e) {
+        const rect = ecgCanvas.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        const leftPad = 52, rightPad = 12;
+        const availW = Math.max(120, w - leftPad - rightPad);
+        const smallSqY = stripMode ? Math.max(5.5, h / 28) : Math.max(7.5, h / 22);
+        const pxPerMs = stripMode ? (smallSqY / 40) : ((smallSqY * 1.35) / 40);
+        const totalMsSpan = stripMode ? Math.max(2400, Math.min(3600, Math.round(availW / pxPerMs))) : 800;
+        const traceWidthPx = totalMsSpan * pxPerMs;
+        const startX = stripMode ? leftPad : Math.max(leftPad, leftPad + (availW - traceWidthPx) * 0.5);
+        const ratio = Math.max(0, Math.min(1, (e.clientX - rect.left - startX) / Math.max(1, traceWidthPx)));
+        if (isPlaying) togglePlay();
+        if (stripMode) {
+            const tot = ratio * totalMsSpan;
+            continuousCycleCount = Math.floor(tot / 800);
+            currentTime = tot % 800;
+        } else {
+            currentTime = ratio * 800;
+        }
+        drawAll2D();
+        renderThreeJSHeart();
+    }
+    ecgCanvas.addEventListener('pointerdown', e => { isScrubbingV3 = true; scrubMainECG(e); });
+    ecgCanvas.addEventListener('pointermove', e => { if (isScrubbingV3) scrubMainECG(e); });
+    window.addEventListener('pointerup', () => { isScrubbingV3 = false; });
+
+    // =========================================================================
+    // 6. STICKY MINI-ECG & MINI-HEART:
+    //    - ONLY appears when the user scrolls down and the main `#ecg-canvas` disappears!
+    //    - Matches the Main ECG 100% (same lead, same stripMode / totalMsSpan, same scanTime)!
+    // =========================================================================
+    const miniWrap = document.getElementById('sticky-mini-monitor-wrapper');
+    const miniEcgC = document.getElementById('sticky-mini-ecg-canvas');
+    const miniHeartC = document.getElementById('sticky-mini-heart-canvas');
+
+    function checkMainECGVisibilityOnScroll() {
+        if (!miniWrap || !ecgCanvas) return;
+        const simView = document.getElementById('ecg-simulator-view');
+        if (!simView || simView.classList.contains('hidden')) {
+            miniWrap.classList.remove('scrolled-past-main-ecg');
+            return;
+        }
+        const rect = ecgCanvas.getBoundingClientRect();
+        // Show the sticky mini monitor ONLY when the bottom of the main ECG canvas scrolls above the sticky bar (~115px)!
+        const mainEcgHiddenAbove = rect.bottom < 125;
+        if (mainEcgHiddenAbove !== miniWrap.classList.contains('scrolled-past-main-ecg')) {
+            miniWrap.classList.toggle('scrolled-past-main-ecg', mainEcgHiddenAbove);
+            if (mainEcgHiddenAbove) {
+                requestAnimationFrame(() => {
+                    if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
+                });
+            }
+        }
+    }
+    window.addEventListener('scroll', checkMainECGVisibilityOnScroll, { passive: true });
+
+    function updateAndDrawStickyMiniMonitor(mainSpanMs, mainScanTime) {
+        checkMainECGVisibilityOnScroll();
+        if (!miniWrap || (!miniWrap.classList.contains('scrolled-past-main-ecg') && !document.body.classList.contains('clinix-heart-fullscreen-mode'))) {
+            return;
+        }
+        const pill = document.getElementById('sticky-mini-lead-pill');
+        if (pill && SCENARIOS[currentScenario]) {
+            pill.textContent = `${selectedLeadName} • ${SCENARIOS[currentScenario].hr} bpm`;
+        }
+
+        const dpr = window.devicePixelRatio || 1;
+        if (miniEcgC && miniEcgC.parentElement) {
+            const r = miniEcgC.parentElement.getBoundingClientRect();
+            if (r.width > 10 && r.height > 10) {
+                if (Math.abs(miniEcgC.width - r.width * dpr) > 4) {
+                    miniEcgC.width = Math.round(r.width * dpr);
+                    miniEcgC.height = Math.round(r.height * dpr);
+                }
+                const ctx = miniEcgC.getContext('2d');
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const w = r.width, h = r.height;
+                const smallSq = Math.max(4.5, h / 12);
+                const largeSq = smallSq * 5;
+                const baseY = h * 0.64;
+                const scaleMV = smallSq * 4.2;
+
+                // Pink paper grid
+                ctx.fillStyle = '#fff9f9';
+                ctx.fillRect(0, 0, w, h);
+                ctx.lineWidth = 0.55;
+                ctx.strokeStyle = 'rgba(244, 63, 94, 0.25)';
+                ctx.beginPath();
+                for (let x = 0; x <= w; x += smallSq) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+                for (let y = 0; y <= h; y += smallSq) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+                ctx.stroke();
+                ctx.lineWidth = 1.15;
+                ctx.strokeStyle = 'rgba(225, 29, 72, 0.50)';
+                ctx.beginPath();
+                for (let x = 0; x <= w; x += largeSq) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+                for (let y = 0; y <= h; y += largeSq) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+                ctx.stroke();
+
+                // Match the EXACT span and waveform of the Main ECG above!
+                const spanMs = mainSpanMs || (stripMode ? 3200 : 800);
+                const scanMs = (typeof mainScanTime === 'number') ? mainScanTime : currentTime;
+                const pxPerMs = w / spanMs;
+
+                ctx.beginPath();
+                ctx.strokeStyle = 'rgba(15, 23, 42, 0.25)';
+                ctx.lineWidth = 1.5;
+                for (let ms = 0; ms <= spanMs; ms += 3) {
+                    const x = ms * pxPerMs;
+                    const v = window.computeLeadVoltage(ms, currentScenario, selectedLeadName);
+                    const y = Math.max(2, Math.min(h - 2, baseY - v * scaleMV));
+                    if (ms === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.strokeStyle = '#0f172a';
+                ctx.lineWidth = 2.1;
+                for (let ms = 0; ms <= Math.min(spanMs, scanMs); ms += 3) {
+                    const x = ms * pxPerMs;
+                    const v = window.computeLeadVoltage(ms, currentScenario, selectedLeadName);
+                    const y = Math.max(2, Math.min(h - 2, baseY - v * scaleMV));
+                    if (ms === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+                }
+                ctx.stroke();
+
+                const cx = Math.min(w, scanMs * pxPerMs);
+                const cv = window.computeLeadVoltage(scanMs, currentScenario, selectedLeadName);
+                const cy = Math.max(3, Math.min(h - 3, baseY - cv * scaleMV));
+                ctx.strokeStyle = '#e11d48';
+                ctx.lineWidth = 1.4;
+                ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+                ctx.fillStyle = '#e11d48';
+                ctx.beginPath(); ctx.arc(cx, cy, 3.8, 0, Math.PI * 2); ctx.fill();
+            }
+        }
+    }
+
+    // =========================================================================
+    // 7. ENHANCED 12-LEAD GRID WITH PROMINENT RED (PRIMARY AFFECTED) AND
+    //    YELLOW/AMBER (PROBABLE / RECIPROCAL) BOXES, BORDERS, BADGES & TRACES!
+    // =========================================================================
+    window.draw12LeadPanel = function () {
+        twelveCtx.direction = 'ltr';
+        twelveCtx.textAlign = 'left';
+        const w = twelveCanvas.width / (window.devicePixelRatio || 1);
+        const h = twelveCanvas.height / (window.devicePixelRatio || 1);
+        const isAr = (currentLang === 'ar');
+
+        const cols = w < 520 ? 2 : (w < 850 ? 3 : 4);
+        const rows = Math.ceil(LEADS_12.length / cols);
+        const cellW = w / cols;
+        const cellH = h / rows;
+
+        // Authentic 1:1 Square Pink/Red Millimeter Paper across the 12-lead sheet
+        const sq = Math.max(4.5, Math.min(6.5, cellH / 22));
+        const lSq = sq * 5;
+        twelveCtx.fillStyle = '#fff9f9';
+        twelveCtx.fillRect(0, 0, w, h);
+
+        twelveCtx.lineWidth = 0.55;
+        twelveCtx.strokeStyle = 'rgba(244, 63, 94, 0.24)';
+        twelveCtx.beginPath();
+        for (let x = 0; x <= w; x += sq) { twelveCtx.moveTo(x, 0); twelveCtx.lineTo(x, h); }
+        for (let y = 0; y <= h; y += sq) { twelveCtx.moveTo(0, y); twelveCtx.lineTo(w, y); }
+        twelveCtx.stroke();
+
+        twelveCtx.lineWidth = 1.15;
+        twelveCtx.strokeStyle = 'rgba(225, 29, 72, 0.48)';
+        twelveCtx.beginPath();
+        for (let x = 0; x <= w; x += lSq) { twelveCtx.moveTo(x, 0); twelveCtx.lineTo(x, h); }
+        for (let y = 0; y <= h; y += lSq) { twelveCtx.moveTo(0, y); twelveCtx.lineTo(w, y); }
+        twelveCtx.stroke();
+
+        const leadStripSpan = 2400;
+        const leadCursorTime = ((continuousCycleCount % 3) * 800) + currentTime;
+
+        LEADS_12.forEach((lead, idx) => {
+            const c = idx % cols;
+            const r = Math.floor(idx / cols);
+            const x0 = c * cellW;
+            const y0 = r * cellH;
+            const baseY = y0 + cellH * 0.63;
+            const scaleMV = cellH * (currentScenario === 'lvh' ? 0.18 : 0.24);
+
+            const leadStatus = (currentScenario === 'normal') ? 'none' : getLeadImpactStatus(currentScenario, lead.id);
+            const isSel = (selectedLeadName === lead.id);
+
+            // Highlight Box Fill & Prominent Colored Border for Primary Affected (RED) vs Probable/Secondary (YELLOW/AMBER)!
+            if (leadStatus === 'primary') {
+                twelveCtx.fillStyle = 'rgba(225, 29, 72, 0.10)';
+                twelveCtx.fillRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+                twelveCtx.strokeStyle = '#e11d48';
+                twelveCtx.lineWidth = isSel ? 3.6 : 2.8;
+                twelveCtx.strokeRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+            } else if (leadStatus === 'secondary') {
+                // YELLOW/AMBER border & glow for Probable / Reciprocal / Supportive leads!
+                twelveCtx.fillStyle = 'rgba(234, 179, 8, 0.14)';
+                twelveCtx.fillRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+                twelveCtx.strokeStyle = '#eab308';
+                twelveCtx.lineWidth = isSel ? 3.6 : 2.8;
+                twelveCtx.strokeRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+            } else {
+                if (isSel) {
+                    twelveCtx.fillStyle = 'rgba(2, 132, 199, 0.09)';
+                    twelveCtx.fillRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+                }
+                twelveCtx.strokeStyle = isSel ? '#0284c7' : 'rgba(225, 29, 72, 0.32)';
+                twelveCtx.lineWidth = isSel ? 2.8 : 1.0;
+                twelveCtx.strokeRect(x0 + 1.5, y0 + 1.5, cellW - 3, cellH - 3);
+            }
+
+            // Lead Name (Top-Left)
+            twelveCtx.fillStyle = leadStatus === 'primary' ? '#be123c' : (leadStatus === 'secondary' ? '#a16207' : (isSel ? '#0369a1' : '#111827'));
+            twelveCtx.font = '900 12px Inter, monospace';
+            twelveCtx.fillText(lead.id, x0 + 7, y0 + 15);
+
+            // Status Pill Badge in Top-Right of Cell (Red "متأثر" vs Yellow "محتمل / مرآتي")
+            if (leadStatus === 'primary' || leadStatus === 'secondary') {
+                const badgeTxt = leadStatus === 'primary'
+                    ? (isAr ? '● متأثر' : '● Affected')
+                    : (isAr ? '◐ محتمل/مرآتي' : '◐ Probable/Recip');
+                twelveCtx.save();
+                twelveCtx.font = '800 9.5px Cairo, Inter, sans-serif';
+                const bw = twelveCtx.measureText(badgeTxt).width + 10;
+                twelveCtx.fillStyle = leadStatus === 'primary' ? '#e11d48' : '#eab308';
+                twelveCtx.beginPath();
+                twelveCtx.roundRect(x0 + cellW - bw - 6, y0 + 4, bw, 15, 4);
+                twelveCtx.fill();
+                twelveCtx.fillStyle = leadStatus === 'primary' ? '#ffffff' : '#0f172a';
+                twelveCtx.textAlign = 'center';
+                twelveCtx.textBaseline = 'middle';
+                twelveCtx.fillText(badgeTxt, x0 + cellW - 6 - bw / 2, y0 + 11.5);
+                twelveCtx.restore();
+            }
+
+            // Waveform Trace (Red-Crimson for Primary Affected, Amber-Gold for Secondary/Probable, Crisp Black for Neutral)
+            twelveCtx.beginPath();
+            twelveCtx.strokeStyle = leadStatus === 'primary' ? '#be123c' : (leadStatus === 'secondary' ? '#b45309' : '#0f172a');
+            twelveCtx.lineWidth = (leadStatus !== 'none' || isSel) ? 2.15 : 1.75;
+            twelveCtx.lineJoin = 'round';
+
+            const padX = 6;
+            const plotCW = cellW - padX * 2;
+            for (let ms = 0; ms <= leadStripSpan; ms += 6) {
+                const px = x0 + padX + (ms / leadStripSpan) * plotCW;
+                const v = window.computeLeadVoltage(ms, currentScenario, lead.id);
+                const py = Math.max(y0 + 20, Math.min(y0 + cellH - 5, baseY - v * scaleMV));
+                if (ms === 0) twelveCtx.moveTo(px, py); else twelveCtx.lineTo(px, py);
+            }
+            twelveCtx.stroke();
+
+            // Synchronized Playhead Dot
+            const curPx = x0 + padX + (leadCursorTime / leadStripSpan) * plotCW;
+            const curV = window.computeLeadVoltage(leadCursorTime, currentScenario, lead.id);
+            const curPy = Math.max(y0 + 20, Math.min(y0 + cellH - 5, baseY - curV * scaleMV));
+            twelveCtx.fillStyle = leadStatus === 'secondary' ? '#eab308' : '#e11d48';
+            twelveCtx.beginPath(); twelveCtx.arc(curPx, curPy, 3.3, 0, Math.PI * 2); twelveCtx.fill();
+        });
+    };
+
+    // =========================================================================
+    // 8. FULL 3D HEART SYNCHRONIZATION ACROSS ALL 35 SCENARIOS:
+    //    - Asystole: Complete electrical & mechanical standstill (0 sparks, 0 glow, 0 contraction)
+    //    - Torsades de Pointes (`tdp`): Rapid 240 bpm twisting contraction & rotating 3D vector
+    //    - Hypokalemia (`hypok`): 3D U-Wave Purkinje delayed repolarization glow during Phase 5
+    //    - RBBB (`rbbb`), Junctional, IVR, MAT, WPW+AFib, R-on-T, LCx Inferior STEMI
+    // =========================================================================
+    const prevRenderHeartP2 = window.renderThreeJSHeart;
+    window.renderThreeJSHeart = function () {
+        prevRenderHeartP2();
+        if (typeof THREE === 'undefined' || !scene || !heartGroup) return;
+
+        const sc = currentScenario;
+        const absT = continuousCycleCount * 800 + currentTime;
+        const isAr = (currentLang === 'ar');
+        const capEl = document.getElementById('heart3d-charge-caption');
+
+        // 1. ASYSTOLE (توقف القلب الكامل): Total electrical & mechanical standstill!
+        if (sc === 'asystole') {
+            if (meshRA) { meshRA.scale.set(1, 1, 1); meshRA.material.emissive.setHex(0x000000); }
+            if (meshLA) { meshLA.scale.set(1, 1, 1); meshLA.material.emissive.setHex(0x000000); }
+            if (meshRV) { meshRV.scale.set(1, 1, 1); meshRV.material.emissive.setHex(0x000000); }
+            if (meshLV) { meshLV.scale.set(1, 1, 1); meshLV.material.emissive.setHex(0x000000); }
+            if (meshAorta) meshAorta.scale.set(1, 1, 1);
+            if (meshPulm) meshPulm.scale.set(1, 1, 1);
+            conductionNodes3D.forEach(n => { n.material.emissiveIntensity = 0.12; n.scale.setScalar(1.0); });
+            conductionTubes3D.forEach(tb => {
+                tb.material.color.setHex(0x475569);
+                tb.material.emissive.setHex(0x000000);
+                tb.material.emissiveIntensity = 0.05;
+            });
+            // Hide any charge-flow sprites inside conductionSystemGroup
+            if (conductionSystemGroup) {
+                conductionSystemGroup.children.forEach(ch => {
+                    if (ch.type === 'Group') ch.visible = false;
+                });
+            }
+            if (vectorArrow3D) vectorArrow3D.visible = false;
+            if (capEl) capEl.textContent = isAr
+                ? '⛔ توقف تام للنشاط الكهربائي والميكانيكي في القلب (Asystole — خط مستقيم بدون أي شحنة أو انقباض)'
+                : '⛔ Complete electrical and mechanical cardiac standstill (Asystole — zero impulse, zero contraction)';
+            const cVal = document.getElementById('val-3d-conduction');
+            const wVal = document.getElementById('val-3d-wall');
+            if (cVal) cVal.textContent = isAr ? 'صمت كهربائي كامل (لا توجد نبضة في SA أو AV أو بركنجي)' : 'Complete Electrical Silence (Flatline)';
+            if (wVal) wVal.textContent = isAr ? 'توقف الانقباض الكامل (النتاج القلبي = صفر)' : 'Total Mechanical Standstill (Cardiac Output = 0)';
+            if (renderer && scene && camera) renderer.render(scene, camera);
+            return;
+        } else if (conductionSystemGroup) {
+            conductionSystemGroup.children.forEach(ch => {
+                if (ch.type === 'Group') ch.visible = layers3D.conduction;
+            });
+        }
+
+        // 2. TORSADES DE POINTES (`tdp`): Synchronized rapid polymorphic twisting ventricular contraction & rotating 3D vector!
+        if (sc === 'tdp') {
+            if (meshRA) { meshRA.scale.set(1, 1, 1); meshRA.material.emissive.setHex(0x000000); }
+            if (meshLA) { meshLA.scale.set(1, 1, 1); meshLA.material.emissive.setHex(0x000000); }
+            const twistAngle = ((absT % 1600) / 1600) * Math.PI * 2;
+            const twistEnv = Math.sin(twistAngle);
+            const fastOsc = Math.sin((absT / 250) * Math.PI * 2);
+            const rvShake = 0.08 * twistEnv * fastOsc;
+            const lvShake = -0.09 * twistEnv * Math.cos((absT / 250) * Math.PI * 2);
+            if (meshRV) {
+                meshRV.scale.set(1 - rvShake, 1 + rvShake * 0.4, 1 - rvShake);
+                meshRV.material.emissive.setHex(fastOsc > 0 ? 0x881337 : 0x1e3a8a);
+            }
+            if (meshLV) {
+                meshLV.scale.set(1 - lvShake, 1 + lvShake * 0.4, 1 - lvShake);
+                meshLV.material.emissive.setHex(fastOsc < 0 ? 0x881337 : 0x1e3a8a);
+            }
+            // Subtle axial twisting motion of the ventricles around the heart's longitudinal axis
+            heartGroup.rotation.y = 0.14 * Math.sin(twistAngle);
+            heartGroup.rotation.z = 0.08 * Math.cos(twistAngle);
+            if (vectorArrow3D && layers3D.vectors) {
+                vectorArrow3D.visible = true;
+                vectorArrow3D.setDirection(new THREE.Vector3(Math.cos(twistAngle * 2), Math.sin(twistAngle), Math.sin(twistAngle * 2)).normalize());
+                vectorArrow3D.setLength(1.2 + Math.abs(twistEnv) * 1.4, 0.45, 0.30);
+            }
+            if (capEl) capEl.textContent = isAr
+                ? '🌀 تورسادس دي بوينت (Torsades): بؤر بطينية متعددة الأشكال تلتف حول محور القلب بسرعة ~220/د دون ضخ فعّال!'
+                : '🌀 Torsades de Pointes: polymorphic ventricular activation twisting around the cardiac axis at ~220 bpm!';
+            if (renderer && scene && camera) renderer.render(scene, camera);
+            return;
+        } else if (sc !== 'tamponade') {
+            heartGroup.rotation.y = 0;
+        }
+
+        // 3. HYPOKALEMIA (`hypok`): Represent the Prominent U Wave on the 3D Heart during Phase 5 (t = 580..720ms)!
+        if (sc === 'hypok' && currentTime >= 575 && currentTime <= 725) {
+            const uPulse = Math.sin(((currentTime - 575) / 150) * Math.PI);
+            conductionTubes3D.forEach((tb, idx) => {
+                if (idx >= 5) { // Purkinje fibers delayed repolarization glow (U wave source!)
+                    tb.material.color.setHex(0xf43f5e);
+                    tb.material.emissive.setHex(0xe11d48);
+                    tb.material.emissiveIntensity = 0.8 + uPulse * 1.4;
+                }
+            });
+            if (meshLV && meshRV) {
+                meshLV.material.emissive.setHex(0x831843);
+                meshRV.material.emissive.setHex(0x831843);
+            }
+            if (capEl) capEl.textContent = isAr
+                ? '🟣 موجة U البارزة في نقص البوتاسيوم: تأخر إعادة استقطاب ألياف بركنجي والعضلات الحليمية في نهاية الطور 3 وبداية الطور 4!'
+                : '🟣 Prominent U Wave in Hypokalemia: delayed repolarization of Purkinje fibers and papillary muscles after the T wave!';
+            const cVal = document.getElementById('val-3d-conduction');
+            if (cVal) cVal.textContent = isAr ? 'تأخر إعادة استقطاب ألياف بركنجي (يرسم موجة U البارزة!)' : 'Delayed Purkinje repolarization (generates prominent U wave!)';
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        // 4. RBBB (`rbbb`): Highlight blocked Right Bundle Branch in red and delay RV squeeze!
+        if (sc === 'rbbb') {
+            conductionTubes3D.forEach((tb, idx) => {
+                if (idx === 4 || idx === 8 || idx === 9) { // Right Bundle Branch & Right Purkinje
+                    tb.material.color.setHex(0xf43f5e);
+                    tb.material.emissive.setHex(0xe11d48);
+                    tb.material.emissiveIntensity = 1.1;
+                }
+            });
+            if (capEl && currentTime >= 215 && currentTime <= 320) {
+                capEl.textContent = isAr
+                    ? '⚡ حصار الحزمة اليمنى (RBBB): يتفعل البطين الأيسر أولاً ثم تنتقل الشحنة ببطء للبطين الأيمن المتأخر (ترسم أذني الأرنب rsR\' في V1)!'
+                    : '⚡ Right Bundle Branch Block (RBBB): LV activates on time while RV activates late via cell-to-cell spread (drawing rsR\' in V1)!';
+            }
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+
+        // 5. LCx Inferior STEMI (`stemi_inf_lcx`): Show 3D Thrombus in Distal LCx & Inferior-Lateral Infarct Patch!
+        if (sc === 'stemi_inf_lcx') {
+            if (meshMI_Inf) meshMI_Inf.visible = true;
+            if (meshMI_Lat) meshMI_Lat.visible = true;
+            if (coronaryGroup) coronaryGroup.visible = true;
+            if (thrombusGroup3D) {
+                thrombusGroup3D.visible = true;
+                thrombusGroup3D.position.set(1.58, -0.42, 0.18); // Distal LCx occlusion site!
+            }
+            if (renderer && scene && camera) renderer.render(scene, camera);
+        }
+    };
+
+    // =========================================================================
+    // 9. DISEASE-SPECIFIC CELL MEMBRANE ION GATES ANIMATION (`drawCellGatesPanel`)
+    //    (Adapts Na+, Ca2+/RyR2, K+ channels, pores, and ion streams to every pathology!)
+    // =========================================================================
+    window.drawCellGatesPanel = function () {
+        gatesCtx.direction = 'ltr';
+        gatesCtx.textAlign = 'left';
+        const w = gatesCanvas.width / (window.devicePixelRatio || 1);
+        const h = gatesCanvas.height / (window.devicePixelRatio || 1);
+        gatesCtx.clearRect(0, 0, w, h);
+
+        const isAr = (currentLang === 'ar');
+        const sc = currentScenario;
+        const memY = h * 0.37;
+        const memThick = 34;
+
+        // Effective cycle time synchronized with fast/slow/dropped beats
+        const absT = continuousCycleCount * 800 + currentTime;
+        const droppedBeat = (sc === 'avb2_1' && Math.floor(absT / 800) % 3 === 2)
+                         || (sc === 'avb2_2' && Math.floor(absT / 800) % 3 === 2)
+                         || (sc === 'avb_highgrade' && Math.floor(absT / 800) % 3 !== 0)
+                         || (sc === 'avb3' && Math.floor(absT / 800) % 2 === 1);
+
+        let effT = currentTime;
+        if (sc === 'svt') effT = ((absT % 266.67) / 266.67) * 800;
+        else if (sc === 'sinus_tachy') effT = ((absT % 400) / 400) * 800;
+        else if (sc === 'vt') effT = ((absT % 320) / 320) * 800;
+        else if (sc === 'tdp') effT = ((absT % 250) / 250) * 800;
+        else if (sc === 'sinus_brady') effT = (absT % 1400 < 800) ? (absT % 1400) : 750;
+        else if (sc === 'junctional') effT = (absT % 1250 < 800) ? (absT % 1250) : 750;
+        else if (sc === 'ivr') effT = (absT % 1600 < 800) ? (absT % 1600) : 750;
+
+        const isAsystole = (sc === 'asystole');
+        const isVFib = (sc === 'vfib');
+        const isSine = (sc === 'sinewave');
+        const isIschemicLead = window.isSelectedLeadIschemic(sc, selectedLeadName);
+
+        const isPhase0 = !isAsystole && !isVFib && !droppedBeat && (effT >= 215 && effT < 252);
+        const isPhase1 = !isAsystole && !isVFib && !droppedBeat && (effT >= 252 && effT < 275);
+        const isPhase2 = !isAsystole && !isVFib && !droppedBeat && (effT >= 275 && effT < (isIschemicLead ? 380 : 445));
+        const isPhase3 = !isAsystole && !droppedBeat && (effT >= (isIschemicLead ? 380 : 445) && effT < (sc === 'hypok' ? 660 : 575));
+        const isPhase4 = isAsystole || droppedBeat || (!isPhase0 && !isPhase1 && !isPhase2 && !isPhase3);
+
+        // Top Disease-Specific Extracellular Banner
+        let extraBannerAr = 'خارج الخلية (Extracellular): تركيز طبيعي من Na+ (140 mEq/L) و Ca2+';
+        let extraBannerEn = 'Extracellular Space: Normal [Na+] (140 mEq/L) & [Ca2+]';
+        let bannerCol = '#94a3b8';
+
+        if (sc === 'hypona') {
+            extraBannerAr = '⚠️ نقص الصوديوم خارج الخلية ([Na+]o < 120 mEq/L) ➔ ضعف القوة الدافعة لدخول الصوديوم بالطور 0!';
+            extraBannerEn = '⚠️ Low Extracellular [Na+] (<120 mEq/L) -> Weakened Phase 0 Na+ driving force (+5mV peak)!';
+            bannerCol = '#38bdf8';
+        } else if (sc === 'hyperna') {
+            extraBannerAr = '⚡ فرط الصوديوم خارج الخلية ([Na+]o > 155 mEq/L) ➔ اندفاع غزير وسريع جداً للصوديوم بالطور 0 (+30mV)!';
+            extraBannerEn = '⚡ High Extracellular [Na+] (>155 mEq/L) -> Torrential Phase 0 Na+ influx (+30mV overshoot)!';
+            bannerCol = '#fbbf24';
+        } else if (sc === 'hyperk' || sc === 'sinewave') {
+            extraBannerAr = '🚨 فرط البوتاسيوم خارج الخلية ([K+]o ↑) ➔ يرفع جهد الراحة (-65mV) ويغلق بوابة h لقناة الصوديوم!';
+            extraBannerEn = '🚨 High Extracellular [K+] -> Depolarizes resting Vm (-65mV) & locks Na+ h-gates!';
+            bannerCol = '#fb7185';
+        } else if (sc === 'hypok') {
+            extraBannerAr = '🟣 نقص البوتاسيوم خارج الخلية ([K+]o < 3.0) ➔ يعيق خروج K+ في الطور 3 ويولد موجة U وتأخر الاستقطاب!';
+            extraBannerEn = '🟣 Low Extracellular [K+] (<3.0) -> Impairs Phase 3 K+ efflux, flattening T & generating U wave!';
+            bannerCol = '#c084fc';
+        } else if (isIschemicLead) {
+            extraBannerAr = `🩸 إقفار حاد تحت القطب (${selectedLeadName}): نقص ATP يعطل مضخة Na+/K+ ويفتح قنوات K-ATP مبكراً (تيار الإصابة)!`;
+            extraBannerEn = `🩸 Acute Ischemia under (${selectedLeadName}): ATP depletion disables Na+/K+ pump & opens K-ATP channels early!`;
+            bannerCol = '#f43f5e';
+        } else if (sc === 'pea') {
+            extraBannerAr = '⚠️ فك الاقتران الكهروميكانيكي (PEA): البوابات الكهربائية تفتح طبيعياً لكن إطلاق الكالسيوم الميكانيكي معطل!';
+            extraBannerEn = '⚠️ PEA (Electromechanical Dissociation): Surface ion gates cycle, but SR Ca2+ release & contraction fail!';
+            bannerCol = '#fb923c';
+        } else if (isAsystole) {
+            extraBannerAr = '⛔ توقف القلب الكامل (Asystole): انعدام التحفيز الكهربائي وبقاء جميع القنوات مغلقة!';
+            extraBannerEn = '⛔ Asystole (Flatline): Zero electrical stimulation; all voltage-gated channels remain dormant!';
+            bannerCol = '#ef4444';
+        } else if (droppedBeat) {
+            extraBannerAr = '⏸ نبضة محجوبة (Blocked Beat): لم تصل الشرارة للبطين فبقيت قنوات الخلية البطينية في طور الراحة 4!';
+            extraBannerEn = '⏸ Blocked Beat (Dropped QRS): Impulse blocked above ventricles; myocyte channels stay in Phase 4 rest!';
+            bannerCol = '#f59e0b';
+        }
+
+        gatesCtx.fillStyle = bannerCol;
+        gatesCtx.font = 'bold 10.5px Cairo, Inter';
+        gatesCtx.fillText(isAr ? extraBannerAr : extraBannerEn, 12, 17, w - 24);
+        gatesCtx.fillStyle = '#94a3b8';
+        gatesCtx.fillText(isAr ? 'داخل الخلية (Intracellular): العصارة الخلوية والشبكة الساركوبلازمية' : 'Intracellular Cytosol & Sarcoplasmic Reticulum', 12, h - 8, w - 24);
+
+        // Phospholipid Bilayer Membrane
+        gatesCtx.fillStyle = isIschemicLead ? 'rgba(69, 10, 10, 0.85)' : 'rgba(30, 41, 59, 0.88)';
+        gatesCtx.fillRect(10, memY, w - 20, memThick);
+        gatesCtx.strokeStyle = isIschemicLead ? '#f43f5e' : '#475569';
+        gatesCtx.lineWidth = 2;
+        gatesCtx.strokeRect(10, memY, w - 20, memThick);
+
+        const xNa = w * 0.20, xCa = w * 0.50, xK = w * 0.80;
+
+        // 1. FAST Na+ CHANNEL (Phase 0)
+        const naReduced = (sc === 'hypona' || sc === 'hyperk' || sc === 'sinewave' || isIschemicLead);
+        const naBoosted = (sc === 'hyperna');
+        drawChannelPore(gatesCtx, xNa, memY, memThick, naBoosted ? '#0ea5e9' : (naReduced ? '#475569' : '#0284c7'), isPhase0);
+        gatesCtx.fillStyle = '#38bdf8';
+        gatesCtx.font = 'bold 11px Cairo, Inter';
+        gatesCtx.textAlign = 'center';
+        gatesCtx.fillText(isAr ? 'قناة الصوديوم (Na+)' : 'Fast Na+ Channel', xNa, memY - 10);
+        gatesCtx.textAlign = 'left';
+
+        const mOpen = isPhase0 || isPhase1 || isPhase2;
+        const hLockedByPathology = (sc === 'hyperk' || sc === 'sinewave' || isVFib || isIschemicLead);
+        const hOpen = hLockedByPathology ? false : (isPhase4 || isPhase0);
+
+        gatesCtx.strokeStyle = '#facc15'; gatesCtx.lineWidth = 3.5;
+        gatesCtx.beginPath();
+        if (mOpen) {
+            gatesCtx.moveTo(xNa - 18, memY + 6); gatesCtx.lineTo(xNa - 14, memY - 4);
+            gatesCtx.moveTo(xNa + 18, memY + 6); gatesCtx.lineTo(xNa + 14, memY - 4);
+        } else {
+            gatesCtx.moveTo(xNa - 18, memY + 6); gatesCtx.lineTo(xNa + 18, memY + 6);
+        }
+        gatesCtx.stroke();
+        gatesCtx.fillStyle = '#fde047'; gatesCtx.font = 'bold 9.5px monospace';
+        gatesCtx.fillText(mOpen ? 'm-gate: OPEN' : 'm-gate: CLOSED', xNa - 38, memY + 20);
+
+        gatesCtx.strokeStyle = '#fb7185'; gatesCtx.fillStyle = '#f43f5e'; gatesCtx.lineWidth = 3;
+        gatesCtx.beginPath();
+        if (hOpen) {
+            gatesCtx.moveTo(xNa - 18, memY + memThick); gatesCtx.lineTo(xNa - 26, memY + memThick + 18); gatesCtx.stroke();
+            gatesCtx.beginPath(); gatesCtx.arc(xNa - 26, memY + memThick + 20, 5, 0, Math.PI * 2); gatesCtx.fill();
+        } else {
+            gatesCtx.moveTo(xNa - 18, memY + memThick); gatesCtx.lineTo(xNa, memY + memThick + 2); gatesCtx.stroke();
+            gatesCtx.beginPath(); gatesCtx.arc(xNa, memY + memThick + 2, 6, 0, Math.PI * 2); gatesCtx.fill();
+        }
+        gatesCtx.fillStyle = '#fda4af';
+        gatesCtx.fillText(
+            hLockedByPathology ? 'h-gate: INACTIVATED!' : (hOpen ? 'h-gate: OPEN' : 'h-gate: LOCKED'),
+            xNa - 42, memY + memThick + 34
+        );
+
+        if (isPhase0 || (isSine && Math.sin(absT * 0.01) > 0)) {
+            const ionCount = naBoosted ? 6 : (naReduced ? 1 : 3);
+            const speedMul = naBoosted ? 1.8 : (naReduced ? 0.45 : 1.0);
+            drawCustomIons(gatesCtx, xNa, memY - 20, memY + memThick + 40, '#38bdf8', ionCount, speedMul);
+        }
+
+        // 2. L-TYPE Ca2+ CHANNEL & SARCOPLASMIC RETICULUM (RyR2)
+        const eadReactivation = (sc === 'tdp' || sc === 'pvc_ront' || sc === 'hypok') && isPhase3 && (effT > 480 && effT < 540);
+        const caOpen = (isPhase2 || eadReactivation) && !isAsystole && !isVFib;
+        const ryrBlocked = (sc === 'pea' || isAsystole || isVFib || isSine);
+        const ryrWeak = isIschemicLead || sc === 'tamponade';
+
+        drawChannelPore(gatesCtx, xCa, memY, memThick, '#059669', caOpen);
+        gatesCtx.fillStyle = '#34d399'; gatesCtx.font = 'bold 11px Cairo, Inter';
+        gatesCtx.textAlign = 'center';
+        gatesCtx.fillText(isAr ? 'قناة الكالسيوم (L-Ca2+)' : 'L-Type Ca2+ Channel', xCa, memY - 10);
+        gatesCtx.textAlign = 'left';
+
+        gatesCtx.strokeStyle = eadReactivation ? '#f43f5e' : '#34d399'; gatesCtx.lineWidth = 3.5;
+        gatesCtx.beginPath();
+        if (caOpen) {
+            gatesCtx.moveTo(xCa - 16, memY + 12); gatesCtx.lineTo(xCa - 12, memY + 2);
+            gatesCtx.moveTo(xCa + 16, memY + 12); gatesCtx.lineTo(xCa + 12, memY + 2);
+        } else {
+            gatesCtx.moveTo(xCa - 18, memY + 15); gatesCtx.lineTo(xCa + 18, memY + 15);
+        }
+        gatesCtx.stroke();
+
+        const srY = memY + memThick + 44;
+        gatesCtx.fillStyle = ryrBlocked ? 'rgba(225, 29, 72, 0.16)' : 'rgba(16, 185, 129, 0.15)';
+        gatesCtx.strokeStyle = ryrBlocked ? '#f43f5e' : '#10b981'; gatesCtx.lineWidth = 2;
+        gatesCtx.beginPath(); gatesCtx.roundRect(xCa - 68, srY, 136, 42, 10); gatesCtx.fill(); gatesCtx.stroke();
+        gatesCtx.fillStyle = ryrBlocked ? '#fda4af' : '#a7f3d0'; gatesCtx.font = 'bold 10px Cairo, Inter';
+        gatesCtx.textAlign = 'center';
+        gatesCtx.fillText(isAr ? 'الشبكة الساركوبلازمية (SR + RyR2)' : 'Sarcoplasmic Reticulum (RyR2)', xCa, srY + 16);
+        let srSubTxt = isAr ? 'مخزن Ca2+ مغلق' : 'RyR2 Closed';
+        if (sc === 'pea') srSubTxt = isAr ? '✕ فشل إطلاق Ca2+ (لا انقباض!)' : '✕ Failed CICR (Zero Contraction!)';
+        else if (eadReactivation) srSubTxt = isAr ? '⚡ قدح مبكر (EAD / R-on-T)!' : '⚡ EAD Ca2+ Reactivation!';
+        else if (caOpen && ryrWeak) srSubTxt = isAr ? '⚠️ إطلاق Ca2+ ضعيف (حماض إقفاري)' : '⚠️ Weak Ca2+ Release (Ischemia)';
+        else if (caOpen && !ryrBlocked) srSubTxt = isAr ? 'إطلاق غزير للكالسيوم (CICR)!' : 'CICR Active: Ca2+ Burst!';
+        gatesCtx.fillText(srSubTxt, xCa, srY + 33);
+        gatesCtx.textAlign = 'left';
+
+        if (caOpen && !ryrBlocked) {
+            drawCustomIons(gatesCtx, xCa, memY - 18, srY + 2, eadReactivation ? '#f43f5e' : '#34d399', ryrWeak ? 1 : 3, ryrWeak ? 0.5 : 1.0);
+        }
+
+        // 3. POTASSIUM K+ CHANNELS (IKr / IKs / IK1 / K-ATP in Ischemia)
+        const kAtpLeak = isIschemicLead && isPhase2; // In STEMI, K_ATP opens early during Phase 2!
+        const kOpen = isPhase1 || isPhase3 || kAtpLeak;
+        const kImpaired = (sc === 'hypok' || sc === 'tdp');
+        const kHyper = (sc === 'hyperk' || sc === 'sinewave');
+
+        drawChannelPore(gatesCtx, xK, memY, memThick, kAtpLeak ? '#e11d48' : '#7e22ce', kOpen);
+        gatesCtx.fillStyle = kAtpLeak ? '#fda4af' : '#c084fc'; gatesCtx.font = 'bold 11px Cairo, Inter';
+        gatesCtx.textAlign = 'center';
+        gatesCtx.fillText(
+            kAtpLeak ? (isAr ? 'قنوات K-ATP (تسريب إقفاري!)' : 'K-ATP Channel (Ischemic Leak!)')
+                     : (isAr ? 'قنوات البوتاسيوم (K+)' : 'K+ Channels (IKr/IKs)'),
+            xK, memY - 10
+        );
+        gatesCtx.textAlign = 'left';
+
+        gatesCtx.strokeStyle = kAtpLeak ? '#f43f5e' : '#c084fc'; gatesCtx.lineWidth = 3.5;
+        gatesCtx.beginPath();
+        if (kOpen) {
+            gatesCtx.moveTo(xK - 16, memY + 18); gatesCtx.lineTo(xK - 10, memY + 28);
+            gatesCtx.moveTo(xK + 16, memY + 18); gatesCtx.lineTo(xK + 10, memY + 28);
+        } else {
+            gatesCtx.moveTo(xK - 18, memY + 18); gatesCtx.lineTo(xK + 18, memY + 18);
+        }
+        gatesCtx.stroke();
+
+        if (kOpen) {
+            const kCount = kHyper ? 5 : (kImpaired ? 1 : 3);
+            const kSpeed = kHyper ? 1.7 : (kImpaired ? 0.4 : 1.0);
+            drawCustomIons(gatesCtx, xK, memY + memThick + 38, memY - 20, kAtpLeak ? '#fb7185' : '#c084fc', kCount, kSpeed);
+        }
+
+        // Update the 3 Gate Status Cards below Panel 4 with disease-specific physiology!
+        const naEl = document.getElementById('state-na-gates');
+        const caEl = document.getElementById('state-ca-gates');
+        const kEl = document.getElementById('state-k-gates');
+        if (naEl) {
+            if (isAsystole) naEl.textContent = isAr ? 'متوقفة تماماً (لا يوجد تحفيز للطور 0)' : 'Dormant (No Phase 0 stimulus)';
+            else if (sc === 'hypona') naEl.textContent = isAr ? 'نقص [Na+]o يبطئ دخول الصوديوم (ذروة +5mV فقط)' : 'Low [Na+]o slows Na+ influx (+5mV peak)';
+            else if (sc === 'hyperna') naEl.textContent = isAr ? 'فرط [Na+]o يسرع اندفاع الصوديوم (ذروة +30mV!)' : 'High [Na+]o accelerates Na+ influx (+30mV!)';
+            else if (hLockedByPathology) naEl.textContent = isAr ? 'بوابة h خاملة جزئياً بسبب ارتفاع جهد الراحة ➔ بطء التوصيل' : 'h-gate partially inactivated by depolarized Vm';
+            else naEl.textContent = isAr ? `بوابة m: ${mOpen ? 'مفتوحة' : 'مغلقة'} | بوابة h: ${hOpen ? 'مفتوحة' : 'مغلقة'}` : `m-gate: ${mOpen ? 'OPEN' : 'CLOSED'} | h-gate: ${hOpen ? 'OPEN' : 'LOCKED'}`;
+        }
+        if (caEl) {
+            if (sc === 'pea') caEl.textContent = isAr ? '✕ فك الاقتران: لا يُطلق الكالسيوم من SR (انقباض = 0%)' : '✕ Uncoupled: SR RyR2 fails to release Ca2+ (0% tension)';
+            else if (eadReactivation) caEl.textContent = isAr ? '⚡ إعادة تفعيل مبكرة لـ Ca2+ (EAD) تطلق نبضة R-on-T / Torsades!' : '⚡ Early Afterdepolarization (EAD) Ca2+ reactivation!';
+            else if (isIschemicLead) caEl.textContent = isAr ? 'حماض الخلية الإقفارية يضعف استجابة التروبونين للكالسيوم' : 'Ischemic acidosis blunts Ca2+ binding to Troponin C';
+            else caEl.textContent = caOpen ? (isAr ? 'مفتوحة ← دخول Ca2+ وتحفيز RyR2 (انقباض)' : 'OPEN -> Ca2+ Influx & CICR') : (isAr ? 'مغلقة (طور الراحة)' : 'CLOSED');
+        }
+        if (kEl) {
+            if (kAtpLeak) kEl.textContent = isAr ? '🩸 فتح مبكر لقنوات K-ATP بسبب نفاد ATP ➔ يولد تيار الإصابة (STE)!' : '🩸 Premature K-ATP opening from ATP loss -> ST Elevation!';
+            else if (sc === 'hypok') kEl.textContent = isAr ? 'بطء خروج K+ بالطور 3 يطيل الاستقطاب ويرسم موجة U البارزة!' : 'Slowed Phase 3 K+ efflux prolongs repolarization (U wave)!';
+            else if (kHyper) kEl.textContent = isAr ? 'زيادة نفاذية IKr تسرع خروج K+ فترسم موجة T مؤنفة كالخيمة!' : 'Accelerated IKr K+ efflux draws tall tented T wave!';
+            else kEl.textContent = kOpen ? (isAr ? 'مفتوحة ← خروج K+ لإعادة الاستقطاب (موجة T)' : 'OPEN -> K+ Efflux (T wave)') : (isAr ? 'IK1 تحفظ جهد الراحة (-90mV)' : 'Resting IK1 (-90mV)');
+        }
+    };
+
+    function drawCustomIons(ctx, cx, yStart, yEnd, color, count, speedMul) {
+        ctx.save();
+        const head = 8;
+        const ang = Math.atan2(yEnd - yStart, 0);
+        ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.moveTo(cx, yStart); ctx.lineTo(cx, yEnd); ctx.stroke();
+        ctx.beginPath();
+        ctx.moveTo(cx, yEnd);
+        ctx.lineTo(cx - head * Math.cos(ang - Math.PI / 6), yEnd - head * Math.sin(ang - Math.PI / 6));
+        ctx.lineTo(cx - head * Math.cos(ang + Math.PI / 6), yEnd - head * Math.sin(ang + Math.PI / 6));
+        ctx.closePath(); ctx.fill();
+
+        const animOffset = (performance.now() * 0.08 * speedMul) % 60;
+        const step = 60 / Math.max(1, count);
+        for (let i = 0; i < count; i++) {
+            const p = ((i * step + animOffset) % 60) / 60;
+            const py = yStart + (yEnd - yStart) * p;
+            ctx.beginPath(); ctx.arc(cx + (i % 2 === 0 ? -5.5 : 5.5), py, 5, 0, Math.PI * 2); ctx.fill();
+        }
+        ctx.restore();
+    }
+
+    
+    // Ensure stemi_inf_lcx has full measurement cards & clot badge
+    const prevUpdateMetricsP3 = window.updateDynamicECGMetrics;
+    window.updateDynamicECGMetrics = function () {
+        prevUpdateMetricsP3();
+        if (currentScenario === "stemi_inf_lcx") {
+            const isAr = (currentLang === "ar");
+            const vals = isAr
+                ? ["0.09s (جيبية منتظمة)", "0.16s (طبيعية دون حصار AV)", "Q مرضية في II, III, aVF, V5-V6", "ارتفاع ST في II ≥ III + V5-V6 (دون انخفاض في I)", "T عالية مندمجة مع ST"]
+                : ["0.09s (regular sinus)", "0.16s (normal PR)", "Path Q in II, III, aVF, V5-V6", "STE in II ≥ III + V5-V6 (no depression in I)", "Hyperacute T merged with ST"];
+            ["meas-p", "meas-pr", "meas-qrs", "meas-st", "meas-qt"].forEach((id, i) => {
+                const el = document.getElementById(id);
+                if (el) el.textContent = vals[i];
+            });
+        }
+    };
+    const prevInspectorP3 = window.updateLeadVectorInspectorBanner;
+    window.updateLeadVectorInspectorBanner = function () {
+        prevInspectorP3();
+        if (currentScenario === "stemi_inf_lcx") {
+            const clotBadge = document.getElementById("vec-insp-clot-badge");
+            if (clotBadge) {
+                clotBadge.classList.remove("hidden");
+                clotBadge.textContent = (currentLang === "ar")
+                    ? "🩸 موقع الخثرة: الشريان المنعطف الأيسر القاصي Distal LCx (يرفع ST في II ≥ III و V5–V6 دون انخفاض في I!)"
+                    : "🩸 Thrombus Site: Distal LCx (drives STE in II ≥ III & V5–V6 without depression in Lead I!)";
+            }
+        }
+    };
+
+    // =========================================================================
+    // 10. INITIALIZATION & SESSION RESTORATION
+    // =========================================================================
+    function initPhase3Final() {
+        // Fix conduction button label immediately on load
+        const isAr = (currentLang === 'ar');
+        const condTxt = document.getElementById('ui-tgl-cond');
+        if (condTxt) condTxt.textContent = isAr ? 'نظام التوصيل الكهربائي' : 'Electrical Conduction';
+        const condBtn = document.getElementById('btn-3d-conduction');
+        if (condBtn) condBtn.classList.toggle('toggle-pill-active', !!layers3D.conduction);
+
+        // Add `stemi_inf_lcx` to UNIFIED_MEAS if present
+        window.renderScenarioButtons();
+
+        // Restore active view if user refreshed while inside ECG Simulator
+        let savedPage = 'hub';
+        try { savedPage = sessionStorage.getItem('clinixActivePage') || 'hub'; } catch (_) {}
+        if (/ECGStimulation/i.test(window.location.hash || '') || savedPage === 'ecg') {
+            window.launchModule('ecg');
+        } else {
+            // Strictly ensure #ecg-simulator-view is hidden on the Main Hub!
+            const ecgV = document.getElementById('ecg-simulator-view');
+            const hubV = document.getElementById('main-hub-view');
+            if (ecgV) ecgV.classList.add('hidden');
+            if (hubV) hubV.classList.remove('hidden');
+        }
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPhase3Final, { once: true });
+    } else {
+        setTimeout(initPhase3Final, 60);
     }
 })();
 </script>
