@@ -91,10 +91,8 @@
             transition: background-color 0.2s ease, color 0.2s ease;
         }
         .font-mono {
-            font-family: 'JetBrains Mono', 'Inter', monospace !important;
-            font-variant-numeric: tabular-nums !important;
-            direction: ltr !important;
-            unicode-bidi: embed;
+            font-family: 'JetBrains Mono', monospace;
+            font-variant-numeric: tabular-nums;
         }
         ::-webkit-scrollbar { width: 7px; height: 7px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -268,7 +266,7 @@
                             <h1 id="ui-main-brand" class="text-xl sm:text-2xl font-black tx-sky">
                                 CliniX Lab — ABG &amp; Acid-Base Pro
                             </h1>
-                            <span id="ui-header-pill" class="px-2.5 py-0.5 rounded-md badge-purple text-[11px] font-extrabold">15 حالة سريرية + مختبر فوري</span>
+                            <span id="ui-header-pill" class="px-2.5 py-0.5 rounded-md badge-purple text-[11px] font-extrabold">14 حالة سريرية + مختبر فوري</span>
                         </div>
                         <p id="ui-platform-sub" class="text-xs tx-muted">
                             المحاكي التفاعلي الشامل لغازات الدم الشرياني، التوازن الحمضي القاعدي، ومعاوضة الرئتين والكليتين
@@ -388,10 +386,10 @@
                 <div>
                     <h2 id="ui-scenarios-heading" class="text-base sm:text-lg font-black tx-main flex items-center gap-2">
                         <span>🧪</span>
-                        <span>الحالات السريرية الـ 15 لغازات الدم والتوازن الحمضي القاعدي (14 Clinical ABG States)</span>
+                        <span>الحالات السريرية الـ 14 لغازات الدم والتوازن الحمضي القاعدي (14 Clinical ABG States)</span>
                     </h2>
                     <p id="ui-scenarios-sub" class="text-xs tx-muted">
-                        اختر الفئة السريرية ثم اضغط على أي من الحالات الـ 15 أو عدّل القراءات الثلاث مباشرة في الميزان أدناه لمشاهدة التفسير الفوري
+                        اختر الفئة السريرية ثم اضغط على أي من الحالات الـ 14 أو عدّل القراءات الثلاث مباشرة في الميزان أدناه لمشاهدة التفسير الفوري
                     </p>
                 </div>
                 <div class="flex items-center gap-2">
@@ -468,13 +466,13 @@
                                     <span id="ui-top-lbl-ph" class="text-xs font-extrabold tx-emerald">1. درجة الحموضة (pH)</span>
                                     <span id="top-pill-ph" class="px-1.5 py-0.5 rounded text-[10px] font-bold badge-emerald">طبيعي</span>
                                 </div>
-                                <div class="flex items-center justify-between gap-1 my-1" dir="ltr" lang="en">
+                                <div class="flex items-center justify-between gap-1 my-1">
                                     <button type="button" onclick="stepCoreReading('ph', -0.02)" class="btn-neutral w-7 h-7 rounded-lg font-mono font-black text-sm flex items-center justify-center">−</button>
-                                    <input id="top-num-ph" type="text" inputmode="decimal" lang="en" dir="ltr" value="7.40" oninput="onTopTextTyping('ph', this.value)" onchange="onTopReadingChange('ph', this.value)" class="w-20 text-center font-mono font-black text-sm rounded-lg px-1 py-0.5 sub-card tx-main">
+                                    <input id="top-num-ph" type="number" min="6.80" max="7.80" step="0.01" value="7.40" onchange="onTopReadingChange('ph', this.value)" class="w-20 text-center font-mono font-black text-sm rounded-lg px-1 py-0.5 sub-card tx-main">
                                     <button type="button" onclick="stepCoreReading('ph', 0.02)" class="btn-neutral w-7 h-7 rounded-lg font-mono font-black text-sm flex items-center justify-center">+</button>
                                 </div>
-                                <input id="top-slider-ph" dir="ltr" lang="en" type="range" min="6.80" max="7.80" step="0.01" value="7.40" oninput="onTopReadingChange('ph', this.value)" class="w-full">
-                                <div class="flex justify-between text-[9px] tx-muted font-mono mt-0.5" dir="ltr" lang="en">
+                                <input id="top-slider-ph" type="range" min="6.80" max="7.80" step="0.01" value="7.40" oninput="onTopReadingChange('ph', this.value)" class="w-full">
+                                <div class="flex justify-between text-[9px] tx-muted font-mono mt-0.5">
                                     <span>6.80</span><span>7.35–7.45</span><span>7.80</span>
                                 </div>
                             </div>
@@ -485,13 +483,13 @@
                                     <span id="ui-top-lbl-paco2" class="text-xs font-extrabold tx-sky">2. غاز الرئة (PaCO₂)</span>
                                     <span id="top-pill-paco2" class="px-1.5 py-0.5 rounded text-[10px] font-bold badge-emerald">طبيعي</span>
                                 </div>
-                                <div class="flex items-center justify-between gap-1 my-1" dir="ltr" lang="en">
+                                <div class="flex items-center justify-between gap-1 my-1">
                                     <button type="button" onclick="stepCoreReading('paco2', -1)" class="btn-neutral w-7 h-7 rounded-lg font-mono font-black text-sm flex items-center justify-center">−</button>
-                                    <input id="top-num-paco2" type="text" inputmode="decimal" lang="en" dir="ltr" value="40" oninput="onTopTextTyping('paco2', this.value)" onchange="onTopReadingChange('paco2', this.value)" class="w-20 text-center font-mono font-black text-sm rounded-lg px-1 py-0.5 sub-card tx-sky">
+                                    <input id="top-num-paco2" type="number" min="15" max="95" step="1" value="40" onchange="onTopReadingChange('paco2', this.value)" class="w-20 text-center font-mono font-black text-sm rounded-lg px-1 py-0.5 sub-card tx-sky">
                                     <button type="button" onclick="stepCoreReading('paco2', 1)" class="btn-neutral w-7 h-7 rounded-lg font-mono font-black text-sm flex items-center justify-center">+</button>
                                 </div>
-                                <input id="top-slider-paco2" dir="ltr" lang="en" type="range" min="15" max="95" step="1" value="40" oninput="onTopReadingChange('paco2', this.value)" class="w-full">
-                                <div class="flex justify-between text-[9px] tx-muted font-mono mt-0.5" dir="ltr" lang="en">
+                                <input id="top-slider-paco2" type="range" min="15" max="95" step="1" value="40" oninput="onTopReadingChange('paco2', this.value)" class="w-full">
+                                <div class="flex justify-between text-[9px] tx-muted font-mono mt-0.5">
                                     <span>15</span><span>35–45 mmHg</span><span>95</span>
                                 </div>
                             </div>
@@ -502,13 +500,13 @@
                                     <span id="ui-top-lbl-hco3" class="text-xs font-extrabold tx-amber">3. البيكربونات (HCO₃⁻)</span>
                                     <span id="top-pill-hco3" class="px-1.5 py-0.5 rounded text-[10px] font-bold badge-emerald">طبيعي</span>
                                 </div>
-                                <div class="flex items-center justify-between gap-1 my-1" dir="ltr" lang="en">
+                                <div class="flex items-center justify-between gap-1 my-1">
                                     <button type="button" onclick="stepCoreReading('hco3', -0.5)" class="btn-neutral w-7 h-7 rounded-lg font-mono font-black text-sm flex items-center justify-center">−</button>
-                                    <input id="top-num-hco3" type="text" inputmode="decimal" lang="en" dir="ltr" value="24.0" oninput="onTopTextTyping('hco3', this.value)" onchange="onTopReadingChange('hco3', this.value)" class="w-20 text-center font-mono font-black text-sm rounded-lg px-1 py-0.5 sub-card tx-amber">
+                                    <input id="top-num-hco3" type="number" min="5" max="48" step="0.5" value="24.0" onchange="onTopReadingChange('hco3', this.value)" class="w-20 text-center font-mono font-black text-sm rounded-lg px-1 py-0.5 sub-card tx-amber">
                                     <button type="button" onclick="stepCoreReading('hco3', 0.5)" class="btn-neutral w-7 h-7 rounded-lg font-mono font-black text-sm flex items-center justify-center">+</button>
                                 </div>
-                                <input id="top-slider-hco3" dir="ltr" lang="en" type="range" min="5" max="48" step="0.5" value="24.0" oninput="onTopReadingChange('hco3', this.value)" class="w-full">
-                                <div class="flex justify-between text-[9px] tx-muted font-mono mt-0.5" dir="ltr" lang="en">
+                                <input id="top-slider-hco3" type="range" min="5" max="48" step="0.5" value="24.0" oninput="onTopReadingChange('hco3', this.value)" class="w-full">
+                                <div class="flex justify-between text-[9px] tx-muted font-mono mt-0.5">
                                     <span>5</span><span>22–26 mEq/L</span><span>48</span>
                                 </div>
                             </div>
@@ -791,7 +789,7 @@
                         <span>الدليل السريري والفسيولوجي الشامل للحالة أو القراءة الحالية (Clinical &amp; Physiological Breakdown)</span>
                     </h2>
                     <p id="ui-clinical-guide-sub" class="text-xs tx-muted">
-                        يتحدث تلقائياً سواء اخترت إحدى الحالات الـ 15 أو أدخلت قراءات جديدة من الميزان العلوي
+                        يتحدث تلقائياً سواء اخترت إحدى الحالات الـ 14 أو أدخلت قراءات جديدة من الميزان العلوي
                     </p>
                 </div>
             </div>
@@ -928,7 +926,7 @@
                             <span>جدول المقارنة المرجعي السريع للحالات الـ 14 (اضغط على أي صف لتشغيله فوراً)</span>
                         </h3>
                         <p id="ui-table-sub" class="text-[11px] tx-muted">
-                            يلخص اتجاهات pH و PaCO₂ و HCO₃⁻ والفجوة الأنيونية وآلية المعاوضة لكل حالة من الحالات الـ 15
+                            يلخص اتجاهات pH و PaCO₂ و HCO₃⁻ والفجوة الأنيونية وآلية المعاوضة لكل حالة من الحالات الـ 14
                         </p>
                     </div>
 
@@ -2088,7 +2086,7 @@ function toggleFreeExamInputMode() {
     freeExamInputMode = !freeExamInputMode;
     updateFreeModeButtonUI();
     recalculateLivePhysiology(false);
-    syncAllInputsFromLive(skipActiveInputSync ? param : null);
+    syncAllInputsFromLive();
     updateAllDOMReadouts();
     drawAllCanvases();
 }
@@ -2105,28 +2103,6 @@ function updateFreeModeButtonUI() {
     }
 }
 
-function toEnglishDigits(str) {
-    if (str === null || str === undefined) return '';
-    return String(str)
-        .replace(/[٠-٩]/g, d => String(d.charCodeAt(0) - 1632))
-        .replace(/[۰-۹]/g, d => String(d.charCodeAt(0) - 1776))
-        .replace(/[٫,]/g, '.');
-}
-
-function onTopTextTyping(param, rawStr) {
-    const cleaned = toEnglishDigits(rawStr);
-    const inputEl = document.getElementById('top-num-' + param);
-    if (inputEl && inputEl.value !== cleaned) {
-        inputEl.value = cleaned;
-    }
-    const val = parseFloat(cleaned);
-    if (isNaN(val)) return;
-    if (param === 'ph' && (val < 6.80 || val > 7.80)) return;
-    if (param === 'paco2' && (val < 15 || val > 95)) return;
-    if (param === 'hco3' && (val < 5 || val > 48)) return;
-    onTopReadingChange(param, val, true);
-}
-
 function stepCoreReading(param, delta) {
     let val = liveABG[param] + delta;
     if (param === 'ph') val = Math.max(6.80, Math.min(7.80, Math.round(val * 100) / 100));
@@ -2135,8 +2111,8 @@ function stepCoreReading(param, delta) {
     onTopReadingChange(param, val);
 }
 
-function onTopReadingChange(param, rawVal, skipActiveInputSync = false) {
-    const val = parseFloat(toEnglishDigits(rawVal));
+function onTopReadingChange(param, rawVal) {
+    const val = parseFloat(rawVal);
     if (isNaN(val)) return;
     isTimelineAutoSweeping = false;
     updateSweepButtonUI();
@@ -2173,7 +2149,7 @@ function onTopReadingChange(param, rawVal, skipActiveInputSync = false) {
 
     updateTrajectoryTargetFromScenarioOrCustom();
     recalculateLivePhysiology(false);
-    syncAllInputsFromLive(skipActiveInputSync ? param : null);
+    syncAllInputsFromLive();
     renderScenarioButtonsGrid();
     renderMasterComparisonTable();
     updateAllDOMReadouts();
@@ -2189,19 +2165,15 @@ function onSecondaryElectrolyteInput() {
     liveABG.alb = parseFloat(document.getElementById('slider-alb').value) || 4.0;
 
     recalculateLivePhysiology(false);
-    syncAllInputsFromLive(skipActiveInputSync ? param : null);
+    syncAllInputsFromLive();
     renderScenarioButtonsGrid();
     renderMasterComparisonTable();
     updateAllDOMReadouts();
     drawAllCanvases();
 }
 
-function syncAllInputsFromLive(skipParam = null) {
-    const setVal = (id, v) => {
-        if (skipParam && id === ('top-num-' + skipParam)) return;
-        const el = document.getElementById(id);
-        if (el) el.value = toEnglishDigits(v);
-    };
+function syncAllInputsFromLive() {
+    const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v; };
     setVal('top-num-ph', liveABG.ph.toFixed(2));
     setVal('top-slider-ph', liveABG.ph.toFixed(2));
     setVal('top-num-paco2', Math.round(liveABG.paco2));
@@ -2239,7 +2211,7 @@ function jumpToTimelineStage(pct) {
 function onEquilibriumProgressChange(val) {
     equilibriumProgress = Math.max(0, Math.min(100, parseFloat(val) || 0)) / 100.0;
     recalculateLivePhysiology(true);
-    syncAllInputsFromLive(skipActiveInputSync ? param : null);
+    syncAllInputsFromLive();
     updateAllDOMReadouts();
     drawAllCanvases();
 }
@@ -2374,7 +2346,7 @@ function setABGScenario(key) {
 
     updateTrajectoryTargetFromScenarioOrCustom();
     recalculateLivePhysiology(false);
-    syncAllInputsFromLive(skipActiveInputSync ? param : null);
+    syncAllInputsFromLive();
     renderScenarioButtonsGrid();
     renderMasterComparisonTable();
     updateAllDOMReadouts();
@@ -2883,10 +2855,10 @@ function drawBufferEquilibriumCanvas() {
         ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke();
     }
 
-    const seeY = h * 0.40;
+    const seeY = h * 0.37;
     const seeX = w * 0.5;
-    const beamLen = Math.min(w * 0.33, 158);
-    const tiltRad = Math.max(-0.22, Math.min(0.22, (7.40 - liveABG.ph) * 0.85));
+    const beamLen = Math.min(w * 0.35, 170);
+    const tiltRad = Math.max(-0.32, Math.min(0.32, (7.40 - liveABG.ph) * 1.1));
 
     ctx.save();
     ctx.beginPath();
@@ -2949,7 +2921,7 @@ function drawBufferEquilibriumCanvas() {
     ctx.lineTo(beamLen, 0);
     ctx.stroke();
 
-    const acidBoxH = Math.max(26, Math.min(44, (liveABG.paco2 / 40) * 30));
+    const acidBoxH = Math.max(28, Math.min(58, (liveABG.paco2 / 40) * 34));
     ctx.fillStyle = 'rgba(2, 132, 199, 0.92)';
     ctx.strokeStyle = '#7dd3fc';
     ctx.lineWidth = 2;
@@ -2966,7 +2938,7 @@ function drawBufferEquilibriumCanvas() {
     ctx.fillStyle = '#e0f2fe';
     ctx.fillText(`PaCO₂: ${liveABG.paco2.toFixed(0)} mmHg`, -beamLen + 4, -8);
 
-    const baseBoxH = Math.max(26, Math.min(44, (liveABG.hco3 / 24) * 30));
+    const baseBoxH = Math.max(28, Math.min(58, (liveABG.hco3 / 24) * 34));
     ctx.fillStyle = 'rgba(217, 119, 6, 0.92)';
     ctx.strokeStyle = '#fde68a';
     ctx.lineWidth = 2;
@@ -3637,7 +3609,7 @@ function applyFullLanguageTranslations() {
     root.dir = isAr ? 'rtl' : 'ltr';
 
     const tMap = {
-        'ui-header-pill': isAr ? '15 حالة سريرية + مختبر فوري' : '15 Clinical States + Live Lab',
+        'ui-header-pill': isAr ? '14 حالة سريرية + مختبر فوري' : '14 Clinical States + Live Lab',
         'ui-platform-sub': isAr
             ? 'المحاكي التفاعلي الشامل لغازات الدم الشرياني، التوازن الحمضي القاعدي، ومعاوضة الرئتين والكليتين'
             : 'Comprehensive Interactive Arterial Blood Gas, Acid-Base Equilibrium & Organ Compensation Simulator',
@@ -3651,10 +3623,10 @@ function applyFullLanguageTranslations() {
         'ui-stage-67': isAr ? '67% معاوضة جزئية' : '67% Partial Comp',
         'ui-stage-100': isAr ? '100% الحالة النهائية' : '100% Final State',
         'ui-scenarios-heading': isAr
-            ? '🧪 الحالات السريرية الـ 15 لغازات الدم والتوازن الحمضي القاعدي (14 Clinical ABG States)'
-            : '🧪 The 15 Clinical Arterial Blood Gas & Acid-Base States',
+            ? '🧪 الحالات السريرية الـ 14 لغازات الدم والتوازن الحمضي القاعدي (14 Clinical ABG States)'
+            : '🧪 The 14 Clinical Arterial Blood Gas & Acid-Base States',
         'ui-scenarios-sub': isAr
-            ? 'اختر الفئة السريرية ثم اضغط على أي من الحالات الـ 15 أو عدّل القراءات الثلاث مباشرة في الميزان أدناه لمشاهدة التفسير الفوري'
+            ? 'اختر الفئة السريرية ثم اضغط على أي من الحالات الـ 14 أو عدّل القراءات الثلاث مباشرة في الميزان أدناه لمشاهدة التفسير الفوري'
             : 'Select a clinical category and click any of the 14 states, or adjust the 3 core readings directly in the Balance Panel below',
         'ui-custom-lab-btn': isAr
             ? 'تعديل القراءات الثلاث مباشرة بالميزان (pH / PaCO₂ / HCO₃⁻)'
@@ -3725,7 +3697,7 @@ function applyFullLanguageTranslations() {
             ? '📘 الدليل السريري والفسيولوجي الشامل للحالة أو القراءة الحالية (Clinical & Physiological Breakdown)'
             : '📘 Comprehensive Clinical & Physiological Breakdown for Current Reading',
         'ui-clinical-guide-sub': isAr
-            ? 'يتحدث تلقائياً سواء اخترت إحدى الحالات الـ 15 أو أدخلت قراءات جديدة من الميزان العلوي'
+            ? 'يتحدث تلقائياً سواء اخترت إحدى الحالات الـ 14 أو أدخلت قراءات جديدة من الميزان العلوي'
             : 'Automatically updates whether you select one of the 14 states or dial in custom readings in Panel 1',
         'ui-card-causes-title': isAr ? 'الأسباب السريرية والآلية المرضية' : 'Clinical Causes & Pathophysiology',
         'ui-card-eq-title': isAr ? 'كيف يحدث الاتزان وماذا يتغير بالضبط؟' : 'How Equilibrium & Compensation Occur',
@@ -3744,10 +3716,10 @@ function applyFullLanguageTranslations() {
         'ui-sl-fio2': isAr ? 'نسبة الأكسجين المستنشق (FiO₂):' : 'Inspired Oxygen (FiO₂):',
         'ui-table-title': isAr
             ? '📊 جدول المقارنة المرجعي السريع للحالات الـ 14 (اضغط على أي صف لتشغيله فوراً)'
-            : '📊 Master Quick-Reference Table of All 15 Clinical States (Click any row to load)',
+            : '📊 Master Quick-Reference Table of All 14 Clinical States (Click any row to load)',
         'ui-table-sub': isAr
-            ? 'يلخص اتجاهات pH و PaCO₂ و HCO₃⁻ والفجوة الأنيونية وآلية المعاوضة لكل حالة من الحالات الـ 15'
-            : 'Summarizes pH, PaCO₂, HCO₃⁻, Anion Gap, and physiological compensation across all 15 states',
+            ? 'يلخص اتجاهات pH و PaCO₂ و HCO₃⁻ والفجوة الأنيونية وآلية المعاوضة لكل حالة من الحالات الـ 14'
+            : 'Summarizes pH, PaCO₂, HCO₃⁻, Anion Gap, and physiological compensation across all 14 states',
         'th-name': isAr ? 'الحالة السريرية (Scenario)' : 'Clinical Scenario',
         'th-comp': isAr ? 'المعاوضة الفسيولوجية' : 'Physiological Compensation'
     };
@@ -3797,7 +3769,7 @@ function initDavenportClickInteraction() {
 
         updateTrajectoryTargetFromScenarioOrCustom();
         recalculateLivePhysiology(false);
-        syncAllInputsFromLive(skipActiveInputSync ? param : null);
+        syncAllInputsFromLive();
         renderScenarioButtonsGrid();
         renderMasterComparisonTable();
         updateAllDOMReadouts();
@@ -3816,7 +3788,7 @@ function animationLoop() {
                 updateSweepButtonUI();
             }
             recalculateLivePhysiology(true);
-            syncAllInputsFromLive(skipActiveInputSync ? param : null);
+            syncAllInputsFromLive();
             updateAllDOMReadouts();
             drawDavenportCanvas();
             drawOxyCurveCanvas();
@@ -3832,7 +3804,7 @@ window.onload = function () {
     initParticles();
     updateTrajectoryTargetFromScenarioOrCustom();
     recalculateLivePhysiology(false);
-    syncAllInputsFromLive(skipActiveInputSync ? param : null);
+    syncAllInputsFromLive();
     applyFullLanguageTranslations();
     initDavenportClickInteraction();
     window.addEventListener('resize', drawAllCanvases);
