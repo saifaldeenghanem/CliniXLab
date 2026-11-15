@@ -1,1 +1,978 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root" class="light" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CliniX Lab | Jarvis Thoracic & Pulmonary Step-by-Step Examination Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root, #html-root, body {
+      color-scheme: light !important;
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-family: 'Inter', 'Cairo', sans-serif;
+      margin: 0;
+    }
+    .panel-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      box-shadow: 0 8px 22px -6px rgba(15, 23, 42, 0.06);
+    }
+    #clinix-v7-split-shell {
+      max-width: 1720px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    @media (min-width: 1024px) {
+      #html-root[dir="rtl"] #clinix-v7-split-shell { grid-template-columns: 400px minmax(0, 1fr); }
+      #html-root[dir="ltr"] #clinix-v7-split-shell { grid-template-columns: minmax(0, 1fr) 400px; }
+      #html-root[dir="rtl"] #clinix-sidebar-col { order: 1; }
+      #html-root[dir="rtl"] #clinix-main-col { order: 2; }
+      #html-root[dir="ltr"] #clinix-main-col { order: 1; }
+      #html-root[dir="ltr"] #clinix-sidebar-col { order: 2; }
+      #clinix-sidebar-col {
+        position: sticky;
+        top: 12px;
+        max-height: calc(100vh - 24px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+    }
+    #clinix-sidebar-scroll {
+      overflow-y: auto;
+      max-height: calc(100vh - 250px);
+      padding-inline-end: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sc-card {
+      width: 100%;
+      text-align: start;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.16s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sc-card:hover { border-color: #0d9488; background: #f8fafc; transform: translateY(-1px); }
+    .sc-card.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+      border-color: #0f766e !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.42) !important;
+    }
+    .sec-tab.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+      color: #ffffff !important;
+      border-color: #0f766e !important;
+    }
+    .step-pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .step-pill.active {
+      background: #0d9488;
+      color: #ffffff;
+      border-color: #0f766e;
+      box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
+    }
+    .mode-pill {
+      padding: 5px 11px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #1e293b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .mode-pill.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0369a1;
+    }
+    .num-ltr { direction: ltr !important; unicode-bidi: embed; font-family: 'Inter', monospace !important; }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-3 lg:p-4">
 
+  <header class="max-w-[1720px] mx-auto mb-3 panel-card p-3 sm:p-4 border-b-2 border-teal-500/40">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-teal-600 to-sky-600 flex items-center justify-center text-white text-xl shadow-md">
+          <i class="fa-solid fa-lungs"></i>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 id="ui-title" class="text-lg sm:text-2xl font-black text-slate-900">Jarvis Thoracic & Pulmonary Step-by-Step Examination Simulator</h1>
+            <span class="num-ltr px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200 text-[10.5px] font-mono font-extrabold">
+              /CliniXLab/Physicalexamination/lungs
+            </span>
+          </div>
+          <p id="ui-subtitle" class="text-xs text-slate-500 font-semibold">5 Interactive Stations: AP:T Ratio (1:2 vs Barrel) • Expansion & Fremitus (99) • Percussion Ladder • Normal Breath Sounds • Crackles, Wheezes & Egophony</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- SINGLE CLEAR BACK BUTTON THAT STRICTLY RETURNS TO PHYSICAL EXAMINATION HUB -->
+        <a href="../index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('pe_hub');return false;}"
+          class="px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 border-2 border-teal-400 text-xs font-black flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span id="ui-back-pe">Back to Physical Examination Hub</span>
+        </a>
+        <button type="button" onclick="toggleLanguage()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-sky-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+          <i class="fa-solid fa-globe"></i>
+          <span id="ui-lang-btn">العربية (AR)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="clinix-v7-split-shell">
+    <!-- SIDEBAR: STEP-BY-STEP CHECKLIST STATIONS -->
+    <aside id="clinix-sidebar-col" class="panel-card p-3">
+      <div class="mb-2.5 pb-2 border-b border-slate-200">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span id="ui-sb-title" class="text-xs sm:text-sm font-black text-teal-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-list-check text-teal-600"></i>
+            <span id="lbl-sb-head">Step-by-Step Checklist Stations</span>
+          </span>
+          <span id="ui-sb-count" class="num-ltr px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 text-[11px] font-extrabold"></span>
+        </div>
+        <input type="search" id="pe-search" oninput="renderSidebar()" placeholder="Search checklist step or finding..."
+          class="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600" />
+        
+      </div>
+      <div id="clinix-sidebar-scroll"></div>
+    </aside>
+
+    <!-- MAIN SIMULATION WORKSPACE -->
+    <main id="clinix-main-col" class="flex flex-col gap-3.5 min-w-0">
+
+      <!-- 1. STEP-BY-STEP PROCEDURE SIMULATOR BAR -->
+      <section class="panel-card p-3.5 bg-gradient-to-r from-teal-50/70 via-white to-sky-50/70">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+          <div class="flex items-center gap-2">
+            <span id="step-counter-badge" class="num-ltr px-2.5 py-1 rounded-lg bg-teal-700 text-white text-xs font-black">Step 1 / 6</span>
+            <span id="lbl-step-guide" class="text-xs sm:text-sm font-black text-slate-800">Interactive Step-by-Step Procedure Walkthrough (University Checklist)</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="stepNavigate(-1)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-backward-step"></i>
+              <span id="lbl-prev-step">Prev Step</span>
+            </button>
+            <button type="button" id="btn-autorun" onclick="toggleAutoRun()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-play"></i>
+              <span id="lbl-autorun">Auto-Run Steps</span>
+            </button>
+            <button type="button" onclick="stepNavigate(1)" class="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <span id="lbl-next-step">Next Step</span>
+              <i class="fa-solid fa-forward-step"></i>
+            </button>
+          </div>
+        </div>
+        <div id="step-pills-row" class="flex flex-wrap gap-1.5"></div>
+      </section>
+
+      <!-- 2. INTERACTIVE SIMULATOR VIEWPORT -->
+      <section class="panel-card p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
+          <div>
+            <span id="sim-badge" class="px-2.5 py-0.5 rounded-md bg-teal-100 text-teal-800 border border-teal-300 text-[11px] font-extrabold"></span>
+            <h2 id="sim-main-heading" class="text-base sm:text-xl font-black text-slate-900 mt-1"></h2>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="btn-bell-diaphragm" onclick="toggleChestpieceMode()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1.5">
+              <i class="fa-solid fa-stethoscope text-teal-600"></i>
+              <span id="lbl-chestpiece">Chestpiece: Diaphragm (High Pitch)</span>
+            </button>
+            <button type="button" id="btn-cont-audio" onclick="toggleContinuousAudio()" class="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-extrabold flex items-center gap-1.5">
+              <i class="fa-solid fa-repeat text-amber-600"></i>
+              <span id="lbl-cont-audio">Continuous Sound: OFF</span>
+            </button>
+            <button type="button" id="btn-audio-synth" onclick="playExamAudio()" class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-volume-high"></i>
+              <span id="lbl-audio-btn">Play Real Clinical Sound</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Clinical Sub-Mode Selector (Normal vs Pathologies for Current Step) -->
+        <div class="mb-2.5 flex flex-wrap items-center gap-1.5">
+          <span id="lbl-sim-mode" class="text-xs font-black text-slate-700 me-1">Simulate Patient Condition:</span>
+          <div id="sim-mode-buttons" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Interactive Canvas Viewport -->
+        <div class="relative w-full h-80 sm:h-96 rounded-xl bg-slate-900 border-2 border-slate-300 overflow-hidden mb-3">
+          <canvas id="pe-sim-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+        </div>
+
+        <p id="sim-canvas-hint" class="text-xs font-bold text-teal-800 bg-teal-50 px-3 py-2 rounded-xl border border-teal-200">
+          💡 Interactive Procedure Simulator: Move your cursor or tap inside the screen above to position the clinical instrument or hand, switch patient findings above, or click "Next Step" to walk through the complete OSCE procedure!
+        </p>
+      </section>
+
+      <!-- 3. STRUCTURED 4-BOX OSCE & CLINICAL BREAKDOWN -->
+      <section class="panel-card p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="p-3.5 rounded-xl bg-sky-50/80 border border-sky-200">
+            <h3 id="box1-title" class="text-xs sm:text-sm font-black text-sky-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-user-doctor text-sky-600"></i>
+              <span>Step-by-Step Procedure & Patient Script (Checklist)</span>
+            </h3>
+            <p id="box1-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200">
+            <h3 id="box2-title" class="text-xs sm:text-sm font-black text-emerald-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i>
+              <span>Normal Finding & Physiological Mechanism</span>
+            </h3>
+            <p id="box2-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-rose-50/80 border border-rose-200">
+            <h3 id="box3-title" class="text-xs sm:text-sm font-black text-rose-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+              <span>Abnormal Findings & Clinical Differential</span>
+            </h3>
+            <p id="box3-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200">
+            <h3 id="box4-title" class="text-xs sm:text-sm font-black text-amber-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-amber-600"></i>
+              <span>OSCE Checklist Evaluation & Documentation ("Record")</span>
+            </h3>
+            <p id="box4-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. INTERACTIVE UNIVERSITY OSCE GRADING CHECKLIST (PRE-ASSESSMENT + PROCEDURE + RECORD) -->
+      <section class="panel-card p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
+          <div>
+            <h3 id="osce-sheet-title" class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-check text-teal-600"></i>
+              <span>Interactive University OSCE Evaluation Sheet (Pre-Assessment, Procedure & Record)</span>
+            </h3>
+            <p id="osce-sheet-sub" class="text-xs text-slate-500 font-semibold">Check off each step as you practice — calculates your OSCE score (0 = Not Done, 1 = Incompletely Done, 2 = Completely Done)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="osce-score-badge" class="num-ltr px-3 py-1 rounded-xl bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-black">Score: 0%</span>
+            <button type="button" onclick="checkAllOSCE(true)" class="px-2.5 py-1 rounded-lg bg-teal-600 text-white text-[11px] font-extrabold">Check All</button>
+            <button type="button" onclick="checkAllOSCE(false)" class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-700 text-[11px] font-extrabold">Reset</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 text-xs">
+          <!-- Column A: 8 Mandatory Pre-Assessment Steps -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 id="lbl-pre-title" class="font-black text-teal-900 mb-2">A. Mandatory Pre-Assessment Steps (8 Steps)</h4>
+            <div id="osce-pre-list" class="space-y-1.5"></div>
+          </div>
+          <!-- Column B: Organ Procedure & Documentation Record Steps -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 id="lbl-rec-title" class="font-black text-sky-900 mb-2">B. Procedure Stations & Required Documentation ("Record")</h4>
+            <div id="osce-rec-list" class="space-y-1.5"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="panel-card py-3 px-6 text-center text-sm font-black text-slate-700">
+        By: MSN, RN Saif AlDeen Ghanem
+      </footer>
+    </main>
+  </div>
+
+<script>
+  let currentLang = 'en';
+  let currentKey = '';
+  let sectionFilter = 'all';
+  let currentModeIdx = 0;
+  let mouseX = 0.5, mouseY = 0.5;
+  let isPressed = false;
+  let pressTimer = 0;
+  let tick = 0;
+  let audioCtx = null;
+  let autoRunInterval = null;
+
+  const PRE_STEPS = [
+    { en: '1. Verify Doctor Order / Clinical Assessment Indication', ar: '1. التحقق من الأمر الطبي / دواعي الفحص السريري' },
+    { en: '2. Prepare Required Equipment (Penlight, Otoscope, Stethoscope, Tuning Fork 512 Hz)', ar: '2. تحضير الأدوات اللازمة (قلم ضوئي، منظار، سماعة، شوكة رنانة 512 Hz)' },
+    { en: '3. Perform Hand Hygiene / Wash Hands before patient contact', ar: '3. غسل اليدين وتعقيمهما قبل لمس المريض' },
+    { en: '4. Introduce Yourself & Role to the Patient', ar: '4. التعريف بالنفس والصفة المهنية للمريض' },
+    { en: '5. Confirm Patient Identity using 2 Identifiers (Full Name & Medical Record / DOB)', ar: '5. التأكد من هوية المريض عبر معرّفين (الاسم الرباعي والرقم الطبي)' },
+    { en: '6. Explain the Procedure Clearly & Obtain Verbal Consent', ar: '6. شرح خطوات الفحص للمريض بلغة واضحة وأخذ الموافقة' },
+    { en: '7. Provide Privacy (Close Curtains / Door & Drape Appropriately)', ar: '7. توفير الخصوصية التامة للمريض (إغلاق الستارة/الباب)' },
+    { en: '8. Position the Patient Comfortably (Sitting Upright or Supine at 30°–45°)', ar: '8. وضع المريض بوضعية مريحة ومناسبة للفحص (جالساً أو مستلقياً بزاوية 30-45°)' }
+  ];
+
+  const RECORD_ITEMS = [
+  { en: 'Station 1: Thoracic Inspection (AP:Transverse Ratio 1:2 vs Barrel Chest 1:1, Spine Alignment, Respiratory Rate/Pattern & Accessory Muscles)', ar: 'محطة 1: تأمل الصدر (نسبة القطر الأمامي-الخلفي للعرضي 1:2 مقابل الصدر البرميلي 1:1، واستخدام العضلات الإضافية)' },
+  { en: 'Station 2: Palpation — Symmetric Chest Expansion (Thumbs at T9–T10) & Tactile Fremitus ("99" / "44" with palmar base/ulnar edge)', ar: 'محطة 2: الجس — تناظر تمدد الصدر (الإبهامان عند T9-T10) والاهتزاز الصوتي اللمسي (Tactile Fremitus بقول 44 أو 99)' },
+  { en: 'Station 3: Thoracic Percussion Ladder — Side-to-side comparison across intercostal spaces (Resonance vs Hyperresonance vs Dullness)', ar: 'محطة 3: قرع الصدر بنمط السلم المتناظر في الأحياز الوربية (الرنين الطبيعي مقابل فرط الرنين والأصمية)' },
+  { en: 'Station 4: Auscultation of Normal Breath Sounds (Bronchial, Bronchovesicular & Vesicular with Diaphragm directly on skin)', ar: 'محطة 4: الإصغاء لأصوات التنفس الطبيعية (القصبي، القصبي-الحويصلي، والحويصلي) بالغشاء مباشرة على الجلد' },
+  { en: 'Station 5: Adventitious Breath Sounds & Vocal Resonance (Fine/Coarse Crackles, Wheezes, Stridor, Bronchophony & Egophony E-to-A)', ar: 'محطة 5: الأصوات التنفسية الإضافية والرنين الصوتي (الخراخر، الوزيز، الصرير، واختبارا Bronchophony و Egophony)' },
+  { en: 'Record: AP:T ratio, symmetric chest expansion, tactile fremitus, percussion note, and breath sounds across all lung fields documented', ar: 'التوثيق (Record): تسجيل شكل الصدر، تناظر التمدد، الاهتزاز الصوتي، نغمة القرع، وأصوات التنفس بجميع الساحات' }
+];
+  const ITEMS = {
+  thoracic_inspection: {
+    modes: [
+      { en: 'Normal Thorax (AP:T Ratio = 1:2)', ar: 'صدر طبيعي (نسبة القطر 1:2)' },
+      { en: 'Barrel Chest (AP:T = 1:1 in COPD)', ar: 'صدر برميلي (نسبة 1:1 في COPD)' },
+      { en: 'Accessory Muscle Retractions / Kyphosis', ar: 'سحب العضلات الإضافية / الحدب' }
+    ],
+    en: {
+      short: '1. Inspection & AP:T Ratio',
+      tag: 'Step 1 • Thoracic Inspection',
+      name: '1. Thoracic Inspection: AP-to-Transverse Diameter Ratio (1:2 vs Barrel Chest 1:1) & Accessory Muscles',
+      tech: '1) Place patient sitting upright with posterior and anterior chest exposed in good lighting. 2) Compare the Anterior-Posterior (AP) diameter to the Transverse (side-to-side) diameter. 3) Inspect spinal alignment (cervical/thoracic/lumbar curves), costal angle (<90° normal), skin color/cyanosis, and observe respiratory rate (12–20/min) and accessory muscle use (SCM, scalenes, intercostal retractions).',
+      norm: 'Elliptical thorax with AP:Transverse ratio of 1:2 (0.70–0.75); costal angle <90°; quiet effortless diaphragmatic/thoracic breathing without retractions or nasal flaring.',
+      abn: '1) Barrel Chest (AP:Transverse ratio = 1:1 with horizontal ribs and costal angle >90°) = Chronic Hyperinflation in COPD / Emphysema. 2) Pectus Excavatum (sunken funnel chest) or Pectus Carinatum (pigeon chest). 3) Tripod posture + pursed-lip breathing + intercostal retractions = Acute Respiratory Distress.',
+      pearl: 'Record in Checklist: Document AP:Transverse ratio (1:2), midline trachea, symmetric rib slope, and effortless respirations without accessory muscle use.'
+    },
+    ar: {
+      short: '1. التأمل ونسبة القطر (1:2)',
+      tag: 'الخطوة 1 • تأمل الصدر ونسبة القطر الأمامي-الخلفي للعرضي',
+      name: '1. تأمل الصدر: نسبة القطر الأمامي-الخلفي للعرضي (1:2 مقابل الصدر البرميلي 1:1) والعضلات الإضافية',
+      tech: '1) يجلس المريض منتصباً مع كشف الصدر الأمامي والخلفي. 2) قارن القطر الأمامي-الخلفي (AP) بالقطر العرضي (Transverse). 3) تأمل استقامة العمود الفقري، الزاوية الضلعية (<90°)، لون الجلد والشفاه، ومعدل التنفس (12-20/دقيقة) وعدم استخدام العضلات التنفسية الإضافية.',
+      norm: 'نسبة القطر الأمامي-الخلفي للعرضي هي 1:2؛ الزاوية الضلعية أقل من 90°؛ وتنفس هادئ منتظم دون سحب وربي.',
+      abn: '1) الصدر البرميلي (Barrel Chest بنسبة 1:1) = فرط انتفاخ الرئة المزمن في COPD. 2) الصدر المقعر أو الجؤجؤي. 3) استخدام العضلات القترائية والوربية = ضائقة تنفسية حادة.',
+      pearl: 'التوثيق بالتشيك ليست (Record): تسجيل نسبة القطر (1:2)، توضع الرغامى بالمنتصف، وعدم استخدام العضلات الإضافية.'
+    }
+  },
+  expansion_fremitus: {
+    modes: [
+      { en: 'Normal Symmetric Expansion & Fremitus', ar: 'تمدد واهتزاز صوتي متناظر طبيعي' },
+      { en: 'Increased Tactile Fremitus (Pneumonia)', ar: 'زيادة الاهتزاز الصوتي (ذات رئة فصية)' },
+      { en: 'Decreased/Absent Fremitus (Pneumothorax/Effusion)', ar: 'نقص/غياب الاهتزاز والتمدد (استرواح/انصباب)' }
+    ],
+    en: {
+      short: '2. Expansion & Fremitus ("99")',
+      tag: 'Step 2 • Palpation (Expansion & Tactile Fremitus)',
+      name: '2. Symmetric Chest Expansion (T9–T10) & Tactile Fremitus ("Ninety-Nine" / "44")',
+      tech: '1) Symmetric Expansion: Place your hands on the posterolateral chest wall with thumbs at the level of T9 or T10; slide thumbs medially to pinch a small fold of skin between thumbs, and ask patient to take a deep breath. 2) Tactile Fremitus: Use the palmar base of fingers (ball of hand) or ulnar edge of one hand to touch the chest in a symmetric side-to-side ladder while the patient repeats "Ninety-Nine" (or "Forty-Four" in Arabic). Avoid the bony scapulae!',
+      norm: 'Thumbs separate symmetrically by 3–5 cm during deep inspiration; equal bilateral tactile vibrations felt strongest near the tracheal bifurcation (T1–T3 between scapulae) and decreasing toward the lung bases.',
+      abn: '1) Unilateral Asymmetric Lag on Expansion = Pneumothorax, Large Pleural Effusion, Atelectasis, or Flail Chest. 2) INCREASED Tactile Fremitus = Lobar Pneumonia / Consolidation (dense fluid-filled alveoli transmit sound faster than air!). 3) DECREASED or ABSENT Fremitus = Pneumothorax, Pleural Effusion, COPD hyperinflation, or Bronchial Obstruction.',
+      pearl: 'Record in Checklist: Use the palmar ball or ulnar edge of the hand (NOT fingertips!) for Tactile Fremitus, and never palpate directly over the bony scapulae.'
+    },
+    ar: {
+      short: '2. تمدد الصدر والاهتزاز (44/99)',
+      tag: 'الخطوة 2 • الجس (تمدد الصدر والاهتزاز الصوتي اللمسي)',
+      name: '2. فحص تناظر تمدد الصدر (عند T9–T10) والاهتزاز الصوتي اللمسي (Tactile Fremitus — 44 / 99)',
+      tech: '1) تمدد الصدر: ضع يديك على أسفل الصدر الخلفي بحيث يلتقي الإبهامان عند مستوى الفقرة T9-T10 مع ضم طية جلدية صغيرة، واطلب من المريض أخذ شهيق عميق. 2) الاهتزاز الصوتي اللمسي (Tactile Fremitus): ضع الحافة الزندية لليد أو قاعدة الأصابع الكفية بنمط السلم المتناظر بين اليمين واليسار (تجنب عظم لوح الكتف!) بينما يردد المريض "أربعة وأربعين" أو "99".',
+      norm: 'تباعد متناظر للإبهامين أثناء الشهيق العميق، واهتزاز صوتي متناظر بالجانبين.',
+      abn: '1) تأخر حركة جهة واحدة = استرواح الصدر أو انصباب جنبي كبير. 2) زيادة الاهتزاز الصوتي = ذات الرئة الفصية (التكثف ينقل الذبذبات الصوتية بقوة!). 3) نقص أو غياب الاهتزاز الصوتي = استرواح الصدر أو الانصباب الجنبي.',
+      pearl: 'التوثيق بالتشيك ليست (Record): استخدام الحافة الزندية أو قاعدة الأصابع (وليس رؤوس الأصابع) وتجنب عظم لوح الكتف.'
+    }
+  },
+  percussion_ladder: {
+    modes: [
+      { en: 'Normal Resonance Over Lung Fields', ar: 'رنين طبيعي (Resonance) فوق الرئتين' },
+      { en: 'Hyperresonance (Pneumothorax / COPD)', ar: 'فرط رنين طبلي (استرواح الصدر / COPD)' },
+      { en: 'Dullness / Flatness (Pneumonia / Effusion)', ar: 'أصمية (Dullness — ذات رئة / انصباب جنبي)' }
+    ],
+    en: {
+      short: '3. Percussion Ladder',
+      tag: 'Step 3 • Thoracic Percussion',
+      name: '3. Thoracic Percussion Ladder (Resonance vs. Hyperresonance vs. Dullness)',
+      tech: '1) Hyperextend the middle finger of your non-dominant hand (pleximeter) and press its distal interphalangeal joint firmly into the intercostal space (parallel to ribs, never over scapulae or ribs). 2) Strike sharply twice with the tip (not pad) of your dominant middle finger (plexor) using a loose wrist flick. 3) Compare side-to-side in a 9–10 point posterior ladder at 4–5 cm intervals, plus lateral and anterior fields.',
+      norm: 'Low-pitched, clear, hollow Resonance heard symmetrically over all healthy air-filled lung tissue (with normal cardiac dullness on left anterior chest and liver dullness at right 5th–6th ICS).',
+      abn: '1) Hyperresonance (loud, booming, lower-pitched note) = Pneumothorax (air in pleural space) or Severe Emphysema/Asthma air trapping. 2) Dullness (soft, high-pitched, thud-like note) = Lobar Pneumonia consolidation, Atelectasis, or Pleural Effusion.',
+      pearl: 'Record in Checklist: Lift the striking finger immediately after each tap so you don\'t damp the vibration, and percuss strictly inside the intercostal spaces!'
+    },
+    ar: {
+      short: '3. قرع الصدر (السلم المتناظر)',
+      tag: 'الخطوة 3 • قرع الصدر بنمط السلم المتناظر',
+      name: '3. قرع الصدر بنمط السلم المتناظر (الرنين الطبيعي مقابل فرط الرنين والأصمية)',
+      tech: '1) ضع المفصل السلامي البعيد لإصبع الوسطى لليد غير المهيمنة بثبات داخل الحيز الوربي (بين الأضلاع وبعيداً عن لوح الكتف). 2) اقرع بطرف إصبع الوسطى لليد الأخرى بحركة سريعة من المعصم مرتين في كل نقطة. 3) قارن بالتناظر بين اليمين واليسار من القمة للقاعدة بنمط السلم.',
+      norm: 'سماع نغمة الرنين الطبيعي (Resonance) فوق جميع الساحات الرئوية السليمة.',
+      abn: '1) فرط الرنين (Hyperresonance) = استرواح الصدر (Pneumothorax) أو النفاخ الرئوي (Emphysema). 2) الأصمية (Dullness) = ذات الرئة الفصية أو الانصباب الجنبي.',
+      pearl: 'التوثيق بالتشيك ليست (Record): القرع داخل الأحياز الوربية حصراً ومقارنة كل نقطة بنظيرتها في الجهة المقابلة.'
+    }
+  },
+  normal_breath_sounds: {
+    modes: [
+      { en: 'Vesicular (Peripheral — Insp > Exp 3:1)', ar: 'حويصلي (محيط الرئة — الشهيق > الزفير)' },
+      { en: 'Bronchovesicular (1st–2nd ICS — Insp = Exp)', ar: 'قصبي حويصلي (الورب 1-2 — الشهيق = الزفير)' },
+      { en: 'Bronchial (Trachea / Consolidation — Exp > Insp)', ar: 'قصبي (الرغامى / التكثف — الزفير > الشهيق)' }
+    ],
+    en: {
+      short: '4. Normal Breath Sounds',
+      tag: 'Step 4 • Auscultation of Normal Breath Sounds',
+      name: '4. Systematic Auscultation of Normal Breath Sounds (Vesicular, Bronchovesicular & Bronchial)',
+      tech: '1) Place the DIAPHRAGM of the stethoscope firmly and directly on bare skin (never over clothing or hair). 2) Instruct patient to breathe slowly and deeply through an OPEN MOUTH (nose breathing is too quiet; pause if dizzy). 3) Listen to one full inspiration and expiration at each point along the side-to-side ladder (Apices at C7 down to Bases at T10 posteriorly, plus anterior/lateral lobes).',
+      norm: '1) Vesicular (over most peripheral lung fields): soft, low-pitched rustling; Inspiration > Expiration (3:1 ratio) with no pause. 2) Bronchovesicular (1st–2nd ICS anteriorly & between scapulae T1–T4 posteriorly): moderate pitch; Inspiration = Expiration (1:1). 3) Bronchial / Tracheal (over trachea/manubrium): loud, harsh, high-pitched tubular sound with a short pause and Expiration > Inspiration.',
+      abn: 'Hearing loud tubular Bronchial or Bronchovesicular breath sounds over the PERIPHERAL lung bases = Lobar Consolidation (Pneumonia)! Markedly diminished or absent breath sounds = Pneumothorax, Pleural Effusion, or "Silent Chest" in life-threatening status asthmaticus.',
+      pearl: 'Record in Checklist: Listen to one full respiratory cycle (in + out) at every point on bare skin before moving to the opposite side!'
+    },
+    ar: {
+      short: '4. أصوات التنفس الطبيعية',
+      tag: 'الخطوة 4 • الإصغاء لأصوات التنفس الطبيعية الثلاثة',
+      name: '4. الإصغاء المنهجي لأصوات التنفس الطبيعية (الحويصلي، القصبي-الحويصلي، والقصبي)',
+      tech: '1) ضع غشاء السماعة (Diaphragm) بثبات ومباشرة على الجلد العاري. 2) اطلب من المريض التنفس بعمق وبطء عبر الفم المفتوح. 3) استمع لدورة تنفسية كاملة (شهيق وزفير) في كل نقطة بنمط السلم المتناظر.',
+      norm: '1) الصوت الحويصلي (Vesicular فوق معظم محيط الرئة): ناعم ومنخفض التردد والشهيق أطول من الزفير (3:1). 2) القصبي-الحويصلي (الورب 1-2 وبين لوحي الكتف): الشهيق = الزفير (1:1). 3) القصبي (فوق الرغامى): عالي اللحن والزفير أطول من الشهيق.',
+      abn: 'سماع الصوت القصبي في محيط أو قاعدة الرئة يدل على تكثف رئوي (ذات رئة فصية)، وغياب أصوات التنفس يدل على استرواح الصدر أو الانصباب الجنبي أو الربو الصامت الخطير.',
+      pearl: 'التوثيق بالتشيك ليست (Record): الإصغاء مباشرة على الجلد لدورة تنفسية كاملة في كل نقطة وتوثيق صفاء الساحتين الرئويتين.'
+    }
+  },
+  adventitious_vocal: {
+    modes: [
+      { en: 'Fine Late-Inspiratory Crackles (CHF / Fibrosis)', ar: 'خراخر ناعمة بنهاية الشهيق (وذمة رئة)' },
+      { en: 'Expiratory Wheezes & Rhonchi (Asthma / COPD)', ar: 'وزيز زفيري وغطيط (الربو و COPD)' },
+      { en: 'Inspiratory Stridor / Positive Egophony (E→A)', ar: 'صرير شهيقي (Stridor) / إيجابية Egophony' }
+    ],
+    en: {
+      short: '5. Crackles, Wheezes & Egophony',
+      tag: 'Step 5 • Adventitious Sounds & Vocal Resonance',
+      name: '5. Adventitious Breath Sounds (Crackles, Wheezes, Rhonchi, Stridor) & Vocal Resonance (Egophony E-to-A)',
+      tech: '1) Note the timing (inspiratory vs expiratory) and pitch of any added sounds, and ask the patient to cough once to see if secretions clear. 2) When consolidation is suspected, perform Vocal Resonance tests with the Diaphragm: a) Bronchophony (patient says "99"), b) Egophony (patient says "EEE"), c) Whispered Pectoriloquy (patient whispers "1-2-3").',
+      norm: 'Zero adventitious sounds; spoken "99" is muffled/indistinct, "EEE" sounds like muffled "EEE", and whispered "1-2-3" is barely audible.',
+      abn: '1) Fine Crackles (high-pitched popping at end-inspiration like rubbing hair near ear; do NOT clear with cough) = Pulmonary Edema (CHF) or Interstitial Fibrosis. 2) Coarse Crackles & Low-pitched Rhonchi (often clear with cough) = Pneumonia / Bronchitis secretions. 3) High-pitched Musical Expiratory Wheezes = Asthma / COPD bronchospasm. 4) Loud Inspiratory Stridor over neck = Upper Airway Obstruction Emergency! 5) Positive Egophony ("EEE" heard as nasal "AAA") & clear whispered "1-2-3" = Lobar Consolidation!',
+      pearl: 'Record in Checklist: Distinguish Fine Crackles (alveolar fluid popping open in late inspiration) from Wheezes (musical continuous air squeezing through narrowed bronchi in expiration).'
+    },
+    ar: {
+      short: '5. الخراخر والوزيز والصرير',
+      tag: 'الخطوة 5 • الأصوات التنفسية الإضافية والرنين الصوتي',
+      name: '5. الأصوات الإضافية (الخراخر، الوزيز، الغطيط، الصرير) واختبارات الرنين الصوتي (Egophony E-to-A)',
+      tech: '1) حدد توقيت الصوت الإضافي (شهيقي أم زفيري) واطلب من المريض السعال لملاحظة زوال الغطيط. 2) عند الشك بتكثف رئوي أجرِ اختبارات الرنين الصوتي بالسماعة: Bronchophony (قول 99)، و Egophony (قول E)، و Whispered Pectoriloquy (همس 1-2-3).',
+      norm: 'خلو الساحتين الرئويتين من الأصوات الإضافية، وسماع الصوت المنطوق مكتوماً وغير واضح.',
+      abn: '1) الخراخر الناعمة بنهاية الشهيق (Fine Crackles) = وذمة الرئة القلبية أو التليف الرئوي. 2) الوزيز الزفيري الموسيقي (Wheezes) = تضيق القصبات في الربو و COPD. 3) الصرير الشهيقي (Stridor) = انسداد حاد في مجرى الهواء العلوي. 4) إيجابية Egophony (سماع E كأنها A) = ذات رئة فصية.',
+      pearl: 'التوثيق بالتشيك ليست (Record): توثيق نوع ومكان وتوقيت أي أصوات تنفسية إضافية ونتيجة الرنين الصوتي.'
+    }
+  }
+};
+  const ITEM_KEYS = Object.keys(ITEMS);
+  currentKey = ITEM_KEYS[0];
+
+  const canvas = document.getElementById('pe-sim-canvas');
+  canvas.addEventListener('pointermove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouseX = Math.max(0, Math.min(1, (e.clientX - r.left) / (r.width || 1)));
+    mouseY = Math.max(0, Math.min(1, (e.clientY - r.top) / (r.height || 1)));
+  });
+  canvas.addEventListener('pointerdown', e => {
+    const r = canvas.getBoundingClientRect();
+    mouseX = Math.max(0, Math.min(1, (e.clientX - r.left) / (r.width || 1)));
+    mouseY = Math.max(0, Math.min(1, (e.clientY - r.top) / (r.height || 1)));
+    isPressed = true;
+    pressTimer = 90;
+    // Detect which anatomical spot was clicked (Base vs Apex in Heart) and play sound!
+    selectedSpotIdx = (mouseY < 0.44) ? 0 : 4;
+    playExamAudio();
+  });
+  canvas.addEventListener('pointerup', () => { isPressed = false; });
+
+  function setSectionFilter(sec) {
+    sectionFilter = sec;
+    ['all', 'cardiac', 'pvs'].forEach(s => {
+      const b = document.getElementById('sec-btn-' + s);
+      if (b) b.classList.toggle('active', s === sec);
+    });
+    const filtered = ITEM_KEYS.filter(k => sec === 'all' || ITEMS[k].sec === sec);
+    if (filtered.length && !filtered.includes(currentKey)) {
+      selectItem(filtered[0]);
+    } else {
+      renderSidebar();
+      renderStepPills();
+    }
+  }
+
+  function renderStepPills() {
+    const row = document.getElementById('step-pills-row');
+    if (!row) return;
+    const isAr = (currentLang === 'ar');
+    const activeList = ITEM_KEYS.filter(k => sectionFilter === 'all' || !ITEMS[k].sec || ITEMS[k].sec === sectionFilter);
+    const curIdx = Math.max(0, activeList.indexOf(currentKey));
+    document.getElementById('step-counter-badge').textContent = `Step ${curIdx + 1} / ${activeList.length}`;
+    row.innerHTML = '';
+    activeList.forEach((k, idx) => {
+      const it = ITEMS[k];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'step-pill' + (k === currentKey ? ' active' : '');
+      const shortLbl = isAr ? (it.ar.short || `خطوة ${idx + 1}`) : (it.en.short || `Step ${idx + 1}`);
+      btn.textContent = `${idx + 1}. ${shortLbl}`;
+      btn.onclick = () => selectItem(k);
+      row.appendChild(btn);
+    });
+  }
+
+  function stepNavigate(dir) {
+    const activeList = ITEM_KEYS.filter(k => sectionFilter === 'all' || !ITEMS[k].sec || ITEMS[k].sec === sectionFilter);
+    const idx = activeList.indexOf(currentKey);
+    const nextIdx = (idx + dir + activeList.length) % activeList.length;
+    selectItem(activeList[nextIdx]);
+  }
+
+  function toggleAutoRun() {
+    const btn = document.getElementById('btn-autorun');
+    const isAr = (currentLang === 'ar');
+    if (autoRunInterval) {
+      clearInterval(autoRunInterval);
+      autoRunInterval = null;
+      btn.className = 'px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm';
+      btn.innerHTML = `<i class="fa-solid fa-play"></i> <span id="lbl-autorun">${isAr ? 'تشغيل تلقائي للخطوات' : 'Auto-Run Steps'}</span>`;
+    } else {
+      autoRunInterval = setInterval(() => stepNavigate(1), 4200);
+      btn.className = 'px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm';
+      btn.innerHTML = `<i class="fa-solid fa-pause"></i> <span id="lbl-autorun">${isAr ? 'إيقاف التشغيل التلقائي' : 'Pause Auto-Run'}</span>`;
+    }
+  }
+
+  function renderModeButtons() {
+    const box = document.getElementById('sim-mode-buttons');
+    if (!box) return;
+    const it = ITEMS[currentKey];
+    const isAr = (currentLang === 'ar');
+    const modes = (it && it.modes) ? it.modes : [
+      { en: 'Normal Physiological Finding', ar: 'النتيجة الطبيعية السليمة' },
+      { en: 'Pathological / Abnormal Case 1', ar: 'الحالة المرضية الأولى' },
+      { en: 'Pathological / Abnormal Case 2', ar: 'الحالة المرضية الثانية' }
+    ];
+    box.innerHTML = '';
+    modes.forEach((m, idx) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mode-pill' + (idx === currentModeIdx ? ' active' : '');
+      b.textContent = isAr ? m.ar : m.en;
+      b.onclick = () => {
+        currentModeIdx = idx;
+        pressTimer = 90;
+        renderModeButtons();
+      };
+      box.appendChild(b);
+    });
+  }
+
+  function renderSidebar() {
+    const box = document.getElementById('clinix-sidebar-scroll');
+    const q = (document.getElementById('pe-search')?.value || '').trim().toLowerCase();
+    const isAr = (currentLang === 'ar');
+    box.innerHTML = '';
+    let shown = 0;
+    ITEM_KEYS.forEach((k, idx) => {
+      const it = ITEMS[k];
+      if (sectionFilter !== 'all' && it.sec && it.sec !== sectionFilter) return;
+      const title = isAr ? it.ar.name : it.en.name;
+      if (q && !it.en.name.toLowerCase().includes(q) && !it.ar.name.toLowerCase().includes(q) && !it.en.tag.toLowerCase().includes(q)) return;
+      shown++;
+      const isSel = (currentKey === k);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sc-card' + (isSel ? ' active' : '');
+      btn.innerHTML = `
+        <div class="flex items-center justify-between gap-1">
+          <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${isSel ? 'bg-white/25 text-white' : 'bg-teal-50 text-teal-800 border border-teal-200'}">
+            ${isAr ? it.ar.tag : it.en.tag}
+          </span>
+          <span class="num-ltr text-[10.5px] font-mono font-extrabold ${isSel ? 'text-teal-100' : 'text-slate-500'}">Step ${idx + 1}/${ITEM_KEYS.length}</span>
+        </div>
+        <div class="text-xs font-extrabold ${isSel ? 'text-white' : 'text-slate-900'} leading-snug">${title}</div>
+      `;
+      btn.onclick = () => selectItem(k);
+      box.appendChild(btn);
+    });
+    document.getElementById('ui-sb-count').textContent = `${shown} / ${ITEM_KEYS.length}`;
+  }
+
+  function selectItem(k) {
+    currentKey = k;
+    currentModeIdx = 0;
+    const it = ITEMS[k];
+    const isAr = (currentLang === 'ar');
+    const d = isAr ? it.ar : it.en;
+    document.getElementById('sim-badge').textContent = d.tag;
+    document.getElementById('sim-main-heading').textContent = d.name;
+    document.getElementById('box1-body').textContent = d.tech;
+    document.getElementById('box2-body').textContent = d.norm;
+    document.getElementById('box3-body').textContent = d.abn;
+    document.getElementById('box4-body').textContent = d.pearl;
+    renderSidebar();
+    renderStepPills();
+    renderModeButtons();
+  }
+
+  function renderOSCEChecklist() {
+    const preBox = document.getElementById('osce-pre-list');
+    const recBox = document.getElementById('osce-rec-list');
+    if (!preBox || !recBox) return;
+    const isAr = (currentLang === 'ar');
+    preBox.innerHTML = '';
+    recBox.innerHTML = '';
+    PRE_STEPS.forEach((st, i) => {
+      const lbl = document.createElement('label');
+      lbl.className = 'flex items-start gap-2 p-1.5 rounded-lg hover:bg-white cursor-pointer';
+      lbl.innerHTML = `<input type="checkbox" class="osce-chk mt-0.5 accent-teal-600" onchange="updateOSCEScore()"> <span class="font-semibold text-slate-800">${isAr ? st.ar : st.en}</span>`;
+      preBox.appendChild(lbl);
+    });
+    RECORD_ITEMS.forEach((st, i) => {
+      const lbl = document.createElement('label');
+      lbl.className = 'flex items-start gap-2 p-1.5 rounded-lg hover:bg-white cursor-pointer';
+      lbl.innerHTML = `<input type="checkbox" class="osce-chk mt-0.5 accent-sky-600" onchange="updateOSCEScore()"> <span class="font-semibold text-slate-800">${isAr ? st.ar : st.en}</span>`;
+      recBox.appendChild(lbl);
+    });
+    updateOSCEScore();
+  }
+
+  function updateOSCEScore() {
+    const chks = document.querySelectorAll('.osce-chk');
+    let done = 0;
+    chks.forEach(c => { if (c.checked) done++; });
+    const pct = chks.length ? Math.round((done / chks.length) * 100) : 0;
+    const badge = document.getElementById('osce-score-badge');
+    if (badge) badge.textContent = `OSCE Score: ${done * 2} / ${chks.length * 2} (${pct}%)`;
+  }
+
+  function checkAllOSCE(state) {
+    document.querySelectorAll('.osce-chk').forEach(c => { c.checked = state; });
+    updateOSCEScore();
+  }
+
+  let useBellMode = false;
+  let contAudioTimer = null;
+  let selectedSpotIdx = 0;
+
+  function toggleChestpieceMode() {
+    useBellMode = !useBellMode;
+    const isAr = (currentLang === 'ar');
+    const lbl = document.getElementById('lbl-chestpiece');
+    if (lbl) {
+      lbl.textContent = useBellMode
+        ? (isAr ? 'القمع: Bell (للأصوات المنخفضة S3/S4/MS)' : 'Chestpiece: Bell (Low Pitch S3/S4/MS)')
+        : (isAr ? 'الغشاء: Diaphragm (للأصوات العالية S1/S2)' : 'Chestpiece: Diaphragm (High Pitch)');
+    }
+    playExamAudio();
+  }
+
+  function toggleContinuousAudio() {
+    const isAr = (currentLang === 'ar');
+    const lbl = document.getElementById('lbl-cont-audio');
+    const btn = document.getElementById('btn-cont-audio');
+    if (contAudioTimer) {
+      clearInterval(contAudioTimer);
+      contAudioTimer = null;
+      if (lbl) lbl.textContent = isAr ? 'صوت السماعة المستمر: متوقف' : 'Continuous Sound: OFF';
+      if (btn) btn.className = 'px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-extrabold flex items-center gap-1.5';
+    } else {
+      playExamAudio();
+      contAudioTimer = setInterval(playExamAudio, 2500);
+      if (lbl) lbl.textContent = isAr ? 'صوت السماعة المستمر: يعمل 🔊' : 'Continuous Sound: ON 🔊';
+      if (btn) btn.className = 'px-3 py-2 rounded-xl bg-emerald-600 text-white border border-emerald-700 text-xs font-extrabold flex items-center gap-1.5 shadow';
+    }
+  }
+
+  function makeNoiseBuffer(ctx, durationSec) {
+    const sr = ctx.sampleRate;
+    const len = Math.floor(sr * durationSec);
+    const buf = ctx.createBuffer(1, len, sr);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1);
+    return buf;
+  }
+
+  function playFilteredNoiseBurst(ctx, tStart, dur, freqHz, qVal, peakGain) {
+    const src = ctx.createBufferSource();
+    src.buffer = makeNoiseBuffer(ctx, dur + 0.05);
+    const flt = ctx.createBiquadFilter();
+    flt.type = 'bandpass';
+    flt.frequency.setValueAtTime(freqHz, tStart);
+    flt.Q.setValueAtTime(qVal, tStart);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.001, tStart);
+    g.gain.linearRampToValueAtTime(peakGain, tStart + dur * 0.42);
+    g.gain.exponentialRampToValueAtTime(0.001, tStart + dur);
+    src.connect(flt); flt.connect(g); g.connect(ctx.destination);
+    src.start(tStart); src.stop(tStart + dur + 0.02);
+  }
+
+  function playThud(ctx, t0, fStart, fEnd, dur, vol) {
+    const o = ctx.createOscillator();
+    const flt = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(fStart, t0);
+    o.frequency.exponentialRampToValueAtTime(fEnd, t0 + dur);
+    flt.type = 'lowpass';
+    flt.frequency.setValueAtTime(useBellMode ? 140 : 240, t0);
+    g.gain.setValueAtTime(0.001, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(flt); flt.connect(g); g.connect(ctx.destination);
+    o.start(t0); o.stop(t0 + dur + 0.01);
+  }
+
+  function playExamAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+
+      if ('lungs' === 'ear') {
+        // Realistic 512 Hz Tuning Fork with Stereo Lateralization (Weber & Rinne)
+        const osc = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(512, now);
+        osc2.type = 'sine'; osc2.frequency.setValueAtTime(1024, now);
+        const g2 = audioCtx.createGain(); g2.gain.setValueAtTime(0.04, now);
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 2.1);
+        if (audioCtx.createStereoPanner) {
+          const pan = audioCtx.createStereoPanner();
+          // Mode 1: Right Conductive Loss -> lateralizes to Right (-0.8); Mode 2: Right Sensorineural -> lateralizes to Left (+0.8)
+          pan.pan.setValueAtTime(currentModeIdx === 1 ? -0.82 : (currentModeIdx === 2 ? 0.82 : 0), now);
+          osc.connect(gain); osc2.connect(g2); g2.connect(gain);
+          gain.connect(pan); pan.connect(audioCtx.destination);
+        } else {
+          osc.connect(gain); gain.connect(audioCtx.destination);
+        }
+        osc.start(now); osc2.start(now);
+        osc.stop(now + 2.15); osc2.stop(now + 2.15);
+      } else if ('lungs' === 'heart') {
+        if (ITEMS[currentKey] && ITEMS[currentKey].sec === 'pvs') {
+          // Arterial Handheld Doppler Ultrasound Sound (Triphasic Normal vs Monophasic PAD)
+          for (let b = 0; b < 3; b++) {
+            const t0 = now + b * 0.80;
+            if (currentModeIdx === 0) {
+              // Crisp Triphasic Doppler: Systolic forward whoosh + Early diastolic reverse + Late diastolic forward
+              playFilteredNoiseBurst(audioCtx, t0, 0.16, 650, 3.0, 0.28);
+              playFilteredNoiseBurst(audioCtx, t0 + 0.18, 0.08, 420, 4.0, 0.16);
+              playFilteredNoiseBurst(audioCtx, t0 + 0.28, 0.07, 520, 4.0, 0.12);
+            } else {
+              // Damped Monophasic PAD Doppler
+              playFilteredNoiseBurst(audioCtx, t0, 0.28, 320, 2.5, 0.15);
+            }
+          }
+          return;
+        }
+        // Realistic Multi-Layer Heart Sounds (S1, S2, Split S2, S3, S4, AS/MR/AR/MS Murmurs & Carotid Bruit)
+        const isBaseSpot = (selectedSpotIdx === 0 || selectedSpotIdx === 1); // Aortic/Pulmonic: S2 > S1
+        const s1Vol = isBaseSpot ? 0.24 : 0.42;
+        const s2Vol = isBaseSpot ? 0.42 : 0.26;
+        for (let b = 0; b < 3; b++) {
+          const t0 = now + b * 0.80;
+          // S4 Atrial Gallop (just before S1)
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 2) {
+            playThud(audioCtx, t0 + 0.02, 46, 32, 0.08, useBellMode ? 0.34 : 0.18);
+          }
+          // S1 ("Lub" — Mitral M1 + Tricuspid T1 closure)
+          playThud(audioCtx, t0 + 0.10, 72, 42, 0.10, s1Vol);
+          // Systolic Murmurs / Carotid Bruit (between S1 and S2)
+          if ((currentKey === 'neck_carotid' && currentModeIdx === 1) || (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 0)) {
+            // Harsh Aortic Stenosis / Carotid Bruit Crescendo-Decrescendo Diamond Murmur
+            playFilteredNoiseBurst(audioCtx, t0 + 0.18, 0.22, 340, 2.2, 0.28);
+          } else if (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 1) {
+            // Blowing Holosystolic Mitral Regurgitation Murmur
+            playFilteredNoiseBurst(audioCtx, t0 + 0.14, 0.28, 580, 1.8, 0.26);
+          }
+          // S2 ("Dub" — Aortic A2 + Pulmonic P2 closure)
+          playThud(audioCtx, t0 + 0.42, 98, 58, 0.085, s2Vol);
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 0) {
+            // Physiologic Split S2 (P2 55ms after A2)
+            playThud(audioCtx, t0 + 0.475, 92, 54, 0.08, s2Vol * 0.85);
+          }
+          // S3 Ventricular Gallop ("Ken-tuck-y" — 120ms after S2)
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 1) {
+            playThud(audioCtx, t0 + 0.55, 50, 34, 0.09, useBellMode ? 0.36 : 0.20);
+          }
+          // Diastolic Murmur (AR / MS)
+          if (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 2) {
+            playFilteredNoiseBurst(audioCtx, t0 + 0.50, 0.25, useBellMode ? 130 : 680, 2.5, 0.24);
+          }
+        }
+      } else if ('lungs' === 'lungs') {
+        if (currentKey === 'percussion_ladder') {
+          // Realistic Thoracic Percussion Notes (Resonance vs Hyperresonance vs Dullness)
+          for (let tap = 0; tap < 2; tap++) {
+            const t0 = now + tap * 0.28;
+            if (currentModeIdx === 0) playThud(audioCtx, t0, 115, 78, 0.18, 0.38); // Hollow Resonance
+            else if (currentModeIdx === 1) playThud(audioCtx, t0, 165, 130, 0.26, 0.44); // Booming Hyperresonance (Pneumothorax)
+            else playThud(audioCtx, t0, 240, 180, 0.06, 0.28); // Short Flat Dullness (Consolidation/Effusion)
+          }
+          return;
+        }
+        // Realistic Breath Cycle (Inspiration 0..1.1s + Expiration 1.2..2.2s)
+        const isBronchial = (currentKey === 'normal_breath_sounds' && currentModeIdx === 2);
+        const isBV = (currentKey === 'normal_breath_sounds' && currentModeIdx === 1);
+        // Inspiration filtered noise
+        playFilteredNoiseBurst(audioCtx, now + 0.05, 1.05, isBronchial ? 720 : (isBV ? 440 : 260), 1.6, 0.24);
+        // Expiration filtered noise
+        playFilteredNoiseBurst(audioCtx, now + 1.20, isBronchial ? 1.15 : (isBV ? 0.95 : 0.55), isBronchial ? 780 : (isBV ? 420 : 220), 1.6, isBronchial ? 0.28 : 0.14);
+
+        if (currentKey === 'adventitious_vocal') {
+          if (currentModeIdx === 0) {
+            // Fine Late-Inspiratory Crackles (12 rapid Velcro micro-popping impulses at 0.55..1.05s)
+            for (let c = 0; c < 12; c++) {
+              const tc = now + 0.52 + c * 0.042 + (Math.random() * 0.015);
+              playFilteredNoiseBurst(audioCtx, tc, 0.014, 1350, 4.5, 0.32);
+            }
+          } else if (currentModeIdx === 1) {
+            // High-Pitched Musical Polyphonic Expiratory Wheezes (1.18..2.15s)
+            [410, 565, 710].forEach((freq, idx) => {
+              const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+              o.type = 'sawtooth'; o.frequency.setValueAtTime(freq, now + 1.18);
+              o.frequency.linearRampToValueAtTime(freq * 0.94, now + 2.10);
+              g.gain.setValueAtTime(0.001, now + 1.18);
+              g.gain.linearRampToValueAtTime(0.055, now + 1.35);
+              g.gain.exponentialRampToValueAtTime(0.001, now + 2.15);
+              o.connect(g); g.connect(audioCtx.destination);
+              o.start(now + 1.18); o.stop(now + 2.18);
+            });
+          } else {
+            // High-Pitched Inspiratory Stridor (0.08..1.05s)
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = 'triangle'; o.frequency.setValueAtTime(640, now + 0.08);
+            o.frequency.linearRampToValueAtTime(760, now + 0.65);
+            g.gain.setValueAtTime(0.001, now + 0.08);
+            g.gain.linearRampToValueAtTime(0.22, now + 0.45);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 1.05);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now + 0.08); o.stop(now + 1.08);
+          }
+        }
+      } else {
+        // Eye stimulus confirmation tone
+        playThud(audioCtx, now, 520, 660, 0.18, 0.18);
+      }
+    } catch (e) {}
+  }
+
+  function toggleLanguage() {
+    currentLang = (currentLang === 'en') ? 'ar' : 'en';
+    const isAr = (currentLang === 'ar');
+    const root = document.getElementById('html-root');
+    root.lang = currentLang;
+    root.dir = isAr ? 'rtl' : 'ltr';
+    document.getElementById('ui-lang-btn').textContent = isAr ? 'English (EN)' : 'العربية (AR)';
+    document.getElementById('ui-title').textContent = isAr ? 'محاكي فحص الصدر والرئتين وأصوات التنفس خطوة بخطوة (حسب التشيك ليست)' : 'Jarvis Thoracic & Pulmonary Step-by-Step Examination Simulator';
+    document.getElementById('ui-subtitle').textContent = isAr ? '5 محطات تفاعلية خطوة بخطوة: نسبة القطر (1:2)، التمدد والاهتزاز الصوتي، سلم القرع، أصوات التنفس الطبيعية، والخراخر والوزيز والصرير' : '5 Interactive Stations: AP:T Ratio (1:2 vs Barrel) • Expansion & Fremitus (99) • Percussion Ladder • Normal Breath Sounds • Crackles, Wheezes & Egophony';
+    document.getElementById('ui-back-pe').textContent = isAr ? 'الرجوع إلى صفحة الفحص السريري (Physical Exam)' : 'Back to Physical Examination Hub';
+    document.getElementById('lbl-sb-head').textContent = isAr ? 'محطات الفحص السريري خطوة بخطوة' : 'Step-by-Step Checklist Stations';
+    document.getElementById('lbl-step-guide').textContent = isAr ? 'محاكي تطبيق خطوات الفحص السريري خطوة بخطوة حسب التشيك ليست' : 'Interactive Step-by-Step Procedure Walkthrough (University Checklist)';
+    document.getElementById('lbl-prev-step').textContent = isAr ? 'الخطوة السابقة' : 'Prev Step';
+    document.getElementById('lbl-next-step').textContent = isAr ? 'الخطوة التالية' : 'Next Step';
+    document.getElementById('lbl-sim-mode').textContent = isAr ? 'اختر حالة المريض للمحاكاة:' : 'Simulate Patient Condition:';
+    document.getElementById('lbl-audio-btn').textContent = isAr ? 'تشغيل الصوت السريري / المنبه' : 'Play Clinical Sound / Stimulus';
+    if (document.getElementById('lbl-sec-all')) {
+      document.getElementById('lbl-sec-all').textContent = isAr ? 'جميع محطات القلب والأطراف (12 محطة)' : 'All Cardiac & Peripheral Stations (12)';
+      document.getElementById('lbl-sec-cardiac').textContent = isAr ? '❤️ فحص القلب والعنق (6)' : '❤️ Heart & Neck (6)';
+      document.getElementById('lbl-sec-pvs').textContent = isAr ? '🦵 فحص الأطراف والأوعية (6)' : '🦵 Extremities / PVS (6)';
+    }
+    document.getElementById('box1-title').innerHTML = `<i class="fa-solid fa-user-doctor text-sky-600"></i> <span>${isAr ? 'طريقة إجراء الفحص خطوة بخطوة وما تقوله للمريض:' : 'Step-by-Step Procedure & Patient Script (Checklist):'}</span>`;
+    document.getElementById('box2-title').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>${isAr ? 'النتيجة الطبيعية والتفسير الفيزيولوجي:' : 'Normal Finding & Physiological Mechanism:'}</span>`;
+    document.getElementById('box3-title').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600"></i> <span>${isAr ? 'النتائج غير الطبيعية والتشخيص التفريقي:' : 'Abnormal Findings & Clinical Differential:'}</span>`;
+    document.getElementById('box4-title').innerHTML = `<i class="fa-solid fa-lightbulb text-amber-600"></i> <span>${isAr ? 'التوثيق المطلوب بالتشيك ليست (Record) وتنبيهات الـ OSCE:' : 'OSCE Checklist Evaluation & Documentation ("Record"):'}</span>`;
+    renderOSCEChecklist();
+    selectItem(currentKey);
+  }
+
+  function drawSim() {
+    tick++;
+    if (pressTimer > 0) pressTimer--;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 10 && rect.height > 10) {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.direction = 'ltr';
+      
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, w, h);
+
+  // Left: Posterior 10-Point Auscultation & Percussion Ladder; Right: Acoustic Envelope / AP:T Ratio
+  const lx = w * 0.28, ly = h * 0.52;
+  const breathExp = Math.sin(tick * 0.05) * 4;
+  const rightLag = (currentKey === 'expansion_fremitus' && currentModeIdx === 2) ? 0 : breathExp;
+
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.5;
+  ctx.beginPath(); ctx.ellipse(lx - 42, ly, 36 + breathExp, 80, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.strokeStyle = (currentModeIdx === 2 && (currentKey === 'expansion_fremitus' || currentKey === 'percussion_ladder')) ? '#f43f5e' : '#38bdf8';
+  ctx.beginPath(); ctx.ellipse(lx + 42, ly, 36 + rightLag, 80, 0, 0, Math.PI * 2); ctx.stroke();
+
+  const ladderPts = [
+    [-24, -56, '1'], [24, -56, '2'],
+    [-30, -24, '3'], [30, -24, '4'],
+    [-36,   8, '5'], [36,   8, '6'],
+    [-42,  40, '7'], [42,  40, '8'],
+    [-46,  66, '9'], [46,  66, '10']
+  ];
+  ladderPts.forEach((pt, idx) => {
+    if (idx > 0) {
+      const prev = ladderPts[idx - 1];
+      ctx.strokeStyle = 'rgba(251, 191, 36, 0.45)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(lx + prev[0], ly + prev[1]); ctx.lineTo(lx + pt[0], ly + pt[1]); ctx.stroke();
+    }
+    ctx.fillStyle = '#f59e0b';
+    ctx.beginPath(); ctx.arc(lx + pt[0], ly + pt[1], 8.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#0f172a'; ctx.font = 'bold 9.5px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(pt[2], lx + pt[0], ly + pt[1] + 3.5);
+  });
+
+  const rx0 = w * 0.54, rw = w * 0.42, ryMid = h * 0.56;
+  ctx.fillStyle = '#e2e8f0'; ctx.font = 'bold 11.5px Inter, sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('Auscultation Acoustic Envelope (Inspiration vs. Expiration)', rx0, 28);
+
+  ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.6;
+  ctx.beginPath();
+  for (let x = 0; x <= rw; x += 2) {
+    const u = ((x / rw) * 2 + (tick * 0.01)) % 1;
+    let y = ryMid;
+    if (u < 0.52) {
+      y = ryMid - 48 * Math.sin((u / 0.52) * Math.PI);
+      if (currentKey === 'adventitious_vocal' && currentModeIdx === 0 && u > 0.32) {
+        y += 16 * Math.sin(x * 2.8); // Late inspiratory fine crackles
+      }
+      if (currentKey === 'adventitious_vocal' && currentModeIdx === 2) {
+        y += 14 * Math.sin(x * 1.9); // Inspiratory stridor
+      }
+    } else if (u < 0.88) {
+      const expAmp = (currentKey === 'normal_breath_sounds' && currentModeIdx === 2) ? 46 : 22;
+      y = ryMid + expAmp * Math.sin(((u - 0.52) / 0.36) * Math.PI);
+      if (currentKey === 'adventitious_vocal' && currentModeIdx === 1) {
+        y += 15 * Math.sin(x * 2.1); // Expiratory musical wheezes
+      }
+    }
+    if (x === 0) ctx.moveTo(rx0 + x, y); else ctx.lineTo(rx0 + x, y);
+  }
+  ctx.stroke();
+
+  ctx.fillStyle = '#fde047'; ctx.font = 'bold 11px Inter, monospace';
+  ctx.fillText('10-Point Symmetric Ladder (Avoid Bony Scapulae!) • Breathe via Open Mouth', rx0, h - 16);
+
+    }
+    requestAnimationFrame(drawSim);
+  }
+
+  renderOSCEChecklist();
+  selectItem(ITEM_KEYS[0]);
+  requestAnimationFrame(drawSim);
+</script>
+</body>
+</html>
