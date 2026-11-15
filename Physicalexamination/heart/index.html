@@ -1,1 +1,1289 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root" class="light" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CliniX Lab | Cardiac, Neck Vessels & Peripheral Vascular (Extremities) Step-by-Step Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root, #html-root, body {
+      color-scheme: light !important;
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-family: 'Inter', 'Cairo', sans-serif;
+      margin: 0;
+    }
+    .panel-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      box-shadow: 0 8px 22px -6px rgba(15, 23, 42, 0.06);
+    }
+    #clinix-v7-split-shell {
+      max-width: 1720px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    @media (min-width: 1024px) {
+      #html-root[dir="rtl"] #clinix-v7-split-shell { grid-template-columns: 400px minmax(0, 1fr); }
+      #html-root[dir="ltr"] #clinix-v7-split-shell { grid-template-columns: minmax(0, 1fr) 400px; }
+      #html-root[dir="rtl"] #clinix-sidebar-col { order: 1; }
+      #html-root[dir="rtl"] #clinix-main-col { order: 2; }
+      #html-root[dir="ltr"] #clinix-main-col { order: 1; }
+      #html-root[dir="ltr"] #clinix-sidebar-col { order: 2; }
+      #clinix-sidebar-col {
+        position: sticky;
+        top: 12px;
+        max-height: calc(100vh - 24px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+    }
+    #clinix-sidebar-scroll {
+      overflow-y: auto;
+      max-height: calc(100vh - 250px);
+      padding-inline-end: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sc-card {
+      width: 100%;
+      text-align: start;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.16s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sc-card:hover { border-color: #0d9488; background: #f8fafc; transform: translateY(-1px); }
+    .sc-card.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+      border-color: #0f766e !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.42) !important;
+    }
+    .sec-tab.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+      color: #ffffff !important;
+      border-color: #0f766e !important;
+    }
+    .step-pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .step-pill.active {
+      background: #0d9488;
+      color: #ffffff;
+      border-color: #0f766e;
+      box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
+    }
+    .mode-pill {
+      padding: 5px 11px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #1e293b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .mode-pill.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0369a1;
+    }
+    .num-ltr { direction: ltr !important; unicode-bidi: embed; font-family: 'Inter', monospace !important; }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-3 lg:p-4">
 
+  <header class="max-w-[1720px] mx-auto mb-3 panel-card p-3 sm:p-4 border-b-2 border-teal-500/40">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-teal-600 to-sky-600 flex items-center justify-center text-white text-xl shadow-md">
+          <i class="fa-solid fa-heart-pulse"></i>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 id="ui-title" class="text-lg sm:text-2xl font-black text-slate-900">Cardiac, Neck Vessels & Peripheral Vascular (Extremities) Step-by-Step Simulator</h1>
+            <span class="num-ltr px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200 text-[10.5px] font-mono font-extrabold">
+              /CliniXLab/Physicalexamination/heart
+            </span>
+          </div>
+          <p id="ui-subtitle" class="text-xs text-slate-500 font-semibold">12 Interactive Stations: Carotid & JVP (30–45°) • PMI & 5 Cardiac Areas • S2/S3/S4 & Murmurs • Upper/Lower Extremities, CRT (<2s), Allen Test (<7s), 4 Lower Pulses & Pitting Edema (1+–4+)</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- SINGLE CLEAR BACK BUTTON THAT STRICTLY RETURNS TO PHYSICAL EXAMINATION HUB -->
+        <a href="../index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('pe_hub');return false;}"
+          class="px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 border-2 border-teal-400 text-xs font-black flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span id="ui-back-pe">Back to Physical Examination Hub</span>
+        </a>
+        <button type="button" onclick="toggleLanguage()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-sky-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+          <i class="fa-solid fa-globe"></i>
+          <span id="ui-lang-btn">العربية (AR)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="clinix-v7-split-shell">
+    <!-- SIDEBAR: STEP-BY-STEP CHECKLIST STATIONS -->
+    <aside id="clinix-sidebar-col" class="panel-card p-3">
+      <div class="mb-2.5 pb-2 border-b border-slate-200">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span id="ui-sb-title" class="text-xs sm:text-sm font-black text-teal-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-list-check text-teal-600"></i>
+            <span id="lbl-sb-head">Step-by-Step Checklist Stations</span>
+          </span>
+          <span id="ui-sb-count" class="num-ltr px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 text-[11px] font-extrabold"></span>
+        </div>
+        <input type="search" id="pe-search" oninput="renderSidebar()" placeholder="Search checklist step or finding..."
+          class="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600" />
+        
+        <div class="grid grid-cols-2 gap-1.5 mt-2">
+          <button type="button" id="sec-btn-all" onclick="setSectionFilter('all')" class="sec-tab active col-span-2 px-2.5 py-1.5 rounded-lg border border-teal-300 bg-teal-600 text-white text-[11px] font-extrabold">
+            <span id="lbl-sec-all">All Cardiac & Peripheral Stations (12)</span>
+          </button>
+          <button type="button" id="sec-btn-cardiac" onclick="setSectionFilter('cardiac')" class="sec-tab px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">
+            <span id="lbl-sec-cardiac">❤️ Heart & Neck (6)</span>
+          </button>
+          <button type="button" id="sec-btn-pvs" onclick="setSectionFilter('pvs')" class="sec-tab px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">
+            <span id="lbl-sec-pvs">🦵 Extremities / PVS (6)</span>
+          </button>
+        </div>
+        
+      </div>
+      <div id="clinix-sidebar-scroll"></div>
+    </aside>
+
+    <!-- MAIN SIMULATION WORKSPACE -->
+    <main id="clinix-main-col" class="flex flex-col gap-3.5 min-w-0">
+
+      <!-- 1. STEP-BY-STEP PROCEDURE SIMULATOR BAR -->
+      <section class="panel-card p-3.5 bg-gradient-to-r from-teal-50/70 via-white to-sky-50/70">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+          <div class="flex items-center gap-2">
+            <span id="step-counter-badge" class="num-ltr px-2.5 py-1 rounded-lg bg-teal-700 text-white text-xs font-black">Step 1 / 6</span>
+            <span id="lbl-step-guide" class="text-xs sm:text-sm font-black text-slate-800">Interactive Step-by-Step Procedure Walkthrough (University Checklist)</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="stepNavigate(-1)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-backward-step"></i>
+              <span id="lbl-prev-step">Prev Step</span>
+            </button>
+            <button type="button" id="btn-autorun" onclick="toggleAutoRun()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-play"></i>
+              <span id="lbl-autorun">Auto-Run Steps</span>
+            </button>
+            <button type="button" onclick="stepNavigate(1)" class="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <span id="lbl-next-step">Next Step</span>
+              <i class="fa-solid fa-forward-step"></i>
+            </button>
+          </div>
+        </div>
+        <div id="step-pills-row" class="flex flex-wrap gap-1.5"></div>
+      </section>
+
+      <!-- 2. INTERACTIVE SIMULATOR VIEWPORT -->
+      <section class="panel-card p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
+          <div>
+            <span id="sim-badge" class="px-2.5 py-0.5 rounded-md bg-teal-100 text-teal-800 border border-teal-300 text-[11px] font-extrabold"></span>
+            <h2 id="sim-main-heading" class="text-base sm:text-xl font-black text-slate-900 mt-1"></h2>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="btn-bell-diaphragm" onclick="toggleChestpieceMode()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1.5">
+              <i class="fa-solid fa-stethoscope text-teal-600"></i>
+              <span id="lbl-chestpiece">Chestpiece: Diaphragm (High Pitch)</span>
+            </button>
+            <button type="button" id="btn-cont-audio" onclick="toggleContinuousAudio()" class="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-extrabold flex items-center gap-1.5">
+              <i class="fa-solid fa-repeat text-amber-600"></i>
+              <span id="lbl-cont-audio">Continuous Sound: OFF</span>
+            </button>
+            <button type="button" id="btn-audio-synth" onclick="playExamAudio()" class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-volume-high"></i>
+              <span id="lbl-audio-btn">Play Real Clinical Sound</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Clinical Sub-Mode Selector (Normal vs Pathologies for Current Step) -->
+        <div class="mb-2.5 flex flex-wrap items-center gap-1.5">
+          <span id="lbl-sim-mode" class="text-xs font-black text-slate-700 me-1">Simulate Patient Condition:</span>
+          <div id="sim-mode-buttons" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Interactive Canvas Viewport -->
+        <div class="relative w-full h-80 sm:h-96 rounded-xl bg-slate-900 border-2 border-slate-300 overflow-hidden mb-3">
+          <canvas id="pe-sim-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+        </div>
+
+        <p id="sim-canvas-hint" class="text-xs font-bold text-teal-800 bg-teal-50 px-3 py-2 rounded-xl border border-teal-200">
+          💡 Interactive Procedure Simulator: Move your cursor or tap inside the screen above to position the clinical instrument or hand, switch patient findings above, or click "Next Step" to walk through the complete OSCE procedure!
+        </p>
+      </section>
+
+      <!-- 3. STRUCTURED 4-BOX OSCE & CLINICAL BREAKDOWN -->
+      <section class="panel-card p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="p-3.5 rounded-xl bg-sky-50/80 border border-sky-200">
+            <h3 id="box1-title" class="text-xs sm:text-sm font-black text-sky-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-user-doctor text-sky-600"></i>
+              <span>Step-by-Step Procedure & Patient Script (Checklist)</span>
+            </h3>
+            <p id="box1-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200">
+            <h3 id="box2-title" class="text-xs sm:text-sm font-black text-emerald-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i>
+              <span>Normal Finding & Physiological Mechanism</span>
+            </h3>
+            <p id="box2-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-rose-50/80 border border-rose-200">
+            <h3 id="box3-title" class="text-xs sm:text-sm font-black text-rose-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+              <span>Abnormal Findings & Clinical Differential</span>
+            </h3>
+            <p id="box3-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200">
+            <h3 id="box4-title" class="text-xs sm:text-sm font-black text-amber-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-amber-600"></i>
+              <span>OSCE Checklist Evaluation & Documentation ("Record")</span>
+            </h3>
+            <p id="box4-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. INTERACTIVE UNIVERSITY OSCE GRADING CHECKLIST (PRE-ASSESSMENT + PROCEDURE + RECORD) -->
+      <section class="panel-card p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
+          <div>
+            <h3 id="osce-sheet-title" class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-check text-teal-600"></i>
+              <span>Interactive University OSCE Evaluation Sheet (Pre-Assessment, Procedure & Record)</span>
+            </h3>
+            <p id="osce-sheet-sub" class="text-xs text-slate-500 font-semibold">Check off each step as you practice — calculates your OSCE score (0 = Not Done, 1 = Incompletely Done, 2 = Completely Done)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="osce-score-badge" class="num-ltr px-3 py-1 rounded-xl bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-black">Score: 0%</span>
+            <button type="button" onclick="checkAllOSCE(true)" class="px-2.5 py-1 rounded-lg bg-teal-600 text-white text-[11px] font-extrabold">Check All</button>
+            <button type="button" onclick="checkAllOSCE(false)" class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-700 text-[11px] font-extrabold">Reset</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 text-xs">
+          <!-- Column A: 8 Mandatory Pre-Assessment Steps -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 id="lbl-pre-title" class="font-black text-teal-900 mb-2">A. Mandatory Pre-Assessment Steps (8 Steps)</h4>
+            <div id="osce-pre-list" class="space-y-1.5"></div>
+          </div>
+          <!-- Column B: Organ Procedure & Documentation Record Steps -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 id="lbl-rec-title" class="font-black text-sky-900 mb-2">B. Procedure Stations & Required Documentation ("Record")</h4>
+            <div id="osce-rec-list" class="space-y-1.5"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="panel-card py-3 px-6 text-center text-sm font-black text-slate-700">
+        By: MSN, RN Saif AlDeen Ghanem
+      </footer>
+    </main>
+  </div>
+
+<script>
+  let currentLang = 'en';
+  let currentKey = '';
+  let sectionFilter = 'all';
+  let currentModeIdx = 0;
+  let mouseX = 0.5, mouseY = 0.5;
+  let isPressed = false;
+  let pressTimer = 0;
+  let tick = 0;
+  let audioCtx = null;
+  let autoRunInterval = null;
+
+  const PRE_STEPS = [
+    { en: '1. Verify Doctor Order / Clinical Assessment Indication', ar: '1. التحقق من الأمر الطبي / دواعي الفحص السريري' },
+    { en: '2. Prepare Required Equipment (Penlight, Otoscope, Stethoscope, Tuning Fork 512 Hz)', ar: '2. تحضير الأدوات اللازمة (قلم ضوئي، منظار، سماعة، شوكة رنانة 512 Hz)' },
+    { en: '3. Perform Hand Hygiene / Wash Hands before patient contact', ar: '3. غسل اليدين وتعقيمهما قبل لمس المريض' },
+    { en: '4. Introduce Yourself & Role to the Patient', ar: '4. التعريف بالنفس والصفة المهنية للمريض' },
+    { en: '5. Confirm Patient Identity using 2 Identifiers (Full Name & Medical Record / DOB)', ar: '5. التأكد من هوية المريض عبر معرّفين (الاسم الرباعي والرقم الطبي)' },
+    { en: '6. Explain the Procedure Clearly & Obtain Verbal Consent', ar: '6. شرح خطوات الفحص للمريض بلغة واضحة وأخذ الموافقة' },
+    { en: '7. Provide Privacy (Close Curtains / Door & Drape Appropriately)', ar: '7. توفير الخصوصية التامة للمريض (إغلاق الستارة/الباب)' },
+    { en: '8. Position the Patient Comfortably (Sitting Upright or Supine at 30°–45°)', ar: '8. وضع المريض بوضعية مريحة ومناسبة للفحص (جالساً أو مستلقياً بزاوية 30-45°)' }
+  ];
+
+  const RECORD_ITEMS = [
+  { en: 'Cardiac 1: Neck Vessels — Palpate Carotid arteries ONE AT A TIME & Auscultate for Carotid Bruits with the Bell (patient holds breath)', ar: 'القلب 1: أوعية العنق — جس الشريان السباتي كل جهة على حدة، والإصغاء بالقمع (Bell) لتحري اللغط السباتي مع حبس النفس' },
+  { en: 'Cardiac 2: Jugular Venous Pressure (JVP) — Position supine at 30°–45°, turn head slightly away, inspect IJ pulsation & JVD at Angle of Louis (≤3 cm)', ar: 'القلب 2: الضغط الوريدي الوداجي (JVP) — بزاوية 30-45° وتقييم نبض الوريد الوداجي والاحتقان عند زاوية لويس (≤3 سم)' },
+  { en: 'Cardiac 3: Precordial Inspection & Palpation — Palpate Apical Impulse (PMI at 5th L ICS MCL, 1–2 cm), Heaves/Lifts & Thrills', ar: 'القلب 3: تأمل وجس البركورديم — جس صدمة القمة (PMI في الورب الخامس خط منتصف الترقوة الأيسر) والهرير (Thrills)' },
+  { en: 'Cardiac 4: 5 Auscultation Areas — Aortic (2nd R), Pulmonic (2nd L), Erb\'s (3rd L), Tricuspid (4th LLSB), Mitral (5th MCL) with Diaphragm & Bell', ar: 'القلب 4: الإصغاء للبؤر الخمس (الأبهرية، الرئوية، إيرب، مثلث الشرف، والتاجية) بالغشاء Diaphragm والقمع Bell' },
+  { en: 'Extremities 1 (Upper): Inspect symmetry, skin color, nail beds/clubbing, palpate temperature (dorsum of fingers) & Capillary Refill Time (<2 sec)', ar: 'الأطراف 1 (العلوية): تأمل التناظر واللون والأظافر، وجس الحرارة بظهر الأصابع، وفحص زمن عود الامتلاء الشعري (CRT < 2 ثانية)' },
+  { en: 'Extremities 2 (Upper): Palpate Radial, Ulnar & Brachial Pulses bilaterally (grade 0 to 3+), Epitrochlear nodes & perform Modified Allen Test (<7 sec)', ar: 'الأطراف 2 (العلوية): جس النبض الكعبري والزندي والعضدي بالجانبين (0 إلى +3)، العقد فوق البكرة، واختبار ألين المعدل (<7 ثوانٍ)' },
+  { en: 'Extremities 3 (Lower): Inspect hair distribution, skin color, venous/arterial ulcers, varicosities, palpate temperature & Superficial Inguinal Nodes', ar: 'الأطراف 3 (السفلية): تأمل توزيع الشعر، اللون، القرحات الوريدية/الشريانية، الدوالي، وجس الحرارة والعقد الإربية السطحية' },
+  { en: 'Extremities 4 (Lower): Palpate 4 Lower Pulses (Femoral, Popliteal, Posterior Tibial, Dorsalis Pedis), grade Pitting Edema (1+ to 4+) & check Calf DVT pain', ar: 'الأطراف 4 (السفلية): جس النبضات الأربعة (الفخذي، المأبضي، الظنبوبي الخلفي، وظهر القدم)، وتقييم الوذمة الانطباعية (1+ إلى 4+) وألم الربلة DVT' },
+  { en: 'Record: Heart rate/rhythm, S1/S2, extra sounds/murmurs, bilateral pulses (2+), CRT <2s, Allen test, and absence/grade of edema documented', ar: 'التوثيق (Record): تسجيل أصوات القلب، النبضات المحيطية بالجانبين (+2)، CRT <2s، اختبار ألين، ودرجة الوذمة الانطباعية' }
+];
+  const ITEMS = {
+  neck_carotid: {
+    sec: 'cardiac',
+    modes: [
+      { en: 'Normal Smooth Carotid (2+, No Bruit)', ar: 'نبض سباتي طبيعي (+2 بدون لغط)' },
+      { en: 'Carotid Stenosis Bruit (Whooshing)', ar: 'لغط تضيق الشريان السباتي (Bruit)' },
+      { en: 'Bounding / Weak Thready Pulse', ar: 'نبض قافز (3+) / خيطي ضعيف (1+)' }
+    ],
+    en: {
+      short: '1. Carotid Pulse & Bruit',
+      tag: 'Cardiac Step 1 • Neck Vessels (Carotid)',
+      name: '1. Carotid Artery Palpation (One at a Time!) & Auscultation for Bruits with the Bell',
+      tech: '1) Position patient sitting or supine at 30°–45°. 2) Inspect neck for visible pulsations. 3) Palpate each Carotid artery medial to the sternocleidomastoid muscle at the level of the cricoid cartilage ONE AT A TIME (never simultaneously, and stay below the carotid sinus at the jaw angle!). 4) Ask patient to take a breath, exhale, and HOLD breath while you place the BELL of the stethoscope over three levels (angle of jaw, mid-cervical, base of neck).',
+      norm: 'Smooth, rapid upstroke with 2+ symmetric amplitude; silent on auscultation (zero turbulent bruit).',
+      abn: 'Blowing/whooshing systolic Carotid Bruit = Atherosclerotic Carotid Artery Stenosis (>50% lumen narrowing → TIA/Stroke risk). Delayed weak upstroke (Pulsus Parvus et Tardus) = Severe Aortic Stenosis.',
+      pearl: 'OSCE Safety Rule: NEVER palpate both carotid arteries at the same time (causes vagal carotid sinus syncope / cerebral ischemia!), and always auscultate with the BELL while the patient holds their breath.'
+    },
+    ar: {
+      short: '1. الشريان السباتي واللغط',
+      tag: 'القلب 1 • فحص الشريان السباتي (Carotid)',
+      name: '1. جس الشريان السباتي (جهة واحدة في كل مرة!) والإصغاء بالقمع (Bell) لتحري اللغط السباتي',
+      tech: '1) ضع المريض بزاوية 30-45°. 2) اجسّ الشريان السباتي أنسي العضلة القترائية في النصف السفلي للعنق كل جهة على حدة (يُمنع جس الجهتين معاً لتجنب الإغماء المبهمي!). 3) اطلب من المريض حبس نفسه مؤقتاً وضع قمع السماعة (Bell) في 3 مستويات (قاعدة العنق، منتصف العنق، وتحت زاوية الفك).',
+      norm: 'نبض سباتي منتظم متناظر بقوة طبيعية (+2)، وعدم سماع أي لغط وعائي (No Bruit).',
+      abn: 'سماع لغط نفخي انقباضي (Carotid Bruit) يدل على تضيق تصلبي في الشريان السباتي وخطر السكتة الدماغية.',
+      pearl: 'قاعدة أمان حرجة بالـ OSCE: لا تجس الشريانين السباتيين معاً أبداً، واطلب من المريض حبس النفس عند الإصغاء بالقمع حتى لا تغطي أصوات التنفس على اللغط!'
+    }
+  },
+  neck_jvp: {
+    sec: 'cardiac',
+    modes: [
+      { en: 'Normal JVP (≤ 3 cm above Angle of Louis)', ar: 'ضغط وداجي طبيعي (≤ 3 سم فوق لويس)' },
+      { en: 'Elevated JVD (> 4 cm — Right Heart Failure)', ar: 'احتقان وداجي مرتفع (قصور القلب الأيمن)' },
+      { en: 'Positive Hepatojugular Reflux / Tamponade', ar: 'جذر كبدي وداجي إيجابي / اندحاس القلب' }
+    ],
+    en: {
+      short: '2. Jugular Venous Pressure (JVP)',
+      tag: 'Cardiac Step 2 • JVP & JVD Assessment',
+      name: '2. Jugular Venous Pressure (JVP) & Distension (JVD) at 30°–45° Head Elevation',
+      tech: '1) Position patient supine with head of bed elevated at 30°–45°. 2) Remove pillow and turn patient\'s head slightly to the LEFT to inspect the RIGHT Internal & External Jugular Veins using tangential penlight illumination. 3) Place one ruler vertically on the Sternal Angle (Angle of Louis = 2nd rib) and a second ruler horizontally from the highest point of internal jugular pulsation.',
+      norm: 'Vertical JVP meniscus height is ≤ 3 cm above the Sternal Angle (total CVP ≤ 8 cmH2O since Sternal Angle sits 5 cm above Right Atrium). Jugular pulsation is biphasic, non-palpable, and drops with inspiration.',
+      abn: 'JVP > 3–4 cm above Sternal Angle (Total > 8–9 cmH2O) = Right Ventricular Failure, Fluid Overload, Cardiac Tamponade, Constrictive Pericarditis, or Tension Pneumothorax. Kussmaul Sign = paradoxical RISE in JVP on inspiration.',
+      pearl: 'Record in Checklist: Distinguish Internal Jugular pulsation (undulant, 2 waves per beat, obliterated by light pressure at clavicle, varies with position/respiration) from Carotid pulse (single brisk palpable thrust).'
+    },
+    ar: {
+      short: '2. الوريد الوداجي (JVP)',
+      tag: 'القلب 2 • فحص الوريد الوداجي (JVP & JVD)',
+      name: '2. تقييم الضغط والاحتقان الوريدي الوداجي (JVP / JVD) بزاوية 30°–45° من زاوية لويس',
+      tech: '1) ضع المريض مستلقياً مع رفع رأس السرير بزاوية 30-45° وإمالة وجهه قليلاً للجانب المعاكس. 2) سلط إضاءة مماسية لملاحظة أعلى نقطة نبض في الوريد الوداجي الباطن الأيمن. 3) ضع مسطرة عمودية على زاوية القص (Angle of Louis) ومسطرة أفقية من أعلى نقطة نبض وداجي.',
+      norm: 'الارتفاع العمودي للـ JVP هو 3 سم أو أقل فوق زاوية لويس (أي CVP كلي ≤ 8 سم ماء لأن زاوية لويس تعلو الأذين الأيمن بـ 5 سم).',
+      abn: 'ارتفاع الـ JVP لأكثر من 3-4 سم فوق زاوية لويس يدل على قصور البطين الأيمن، فرط السوائل، اندحاس القلب، أو استرواح الصدر الضاغط.',
+      pearl: 'التوثيق بالتشيك ليست (Record): تحديد زاوية السرير (30-45°) وقياس الارتفاع بالسنتمتر فوق زاوية لويس.'
+    }
+  },
+  precordium_pmi: {
+    sec: 'cardiac',
+    modes: [
+      { en: 'Normal PMI (5th L ICS MCL, 1–2 cm)', ar: 'صدمة قمة طبيعية (الورب 5 منتصف الترقوة)' },
+      { en: 'Displaced Sustained Heave (LVH / HF)', ar: 'انزياح القمة للخارج والأسفل (ضخامة LV)' },
+      { en: 'Palpable Precordial Thrill (Grade ≥ IV Murmur)', ar: 'هرير مجسوس باليد (Thrill — نفخة ≥ IV)' }
+    ],
+    en: {
+      short: '3. Precordium & Apical PMI',
+      tag: 'Cardiac Step 3 • Precordial Inspection & Palpation',
+      name: '3. Precordial Inspection & Palpation (Apical Impulse / PMI at 5th L ICS MCL, Heaves & Thrills)',
+      tech: '1) Inspect anterior chest tangentially for visible pulsations or parasternal heaves/lifts. 2) Locate the Point of Maximal Impulse (PMI / Apical Impulse) using one fingerpad at the 5th Left Intercostal Space at the Midclavicular Line (7–9 cm lateral to midsternal line). If difficult to feel, roll patient to Left Lateral Decubitus position and ask them to exhale. 3) Palpate across all 5 precordial areas with the palmar base of fingers (ball of hand) for vibratory Thrills.',
+      norm: 'Apical impulse (PMI) is a gentle, brief tap felt in only ONE intercostal space (5th L ICS MCL), diameter 1×2 cm; zero heaves, lifts, or palpable thrills.',
+      abn: '1) PMI displaced laterally and downward (6th ICS anterior axillary line) and >2.5 cm = Left Ventricular Hypertrophy/Dilatation (Heart Failure / Cardiomyopathy). 2) Left Parasternal Lift/Heave = Right Ventricular Hypertrophy. 3) Palpable purring Thrill = Grade IV–VI Heart Murmur!',
+      pearl: 'Record in Checklist: Note PMI location (5th L ICS MCL), size (1–2 cm), amplitude (brisk tap), duration, and absence of heaves or thrills.'
+    },
+    ar: {
+      short: '3. جس صدمة القمة (PMI)',
+      tag: 'القلب 3 • تأمل وجس البركورديم وصدمة القمة',
+      name: '3. تأمل وجس الناحية القلبية وصدمة القمة (Apical Impulse / PMI) والهرير (Thrills)',
+      tech: '1) تأمل جدار الصدر الأمامي لتحري أي نبضات مرئية أو رفعات (Heaves/Lifts). 2) حدد موقع صدمة القمة (PMI) ببصمة إصبع واحد في الورب الخامس الأيسر على خط منتصف الترقوة (5th L ICS MCL). 3) اجسّ بؤر القلب الخمس بقاعدة الأصابع الكفية لتحري وجود هرير اهتزازي (Thrills).',
+      norm: 'صدمة قمة خفيفة ومحددة بقطر 1-2 سم في الورب الخامس الأيسر خط منتصف الترقوة، مع غياب الرفعات أو الهرير.',
+      abn: 'انزياح صدمة القمة للخارج والأسفل (الورب السادس) = ضخامة وتوسع البطين الأيسر؛ وجود هرير مجسوس (Thrill) = نفخة قلبية من الدرجة الرابعة فما فوق!',
+      pearl: 'التوثيق بالتشيك ليست (Record): توثيق موقع وحجم وقوة صدمة القمة وغياب الرفعات والهرير.'
+    }
+  },
+  five_areas_auscultation: {
+    sec: 'cardiac',
+    modes: [
+      { en: 'Normal S1 & S2 Across 5 Areas', ar: 'أصوات S1 و S2 طبيعية بالبؤر الخمس' },
+      { en: 'Base Focus (S2 > S1 at Aortic/Pulmonic)', ar: 'التركيز على القاعدة (S2 أعلى من S1)' },
+      { en: 'Apex Focus (S1 > S2 at Mitral 5th MCL)', ar: 'التركيز على القمة (S1 أعلى من S2)' }
+    ],
+    en: {
+      short: '4. 5 Auscultation Areas',
+      tag: 'Cardiac Step 4 • 5 Precordial Areas (Diaphragm & Bell)',
+      name: '4. Systematic 5-Area Precordial Auscultation ("All Physicians Earn Too Much" — Diaphragm & Bell)',
+      tech: 'Warm stethoscope and auscultate directly on bare skin in a Z-pattern using BOTH Diaphragm (firm pressure for high-pitched S1, S2, AR/MR/AS) and Bell (light skin seal for low-pitched S3, S4, MS): 1) Aortic Area (2nd Right ICS at right sternal border), 2) Pulmonic Area (2nd Left ICS at left sternal border), 3) Erb\'s Point (3rd Left ICS), 4) Tricuspid Area (4th Left ICS LLSB), 5) Mitral / Apical Area (5th Left ICS Midclavicular Line — count Apical Rate for 1 full minute!).',
+      norm: 'Regular rhythm (60–100 bpm). At the Base (Aortic & Pulmonic), S2 ("dub" = semilunar A2/P2 closure) is louder than S1. At the Apex (Mitral & Tricuspid), S1 ("lub" = AV M1/T1 closure) is louder than S2. Apical-Radial pulse deficit = 0.',
+      abn: 'Pulse Deficit (Apical HR > Radial Pulse Rate) = Atrial Fibrillation or frequent PVCs! Accentuated S1 = Mitral Stenosis; Muffled S1/S2 = Cardiac Tamponade, Pericardial Effusion, or COPD barrel chest.',
+      pearl: 'Record in Checklist: Always inch along all 5 areas first with the Diaphragm and then repeat all 5 areas lightly with the Bell!'
+    },
+    ar: {
+      short: '4. بؤر الإصغاء الخمس',
+      tag: 'القلب 4 • الإصغاء لبؤر القلب الخمس (الغشاء والقمع)',
+      name: '4. الإصغاء المنهجي لبؤر القلب الخمس باستخدام الغشاء (Diaphragm) والقمع (Bell)',
+      tech: 'أصغِ مباشرة على الجلد بترتيب Z باستخدام الغشاء (بضغط ثابت للأصوات عالية التردد S1, S2) ثم القمع (بلمس خفيف للأصوات منخفضة التردد S3, S4): 1) البؤرة الأبهرية (الورب 2 أيمن حافة القص)، 2) البؤرة الرئوية (الورب 2 أيسر)، 3) نقطة إيرب (الورب 3 أيسر)، 4) مثلث الشرف (الورب 4 أيسر)، 5) البؤرة التاجية/القمة (الورب 5 خط منتصف الترقوة الأيسر — عد النبض القمي لدقيقة كاملة).',
+      norm: 'في القاعدة (الأبهرية والرئوية) يكون الصوت الثاني S2 أعلى من S1؛ وفي القمة (التاجية) يكون الصوت الأول S1 أعلى من S2، ولا يوجد عجز نبضي بين القمة والكعبري.',
+      abn: 'عجز النبض (النبض القمي أعلى من النبض الكعبري) = الرجفان الأذيني (AFib)؛ خفوت أصوات القلب = اندحاس التامور.',
+      pearl: 'التوثيق بالتشيك ليست (Record): الإصغاء بجميع البؤر الخمس بالغشاء أولاً ثم إعادتها بالقمع وتوثيق المعدل والانتظام و S1/S2.'
+    }
+  },
+  split_s2_gallops: {
+    sec: 'cardiac',
+    modes: [
+      { en: 'Physiologic Split S2 (Inspiration Only)', ar: 'انشطار S2 الفيزيولوجي (بالشهيق فقط)' },
+      { en: 'S3 Ventricular Gallop (Heart Failure)', ar: 'الصوت الثالث S3 (خبب قصور القلب)' },
+      { en: 'S4 Atrial Gallop (Stiff LV / HTN)', ar: 'الصوت الرابع S4 (تيبس البطين الأيسر)' }
+    ],
+    en: {
+      short: '5. Split S2, S3 & S4 Gallops',
+      tag: 'Cardiac Step 5 • Extra Heart Sounds & Positions',
+      name: '5. Split S2, S3 (Ventricular Gallop) & S4 (Atrial Gallop) with Positional Maneuvers',
+      tech: '1) Split S2: Listen at Pulmonic area (2nd L ICS) with Diaphragm while patient breathes normally, then takes a deep inspiration. 2) S3 & S4 Gallops: Roll patient onto Left Lateral Decubitus side (brings LV apex against chest wall) and place the BELL lightly over the Mitral Apex (5th L ICS MCL).',
+      norm: 'Physiologic Split S2 (A2-P2 separated by 0.06s) heard ONLY during inspiration and fuses into a single S2 on expiration; zero S3 or S4 in adults >35 yrs.',
+      abn: '1) Fixed Split S2 (split in both inspiration & expiration) = Atrial Septal Defect (ASD). 2) Paradoxical Split S2 (split on expiration) = LBBB or Severe Aortic Stenosis. 3) S3 ("Ken-tuck-y" early diastolic rapid ventricular filling) = Systolic Heart Failure / Volume Overload. 4) S4 ("Ten-nes-see" late diastolic atrial kick against stiff LV) = LVH / Hypertension / Acute MI.',
+      pearl: 'Record in Checklist: Always turn the patient to Left Lateral Decubitus and use the BELL lightly at the Apex to detect S3 and S4!'
+    },
+    ar: {
+      short: '5. انشطار S2 وأصوات S3 و S4',
+      tag: 'القلب 5 • انشطار S2 وأصوات الخبب S3 & S4',
+      name: '5. تحري انشطار الصوت الثاني S2 وأصوات الخبب البطيني (S3) والأذيني (S4) مع وضعيات الفحص',
+      tech: '1) انشطار S2: أصغِ في البؤرة الرئوية (الورب 2 أيسر) أثناء الشهيق والزفير. 2) أصوات S3 و S4: اطلب من المريض الاضطجاع على جانبه الأيسر (Left Lateral Decubitus) وضع القمع (Bell) بلمس خفيف على قمة القلب.',
+      norm: 'انشطار S2 الفيزيولوجي (A2 ثم P2) يُسمع في الشهيق فقط ويندمج في الزفير، مع غياب S3 و S4 لدى البالغين.',
+      abn: '1) انشطار S2 الثابت = فتحة بين الأذينين (ASD). 2) الصوت الثالث S3 (بداية الانبساط بعد S2) = قصور القلب وفرط الحمل الحجمي. 3) الصوت الرابع S4 (نهاية الانبساط قبل S1) = ضخامة وتيبس البطين الأيسر.',
+      pearl: 'التوثيق بالتشيك ليست (Record): استخدام وضعية الاضطجاع الجانبي الأيسر والقمع (Bell) عند القمة.'
+    }
+  },
+  systolic_diastolic_murmurs: {
+    sec: 'cardiac',
+    modes: [
+      { en: 'Aortic Stenosis (Crescendo-Decrescendo)', ar: 'تضيق الأبهر AS (نفخة انقباضية معينية)' },
+      { en: 'Mitral Regurgitation (Holosystolic → Axilla)', ar: 'قصور التاجي MR (شاملة للانقباض للإبط)' },
+      { en: 'Aortic Regurg / Mitral Stenosis (Diastolic)', ar: 'قصور الأبهر AR / تضيق التاجي MS' }
+    ],
+    en: {
+      short: '6. Valvular Murmurs (AS/MR/AR/MS)',
+      tag: 'Cardiac Step 6 • Systolic & Diastolic Murmurs',
+      name: '6. Valvular Heart Murmurs (Timing, Levine Grading I–VI, Radiation & Sitting Leaning Forward)',
+      tech: '1) Time any murmur with simultaneous Carotid palpation (Systolic = between S1 and S2; Diastolic = between S2 and next S1). 2) Have patient sit upright, lean forward, exhale completely, and hold breath while you listen with the Diaphragm at Erb\'s Point (3rd L ICS) for Aortic Regurgitation. 3) Check radiation to the Neck/Carotids (Aortic Stenosis) and Left Axilla (Mitral Regurgitation).',
+      norm: 'Silent systole and silent diastole without turbulent murmurs or pericardial friction rub.',
+      abn: '1) Aortic Stenosis (AS): Harsh systolic crescendo-decrescendo murmur at 2nd R ICS radiating to Carotids. 2) Mitral Regurgitation (MR): Blowing holosystolic murmur at Apex radiating to Left Axilla. 3) Aortic Regurgitation (AR): High-pitched early diastolic decrescendo murmur at Erb\'s point leaning forward. 4) Mitral Stenosis (MS): Low-pitched diastolic rumble with Opening Snap at Apex (Bell).',
+      pearl: 'Record in Checklist: Grade murmurs on the 6-point Levine scale (Grade I–III = no thrill; Grade IV–VI = palpable thrill!).'
+    },
+    ar: {
+      short: '6. النفخات القلبية الصمامية',
+      tag: 'القلب 6 • النفخات الانقباضية والانبساطية',
+      name: '6. فحص النفخات القلبية الصمامية (التوقيت، الدرجات I–VI، الانتشار، ووضعية الميلان للأمام)',
+      tech: '1) حدد توقيت النفخة بجس النبض السباتي بالتزامن. 2) اطلب من المريض الجلوس والميلان للأمام مع الزفير الكامل وحبس النفس للإصغاء بالغشاء في نقطة إيرب لتحري قصور الأبهر (AR). 3) افحص انتشار النفخة نحو العنق (تضيق الأبهر AS) أو نحو الإبط الأيسر (قصور التاجي MR).',
+      norm: 'عدم وجود أي نفخات قلبية أو احتكاك تاموري.',
+      abn: '1) تضيق الأبهر (AS): نفخة انقباضية خشنة بالورب 2 أيمن تنتشر للسباتيين. 2) قصور التاجي (MR): نفخة شاملة للانقباض بالقمة تنتشر للإبط الأيسر. 3) قصور الأبهر (AR): نفخة انبساطية مبكرة عالية التردد. 4) تضيق التاجي (MS): دحرجة انبساطية بالقمع.',
+      pearl: 'التوثيق بالتشيك ليست (Record): تحديد توقيت النفخة، بؤرتها، انتشارها، ودرجتها من I إلى VI.'
+    }
+  },
+  pvs_upper_inspection_crt: {
+    sec: 'pvs',
+    modes: [
+      { en: 'Normal Warm Hands & CRT < 2 sec', ar: 'أطراف دافئة طبيعية وعود امتلاء < 2 ثانية' },
+      { en: 'Delayed CRT > 3 sec & Cool Acrocyanosis', ar: 'تأخر عود الامتلاء > 3 ثوانٍ وبرودة/ازرقاق' },
+      { en: 'Digital Clubbing (> 180° Schamroth Loss)', ar: 'تعجر الأصابع (Clubbing > 180° — نقص أكسجة)' }
+    ],
+    en: {
+      short: '7. Upper Extremities & CRT (<2s)',
+      tag: 'Extremities Step 1 • Upper Limb Inspection, Temp & CRT',
+      name: '7. Upper Extremities Assessment: Symmetry, Skin Temperature (Dorsum of Fingers), Clubbing & Capillary Refill Time (<2 sec)',
+      tech: '1) Expose both arms completely from shoulders to fingertips; inspect for symmetry in size, skin color, hair distribution, venous pattern, rashes, or lymphedema. 2) Palpate skin temperature symmetrically from forearms down to fingertips using the DORSUM (backs) of your fingers. 3) Inspect nail profile angle (normal 160°; perform Schamroth diamond window test). 4) Capillary Refill Time (CRT): Depress nailbed at heart level until it blanches white, release, and count seconds for pink color return.',
+      norm: 'Symmetric arm size without edema; warm skin bilaterally; nail profile angle 160° with intact diamond window; brisk Capillary Refill Time < 1–2 seconds.',
+      abn: '1) Delayed CRT (>2–3 seconds) + cool pale/cyanotic fingers = Peripheral Vasoconstriction, Hypovolemic Shock, or Raynaud Phenomenon. 2) Nail Clubbing (angle ≥180°, spongy nail base, loss of diamond window) = Chronic Hypoxia (COPD, Lung Cancer, Congenital Cyanotic Heart Disease). 3) Unilateral arm swelling = Lymphedema (post-mastectomy) or Subclavian DVT.',
+      pearl: 'Record in Checklist: Always use the DORSUM (back) of your fingers to test skin temperature, and hold the patient\'s hand at HEART LEVEL when testing Capillary Refill Time (<2 sec)!'
+    },
+    ar: {
+      short: '7. الأطراف العلوية و CRT (<2s)',
+      tag: 'الأطراف 1 • تأمل وحرارة الأطراف العلوية وعود الامتلاء الشعري',
+      name: '7. فحص الأطراف العلوية: التناظر، الحرارة (بظهر الأصابع)، تعجر الأصابع، وزمن عود الامتلاء الشعري (CRT < 2s)',
+      tech: '1) اكشف الذراعين بالكامل وقارن الحجم واللون والتناظر وعدم وجود وذمة. 2) اجسّ درجة حرارة الجلد بالتناظر من الذراعين حتى الأصابع باستخدام ظهر أصابعك (Dorsum of fingers). 3) افحص زاوية الظفر (الطبيعي 160°) واختبار نافذة شامروث المعينية. 4) زمن عود الامتلاء الشعري (CRT): اضغط على سرير الظفر بمستوى القلب حتى يبيضّ ثم ارفع الضغط واحسب زمن عودة اللون الوردي.',
+      norm: 'ذراعان متناظرتان دافئتان، زاوية ظفر 160° دون تعجر، وزمن عود امتلاء شعري سريع أقل من ثانيتين (< 2 sec).',
+      abn: '1) تأخر عود الامتلاء الشعري (> 2-3 ثوانٍ) مع برودة الأطراف = نقص التروية المحيطية أو الصدمة أو ظاهرة رينو. 2) تعجر الأصابع (Clubbing ≥ 180°) = نقص الأكسجة المزمن. 3) تورم ذراع واحدة = وذمة لمفاوية (بعد استئصال الثدي).',
+      pearl: 'التوثيق بالتشيك ليست (Record): استخدام ظهر الأصابع لفحص الحرارة، وإجراء اختبار CRT واليد بمستوى القلب (< 2 ثانية).'
+    }
+  },
+  pvs_upper_pulses_epitrochlear: {
+    sec: 'pvs',
+    modes: [
+      { en: 'Normal Radial/Ulnar/Brachial (2+ Equal)', ar: 'نبض كعبري/زندي/عضدي طبيعي متناظر (+2)' },
+      { en: 'Weak / Absent Unilateral Pulse (1+ / 0)', ar: 'ضعف أو غياب النبض في طرف واحد (+1 / 0)' },
+      { en: 'Bounding Pulse (3+) / Epitrochlear Node', ar: 'نبض قافز (+3) / تضخم العقدة فوق البكرة' }
+    ],
+    en: {
+      short: '8. Radial, Brachial & Epitrochlear',
+      tag: 'Extremities Step 2 • Upper Limb Pulses & Epitrochlear Node',
+      name: '8. Upper Extremity Pulses (Radial, Ulnar & Brachial — 0 to 3+ Scale) & Epitrochlear Lymph Node Palpation',
+      tech: '1) Radial Pulse: Palpate BOTH radial pulses simultaneously with pads of index/middle fingers on the flexor wrist lateral to flexor carpi radialis tendon to compare symmetry, rate, rhythm, and elasticity. 2) Ulnar Pulse: Palpate medial wrist aspect. 3) Brachial Pulse: Support patient\'s forearm with elbow slightly flexed and palpate groove medial to the biceps tendon at the antecubital fossa. 4) Epitrochlear Lymph Node: Support patient\'s hand in yours, flex elbow 90°, and reach into the groove between biceps and triceps ~3 cm above the medial epicondyle.',
+      norm: 'Symmetric, regular, elastic pulses graded 2+ (Brisk/Normal) on the 4-point scale (0 = Absent, 1+ = Weak/Thready, 2+ = Normal, 3+ = Full/Bounding); Epitrochlear lymph nodes are NON-palpable.',
+      abn: 'Unequal Radial/Brachial pulses (Right vs Left difference >15–20 mmHg BP) = Aortic Dissection, Subclavian Steal Syndrome, or Takayasu Arteritis! Palpable enlarged Epitrochlear node (>1 cm) = Infection of hand/forearm, Lymphoma, or Secondary Syphilis.',
+      pearl: 'Record in Checklist: Palpate Radial pulses SIMULTANEOUSLY on both wrists to verify bilateral arterial symmetry (2+)!'
+    },
+    ar: {
+      short: '8. النبض الكعبري والعضدي والعقد',
+      tag: 'الأطراف 2 • النبض الكعبري والزندي والعضدي والعقد فوق البكرة',
+      name: '8. جس نبضات الطرف العلوي (الكعبري Radial، الزندي Ulnar، والعضدي Brachial) والعقد اللمفاوية فوق البكرة',
+      tech: '1) النبض الكعبري (Radial): اجسّ النبضين الكعبريين معاً في نفس اللحظة ببصمات السبابة والوسطى لمقارنة التناظر والقوة. 2) النبض الزندي (Ulnar): في الجانب الأنسي للمعصم. 3) النبض العضدي (Brachial): اثنِ المرفق قليلاً واجسّ الإنسي لوتر العضلة ذات الرأسين في الحفرة المرفقية. 4) العقدة فوق البكرة (Epitrochlear Node): اثنِ مرفق المريض 90° واجسّ الميزابة بين ذات الرأسين وثلاثية الرؤوس على بعد 3 سم فوق اللقمة الإنسية للعضد.',
+      norm: 'نبضات متناظرة ومنتظمة بقوة طبيعية (+2 على مقياس 0 إلى +3)، وعدم جس أي عقد لمفاوية فوق البكرة.',
+      abn: 'عدم تناظر النبض بين الذراعين = تسلخ الأبهر (Aortic Dissection) أو تضيق تحت الترقوة؛ ضخامة العقدة فوق البكرة = التهاب باليد أو لمفوما.',
+      pearl: 'التوثيق بالتشيك ليست (Record): مقارنة النبضين الكعبريين والعضديين بالجانبين وتسجيل الدرجة (+2) وسلامة العقد فوق البكرة.'
+    }
+  },
+  pvs_allen_test: {
+    sec: 'pvs',
+    modes: [
+      { en: 'Positive / Normal Allen Test (Flush < 7 sec)', ar: 'اختبار ألين إيجابي سليم (عودة اللون < 7 ثوانٍ)' },
+      { en: 'Borderline Equivocal Return (8–14 sec)', ar: 'عودة بطيئة حدية (8-14 ثانية)' },
+      { en: 'Negative / Abnormal Allen (>15s — DO NOT Cannulate!)', ar: 'اختبار ألين سلبي مرضي (> 15 ثانية — يمنع الوخز!)' }
+    ],
+    en: {
+      short: '9. Modified Allen Test (<7 sec)',
+      tag: 'Extremities Step 3 • Modified Allen Test (Ulnar Patency)',
+      name: '9. Modified Allen Test Simulator (Verifying Ulnar Collateral Patency Before Radial ABG / A-Line)',
+      tech: '1) Instruct patient to clench their fist tightly for 3–5 seconds (or compress both arteries and have them open/close hand). 2) Firmly occlude BOTH the Radial and Ulnar arteries at the wrist with your thumbs. 3) Ask patient to open hand slightly in a relaxed position (avoid hyperextension, which causes false pallor!) — verify palm is blanched pale white. 4) Release pressure on the ULNAR artery ONLY while keeping the Radial artery occluded, and count seconds for palmar flushing.',
+      norm: 'Brisk pink flushing of the entire palm within < 7 seconds (Positive Modified Allen Test) → confirms patent Ulnar artery and intact superficial palmar arch; safe for Radial ABG puncture or Arterial Line insertion.',
+      abn: 'Palm remains pale white for > 14–15 seconds after releasing Ulnar artery (Negative/Abnormal Allen Test) → Ulnar collateral circulation is inadequate; Radial artery puncture is CONTRAINDICATED (risk of hand necrosis!).',
+      pearl: 'Record in Checklist: Never let the patient hyperextend their wrist or fingers wide open when releasing the Ulnar artery (stretches palmar fascia and causes a false-negative pale palm)!'
+    },
+    ar: {
+      short: '9. اختبار ألين المعدل (<7s)',
+      tag: 'الأطراف 3 • اختبار ألين المعدل (Modified Allen Test)',
+      name: '9. محاكي اختبار ألين المعدل (تقييم كفاية التروية الزندية قبل سحب ABG أو تركيب A-Line)',
+      tech: '1) اطلب من المريض قبض يده بقوة لبضع ثوانٍ. 2) اضغط بإبهاميك بقوة لسد كلٍ من الشريان الكعبري والشريان الزندي معاً عند المعصم. 3) اطلب من المريض فتح كفه باسترخاء (دون فرط بسط الأصابع) ولاحظ شحوب وابيضاض راحة اليد. 4) ارفع الضغط عن الشريان الزندي (Ulnar) فقط مع إبقاء الشريان الكعبري مسدوداً، واحسب عدد الثوانٍ لعودة اللون الوردي للكف.',
+      norm: 'عودة التورد لكامل راحة اليد خلال أقل من 7 ثوانٍ (اختبار ألين معدل إيجابي/طبيعي) مما يؤكد سلامة القوس الشريانية الكفية وأمان وخز الشريان الكعبري.',
+      abn: 'بقاء راحة اليد شاحبة لأكثر من 14-15 ثانية (اختبار ألين سلبي/غير طبيعي) يعني قصور الشريان الزندي ويُمنع منعاً باتاً وخز الشريان الكعبري في هذه اليد!',
+      pearl: 'التوثيق بالتشيك ليست (Record): إبقاء الكف مسترخية دون فرط بسط عند فتحها، وتوثيق زمن عودة التروية بالثواني (< 7 ثوانٍ).'
+    }
+  },
+  pvs_lower_inspection_inguinal: {
+    sec: 'pvs',
+    modes: [
+      { en: 'Normal Warm Legs, Hair & Inguinal Nodes', ar: 'ساقان دافئتان وتوزيع شعر وعقد إربية طبيعية' },
+      { en: 'Chronic Arterial Insufficiency (PAD)', ar: 'قصور شرياني محيطي مزمن (PAD — فقدان الشعر)' },
+      { en: 'Chronic Venous Insufficiency & Varicosities', ar: 'قصور وريدي مزمن وتصبغات ودوالي' }
+    ],
+    en: {
+      short: '10. Lower Limbs & Inguinal Nodes',
+      tag: 'Extremities Step 4 • Lower Limb Inspection, Temp & Inguinal Nodes',
+      name: '10. Lower Extremities Inspection (Hair, Skin, Venous vs Arterial Ulcers), Temperature & Inguinal Lymph Nodes',
+      tech: '1) Uncover both legs from groin to toes (keep genitalia draped). Inspect symmetry, skin color, hair distribution over anterior shins and dorsal toes, superficial veins/varicosities, and skin ulcers. 2) Compare skin temperature bilaterally from thighs to feet using the dorsum of your hands. 3) Palpate the Horizontal and Vertical groups of Superficial Inguinal Lymph Nodes along the inguinal ligament and upper medial thigh.',
+      norm: 'Symmetric leg size, warm skin from thighs to toes, even hair distribution on shins/toes, no varicosities or ulcers; small (<1 cm), movable, soft, non-tender superficial inguinal nodes may be normal.',
+      abn: '1) Chronic Arterial Insufficiency (PAD): Thin shiny hairless skin, cool pale legs (pallor on elevation, dependent rubor), thickened nails, and painful punched-out ulcers on TOES / lateral malleolus. 2) Chronic Venous Insufficiency: Brown hemosiderin brawny skin, varicose veins, edema, and shallow weeping ulcers at the MEDIAL malleolus.',
+      pearl: 'Record in Checklist: Contrast Arterial Ulcers (lateral malleolus/toes, pale base, severe pain relieved by dangling leg down) vs Venous Ulcers (medial malleolus, red granulation base, aching relieved by leg elevation).'
+    },
+    ar: {
+      short: '10. الأطراف السفلية والعقد الإربية',
+      tag: 'الأطراف 4 • تأمل وحرارة الطرفين السفليين والعقد الإربية',
+      name: '10. فحص الأطراف السفلية: توزيع الشعر، القرحات الشريانية مقابل الوريدية، الحرارة، والعقد الإربية (Inguinal Nodes)',
+      tech: '1) اكشف الساقين والقدمين مع الحفاظ على خصوصية المريض؛ تأمل تناظر الحجم، لون الجلد، توزيع الشعر على الساقين وظهر الأصابع، والدوالي أو القرحات. 2) قارن حرارة الجلد بالجانبين من الفخذ حتى الأصابع بظهر اليدين. 3) اجسّ العقد اللمفاوية الإربية السطحية (الأفقية والعمودية) في الناحية الإربية.',
+      norm: 'ساقان متناظرتان دافئتان مع توزيع شعر طبيعي وعدم وجود دوالي أو قرحات؛ العقد الإربية غير متضخمة وغير مؤلمة.',
+      abn: '1) القصور الشرياني المزمن (PAD): جلد رقيق لامع فاقد للشعر، برودة وشحوب، وقرحات مؤلمة جداً في أطراف الأصابع أو الكعب الوحشي. 2) القصور الوريدي المزمن: تصبغ بني ووذمة ودوالي وقرحات عند الكعب الأنسي.',
+      pearl: 'التوثيق بالتشيك ليست (Record): مقارنة الحرارة وتوزيع الشعر بالجانبين وفحص العقد اللمفاوية الإربية.'
+    }
+  },
+  pvs_lower_four_pulses: {
+    sec: 'pvs',
+    modes: [
+      { en: 'Normal 4 Lower Pulses (2+ Symmetric)', ar: 'النبضات الأربعة طبيعية ومتناظرة (+2)' },
+      { en: 'PAD: Diminished / Absent PT & DP (1+ / 0)', ar: 'نقص تروية: ضعف/غياب نبض القدم (+1 / 0)' },
+      { en: 'Acute Limb Ischemia (6 Ps Emergency!)', ar: 'انسداد شرياني حاد بالطرف (طوارئ الـ 6 Ps)' }
+    ],
+    en: {
+      short: '11. 4 Lower Pulses (Fem/Pop/PT/DP)',
+      tag: 'Extremities Step 5 • 4 Lower Extremity Arterial Pulses',
+      name: '11. Palpation of the 4 Lower Extremity Pulses (Femoral, Popliteal, Posterior Tibial & Dorsalis Pedis)',
+      tech: 'Palpate and compare symmetrically (0 to 3+ scale): 1) Femoral Pulse: Press deeply below the inguinal ligament, midway between the anterior superior iliac spine (ASIS) and symphysis pubis. 2) Popliteal Pulse: Flex knee 30° with leg relaxed; press deeply with both hands into the popliteal fossa. 3) Posterior Tibial (PT) Pulse: Curve fingers behind and slightly below the MEDIAL malleolus of the ankle. 4) Dorsalis Pedis (DP) Pulse: Touch lightly on the dorsum of the foot just lateral to the extensor tendon of the great toe (ask patient to dorsiflex big toe first to locate tendon!).',
+      norm: 'All 4 pulses (Femoral, Popliteal, Posterior Tibial, Dorsalis Pedis) are symmetric, regular, and 2+ bilaterally.',
+      abn: '1) Weak (1+) or Absent (0, requires Doppler) Posterior Tibial & Dorsalis Pedis pulses = Peripheral Arterial Disease (PAD; Ankle-Brachial Index ABI < 0.90). 2) Acute Arterial Occlusion (6 Ps): Pain, Pallor, Pulselessness, Paresthesia, Paralysis, Poikilothermia (cold!).',
+      pearl: 'Record in Checklist: Use LIGHT touch for Dorsalis Pedis (pressing too hard obliterates it against the tarsal bones!) and locate it lateral to the extensor hallucis longus tendon.'
+    },
+    ar: {
+      short: '11. النبضات الأربعة بالطرف السفلي',
+      tag: 'الأطراف 5 • جس الشرايين الأربعة في الطرف السفلي',
+      name: '11. جس النبضات الشريانية الأربعة بالطرف السفلي (الفخذي، المأبضي، الظنبوبي الخلفي، وظهر القدم)',
+      tech: 'اجسّ وقارن بالجانبين (مقياس 0 إلى +3): 1) الشريان الفخذي (Femoral): تحت الرباط الإربي في منتصف المسافة بين الشوك الحرقفي وارتفاق العانة. 2) الشريان المأبضي (Popliteal): اثنِ الركبة قليلاً واجسّ بعمق بكلتا اليدين في الحفرة المأبضية خلف الركبة. 3) الشريان الظنبوبي الخلفي (Posterior Tibial): خلف وتحت الكعب الأنسي (Medial Malleolus). 4) شريان ظهر القدم (Dorsalis Pedis): بلمس خفيف على ظهر القدم وحشي وتر باسطة إبهام القدم.',
+      norm: 'جميع النبضات الأربعة متناظرة ومنتظمة وبقوة طبيعية (+2) في الطرفين.',
+      abn: 'ضعف (+1) أو غياب (0) نبضي الظنبوبي الخلفي وظهر القدم يدل على مرض الشرايين المحيطية (PAD)، بينما العلامات الست (6 Ps) تدل على انسداد شرياني حاد طارئ.',
+      pearl: 'التوثيق بالتشيك ليست (Record): اجسّ شريان ظهر القدم (Dorsalis Pedis) بلمس خفيف لأن الضغط القوي يطمس النبض فوق عظام الرسغ!'
+    }
+  },
+  pvs_pitting_edema_dvt: {
+    sec: 'pvs',
+    modes: [
+      { en: 'No Edema (0) & Negative Calf DVT', ar: 'لا توجد وذمة (0) ولا ألم بالربلة' },
+      { en: '1+ (2mm) to 2+ (4mm) Pitting Edema', ar: 'وذمة انطباعية +1 (2 مم) إلى +2 (4 مم)' },
+      { en: '3+ (6mm) / 4+ (8mm) Edema or Unilateral DVT', ar: 'وذمة شديدة +3/+4 (6-8 مم) أو خثار وريدي DVT' }
+    ],
+    en: {
+      short: '12. Pitting Edema (1+–4+) & DVT/ABI',
+      tag: 'Extremities Step 6 • Pitting Edema Scale, DVT & ABI',
+      name: '12. Pitting Edema Grading (1+ to 4+ Scale), Calf DVT Assessment & Ankle-Brachial Index (ABI)',
+      tech: '1) Pitting Edema Test: Press thumb firmly for at least 5 seconds over bony prominences: dorsum of each foot, behind medial malleolus, and over the anterior tibia (shin). Release and grade pit depth in mm. 2) Deep Vein Thrombosis (DVT) Check: Measure bilateral calf circumference with a tape measure (>2–3 cm asymmetry is abnormal) and gently palpate calves for warmth, cord-like induration, and tenderness. 3) ABI Calculation: Divide Ankle Systolic BP (higher of DP or PT) by Brachial Systolic BP.',
+      norm: 'Zero pitting edema; symmetric soft non-tender calves; normal Ankle-Brachial Index (ABI) = 0.90 to 1.30.',
+      abn: 'Pitting Edema Scale: 1+ = 2 mm mild pit (rapid return); 2+ = 4 mm moderate pit (10–15s return); 3+ = 6 mm deep pit (extremity looks swollen, >1 min); 4+ = 8 mm very deep pit (2–5 min). Unilateral swollen red painful calf = DVT (risk of Pulmonary Embolism!). ABI < 0.90 = PAD; ABI < 0.40 = Critical Limb Ischemia.',
+      pearl: 'Record in Checklist: Memorize the exact millimeter depths for Pitting Edema: 1+ = 2 mm, 2+ = 4 mm, 3+ = 6 mm, 4+ = 8 mm!'
+    },
+    ar: {
+      short: '12. الوذمة الانطباعية (1+–4+) و DVT',
+      tag: 'الأطراف 6 • مقياس الوذمة الانطباعية وفحص خثار الوريد العميق DVT',
+      name: '12. تقييم الوذمة الانطباعية (Pitting Edema 1+ to 4+)، تحري خثار الوريد العميق (DVT)، ومؤشر الكاحل-العضد (ABI)',
+      tech: '1) اختبار الوذمة الانطباعية: اضغط بإبهامك بثبات لمدة 5 ثوانٍ فوق البروزات العظمية (ظهر القدم، خلف الكعب الأنسي، ومقدمة الظنبوب)، ثم ارفع إصبعك وقدّر عمق الحفرة بالمليمتر. 2) فحص الربلة (DVT): قس محيط الساقين بشريط القياس واجسّ عضلة الربلة لتحري السخونة أو القساوة أو الإيلام. 3) مؤشر الكاحل-العضد (ABI): قسمة ضغط الكاحل الانقباضي على ضغط العضد الانقباضي.',
+      norm: 'عدم وجود وذمة انطباعية، تناظر محيط الساقين دون ألم، ومؤشر ABI طبيعي (0.90 – 1.30).',
+      abn: 'مقياس الوذمة الانطباعية: +1 = عمق 2 مم (طفيفة)، +2 = عمق 4 مم (متوسطة)، +3 = عمق 6 مم (عميقة مع تورم واضح)، +4 = عمق 8 مم (شديدة جداً). تورم واحمرار وألم ساق واحدة فقط = خثار وريدي عميق (DVT)!',
+      pearl: 'التوثيق بالتشيك ليست (Record): حفظ أرقام الوذمة الانطباعية بدقة (+1 = 2 مم، +2 = 4 مم، +3 = 6 مم، +4 = 8 مم) والضغط لمدة 5 ثوانٍ فوق العظم.'
+    }
+  }
+};
+  const ITEM_KEYS = Object.keys(ITEMS);
+  currentKey = ITEM_KEYS[0];
+
+  const canvas = document.getElementById('pe-sim-canvas');
+  canvas.addEventListener('pointermove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouseX = Math.max(0, Math.min(1, (e.clientX - r.left) / (r.width || 1)));
+    mouseY = Math.max(0, Math.min(1, (e.clientY - r.top) / (r.height || 1)));
+  });
+  canvas.addEventListener('pointerdown', e => {
+    const r = canvas.getBoundingClientRect();
+    mouseX = Math.max(0, Math.min(1, (e.clientX - r.left) / (r.width || 1)));
+    mouseY = Math.max(0, Math.min(1, (e.clientY - r.top) / (r.height || 1)));
+    isPressed = true;
+    pressTimer = 90;
+    // Detect which anatomical spot was clicked (Base vs Apex in Heart) and play sound!
+    selectedSpotIdx = (mouseY < 0.44) ? 0 : 4;
+    playExamAudio();
+  });
+  canvas.addEventListener('pointerup', () => { isPressed = false; });
+
+  function setSectionFilter(sec) {
+    sectionFilter = sec;
+    ['all', 'cardiac', 'pvs'].forEach(s => {
+      const b = document.getElementById('sec-btn-' + s);
+      if (b) b.classList.toggle('active', s === sec);
+    });
+    const filtered = ITEM_KEYS.filter(k => sec === 'all' || ITEMS[k].sec === sec);
+    if (filtered.length && !filtered.includes(currentKey)) {
+      selectItem(filtered[0]);
+    } else {
+      renderSidebar();
+      renderStepPills();
+    }
+  }
+
+  function renderStepPills() {
+    const row = document.getElementById('step-pills-row');
+    if (!row) return;
+    const isAr = (currentLang === 'ar');
+    const activeList = ITEM_KEYS.filter(k => sectionFilter === 'all' || !ITEMS[k].sec || ITEMS[k].sec === sectionFilter);
+    const curIdx = Math.max(0, activeList.indexOf(currentKey));
+    document.getElementById('step-counter-badge').textContent = `Step ${curIdx + 1} / ${activeList.length}`;
+    row.innerHTML = '';
+    activeList.forEach((k, idx) => {
+      const it = ITEMS[k];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'step-pill' + (k === currentKey ? ' active' : '');
+      const shortLbl = isAr ? (it.ar.short || `خطوة ${idx + 1}`) : (it.en.short || `Step ${idx + 1}`);
+      btn.textContent = `${idx + 1}. ${shortLbl}`;
+      btn.onclick = () => selectItem(k);
+      row.appendChild(btn);
+    });
+  }
+
+  function stepNavigate(dir) {
+    const activeList = ITEM_KEYS.filter(k => sectionFilter === 'all' || !ITEMS[k].sec || ITEMS[k].sec === sectionFilter);
+    const idx = activeList.indexOf(currentKey);
+    const nextIdx = (idx + dir + activeList.length) % activeList.length;
+    selectItem(activeList[nextIdx]);
+  }
+
+  function toggleAutoRun() {
+    const btn = document.getElementById('btn-autorun');
+    const isAr = (currentLang === 'ar');
+    if (autoRunInterval) {
+      clearInterval(autoRunInterval);
+      autoRunInterval = null;
+      btn.className = 'px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm';
+      btn.innerHTML = `<i class="fa-solid fa-play"></i> <span id="lbl-autorun">${isAr ? 'تشغيل تلقائي للخطوات' : 'Auto-Run Steps'}</span>`;
+    } else {
+      autoRunInterval = setInterval(() => stepNavigate(1), 4200);
+      btn.className = 'px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm';
+      btn.innerHTML = `<i class="fa-solid fa-pause"></i> <span id="lbl-autorun">${isAr ? 'إيقاف التشغيل التلقائي' : 'Pause Auto-Run'}</span>`;
+    }
+  }
+
+  function renderModeButtons() {
+    const box = document.getElementById('sim-mode-buttons');
+    if (!box) return;
+    const it = ITEMS[currentKey];
+    const isAr = (currentLang === 'ar');
+    const modes = (it && it.modes) ? it.modes : [
+      { en: 'Normal Physiological Finding', ar: 'النتيجة الطبيعية السليمة' },
+      { en: 'Pathological / Abnormal Case 1', ar: 'الحالة المرضية الأولى' },
+      { en: 'Pathological / Abnormal Case 2', ar: 'الحالة المرضية الثانية' }
+    ];
+    box.innerHTML = '';
+    modes.forEach((m, idx) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mode-pill' + (idx === currentModeIdx ? ' active' : '');
+      b.textContent = isAr ? m.ar : m.en;
+      b.onclick = () => {
+        currentModeIdx = idx;
+        pressTimer = 90;
+        renderModeButtons();
+      };
+      box.appendChild(b);
+    });
+  }
+
+  function renderSidebar() {
+    const box = document.getElementById('clinix-sidebar-scroll');
+    const q = (document.getElementById('pe-search')?.value || '').trim().toLowerCase();
+    const isAr = (currentLang === 'ar');
+    box.innerHTML = '';
+    let shown = 0;
+    ITEM_KEYS.forEach((k, idx) => {
+      const it = ITEMS[k];
+      if (sectionFilter !== 'all' && it.sec && it.sec !== sectionFilter) return;
+      const title = isAr ? it.ar.name : it.en.name;
+      if (q && !it.en.name.toLowerCase().includes(q) && !it.ar.name.toLowerCase().includes(q) && !it.en.tag.toLowerCase().includes(q)) return;
+      shown++;
+      const isSel = (currentKey === k);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sc-card' + (isSel ? ' active' : '');
+      btn.innerHTML = `
+        <div class="flex items-center justify-between gap-1">
+          <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${isSel ? 'bg-white/25 text-white' : 'bg-teal-50 text-teal-800 border border-teal-200'}">
+            ${isAr ? it.ar.tag : it.en.tag}
+          </span>
+          <span class="num-ltr text-[10.5px] font-mono font-extrabold ${isSel ? 'text-teal-100' : 'text-slate-500'}">Step ${idx + 1}/${ITEM_KEYS.length}</span>
+        </div>
+        <div class="text-xs font-extrabold ${isSel ? 'text-white' : 'text-slate-900'} leading-snug">${title}</div>
+      `;
+      btn.onclick = () => selectItem(k);
+      box.appendChild(btn);
+    });
+    document.getElementById('ui-sb-count').textContent = `${shown} / ${ITEM_KEYS.length}`;
+  }
+
+  function selectItem(k) {
+    currentKey = k;
+    currentModeIdx = 0;
+    const it = ITEMS[k];
+    const isAr = (currentLang === 'ar');
+    const d = isAr ? it.ar : it.en;
+    document.getElementById('sim-badge').textContent = d.tag;
+    document.getElementById('sim-main-heading').textContent = d.name;
+    document.getElementById('box1-body').textContent = d.tech;
+    document.getElementById('box2-body').textContent = d.norm;
+    document.getElementById('box3-body').textContent = d.abn;
+    document.getElementById('box4-body').textContent = d.pearl;
+    renderSidebar();
+    renderStepPills();
+    renderModeButtons();
+  }
+
+  function renderOSCEChecklist() {
+    const preBox = document.getElementById('osce-pre-list');
+    const recBox = document.getElementById('osce-rec-list');
+    if (!preBox || !recBox) return;
+    const isAr = (currentLang === 'ar');
+    preBox.innerHTML = '';
+    recBox.innerHTML = '';
+    PRE_STEPS.forEach((st, i) => {
+      const lbl = document.createElement('label');
+      lbl.className = 'flex items-start gap-2 p-1.5 rounded-lg hover:bg-white cursor-pointer';
+      lbl.innerHTML = `<input type="checkbox" class="osce-chk mt-0.5 accent-teal-600" onchange="updateOSCEScore()"> <span class="font-semibold text-slate-800">${isAr ? st.ar : st.en}</span>`;
+      preBox.appendChild(lbl);
+    });
+    RECORD_ITEMS.forEach((st, i) => {
+      const lbl = document.createElement('label');
+      lbl.className = 'flex items-start gap-2 p-1.5 rounded-lg hover:bg-white cursor-pointer';
+      lbl.innerHTML = `<input type="checkbox" class="osce-chk mt-0.5 accent-sky-600" onchange="updateOSCEScore()"> <span class="font-semibold text-slate-800">${isAr ? st.ar : st.en}</span>`;
+      recBox.appendChild(lbl);
+    });
+    updateOSCEScore();
+  }
+
+  function updateOSCEScore() {
+    const chks = document.querySelectorAll('.osce-chk');
+    let done = 0;
+    chks.forEach(c => { if (c.checked) done++; });
+    const pct = chks.length ? Math.round((done / chks.length) * 100) : 0;
+    const badge = document.getElementById('osce-score-badge');
+    if (badge) badge.textContent = `OSCE Score: ${done * 2} / ${chks.length * 2} (${pct}%)`;
+  }
+
+  function checkAllOSCE(state) {
+    document.querySelectorAll('.osce-chk').forEach(c => { c.checked = state; });
+    updateOSCEScore();
+  }
+
+  let useBellMode = false;
+  let contAudioTimer = null;
+  let selectedSpotIdx = 0;
+
+  function toggleChestpieceMode() {
+    useBellMode = !useBellMode;
+    const isAr = (currentLang === 'ar');
+    const lbl = document.getElementById('lbl-chestpiece');
+    if (lbl) {
+      lbl.textContent = useBellMode
+        ? (isAr ? 'القمع: Bell (للأصوات المنخفضة S3/S4/MS)' : 'Chestpiece: Bell (Low Pitch S3/S4/MS)')
+        : (isAr ? 'الغشاء: Diaphragm (للأصوات العالية S1/S2)' : 'Chestpiece: Diaphragm (High Pitch)');
+    }
+    playExamAudio();
+  }
+
+  function toggleContinuousAudio() {
+    const isAr = (currentLang === 'ar');
+    const lbl = document.getElementById('lbl-cont-audio');
+    const btn = document.getElementById('btn-cont-audio');
+    if (contAudioTimer) {
+      clearInterval(contAudioTimer);
+      contAudioTimer = null;
+      if (lbl) lbl.textContent = isAr ? 'صوت السماعة المستمر: متوقف' : 'Continuous Sound: OFF';
+      if (btn) btn.className = 'px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-extrabold flex items-center gap-1.5';
+    } else {
+      playExamAudio();
+      contAudioTimer = setInterval(playExamAudio, 2500);
+      if (lbl) lbl.textContent = isAr ? 'صوت السماعة المستمر: يعمل 🔊' : 'Continuous Sound: ON 🔊';
+      if (btn) btn.className = 'px-3 py-2 rounded-xl bg-emerald-600 text-white border border-emerald-700 text-xs font-extrabold flex items-center gap-1.5 shadow';
+    }
+  }
+
+  function makeNoiseBuffer(ctx, durationSec) {
+    const sr = ctx.sampleRate;
+    const len = Math.floor(sr * durationSec);
+    const buf = ctx.createBuffer(1, len, sr);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1);
+    return buf;
+  }
+
+  function playFilteredNoiseBurst(ctx, tStart, dur, freqHz, qVal, peakGain) {
+    const src = ctx.createBufferSource();
+    src.buffer = makeNoiseBuffer(ctx, dur + 0.05);
+    const flt = ctx.createBiquadFilter();
+    flt.type = 'bandpass';
+    flt.frequency.setValueAtTime(freqHz, tStart);
+    flt.Q.setValueAtTime(qVal, tStart);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.001, tStart);
+    g.gain.linearRampToValueAtTime(peakGain, tStart + dur * 0.42);
+    g.gain.exponentialRampToValueAtTime(0.001, tStart + dur);
+    src.connect(flt); flt.connect(g); g.connect(ctx.destination);
+    src.start(tStart); src.stop(tStart + dur + 0.02);
+  }
+
+  function playThud(ctx, t0, fStart, fEnd, dur, vol) {
+    const o = ctx.createOscillator();
+    const flt = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(fStart, t0);
+    o.frequency.exponentialRampToValueAtTime(fEnd, t0 + dur);
+    flt.type = 'lowpass';
+    flt.frequency.setValueAtTime(useBellMode ? 140 : 240, t0);
+    g.gain.setValueAtTime(0.001, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(flt); flt.connect(g); g.connect(ctx.destination);
+    o.start(t0); o.stop(t0 + dur + 0.01);
+  }
+
+  function playExamAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+
+      if ('heart' === 'ear') {
+        // Realistic 512 Hz Tuning Fork with Stereo Lateralization (Weber & Rinne)
+        const osc = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(512, now);
+        osc2.type = 'sine'; osc2.frequency.setValueAtTime(1024, now);
+        const g2 = audioCtx.createGain(); g2.gain.setValueAtTime(0.04, now);
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 2.1);
+        if (audioCtx.createStereoPanner) {
+          const pan = audioCtx.createStereoPanner();
+          // Mode 1: Right Conductive Loss -> lateralizes to Right (-0.8); Mode 2: Right Sensorineural -> lateralizes to Left (+0.8)
+          pan.pan.setValueAtTime(currentModeIdx === 1 ? -0.82 : (currentModeIdx === 2 ? 0.82 : 0), now);
+          osc.connect(gain); osc2.connect(g2); g2.connect(gain);
+          gain.connect(pan); pan.connect(audioCtx.destination);
+        } else {
+          osc.connect(gain); gain.connect(audioCtx.destination);
+        }
+        osc.start(now); osc2.start(now);
+        osc.stop(now + 2.15); osc2.stop(now + 2.15);
+      } else if ('heart' === 'heart') {
+        if (ITEMS[currentKey] && ITEMS[currentKey].sec === 'pvs') {
+          // Arterial Handheld Doppler Ultrasound Sound (Triphasic Normal vs Monophasic PAD)
+          for (let b = 0; b < 3; b++) {
+            const t0 = now + b * 0.80;
+            if (currentModeIdx === 0) {
+              // Crisp Triphasic Doppler: Systolic forward whoosh + Early diastolic reverse + Late diastolic forward
+              playFilteredNoiseBurst(audioCtx, t0, 0.16, 650, 3.0, 0.28);
+              playFilteredNoiseBurst(audioCtx, t0 + 0.18, 0.08, 420, 4.0, 0.16);
+              playFilteredNoiseBurst(audioCtx, t0 + 0.28, 0.07, 520, 4.0, 0.12);
+            } else {
+              // Damped Monophasic PAD Doppler
+              playFilteredNoiseBurst(audioCtx, t0, 0.28, 320, 2.5, 0.15);
+            }
+          }
+          return;
+        }
+        // Realistic Multi-Layer Heart Sounds (S1, S2, Split S2, S3, S4, AS/MR/AR/MS Murmurs & Carotid Bruit)
+        const isBaseSpot = (selectedSpotIdx === 0 || selectedSpotIdx === 1); // Aortic/Pulmonic: S2 > S1
+        const s1Vol = isBaseSpot ? 0.24 : 0.42;
+        const s2Vol = isBaseSpot ? 0.42 : 0.26;
+        for (let b = 0; b < 3; b++) {
+          const t0 = now + b * 0.80;
+          // S4 Atrial Gallop (just before S1)
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 2) {
+            playThud(audioCtx, t0 + 0.02, 46, 32, 0.08, useBellMode ? 0.34 : 0.18);
+          }
+          // S1 ("Lub" — Mitral M1 + Tricuspid T1 closure)
+          playThud(audioCtx, t0 + 0.10, 72, 42, 0.10, s1Vol);
+          // Systolic Murmurs / Carotid Bruit (between S1 and S2)
+          if ((currentKey === 'neck_carotid' && currentModeIdx === 1) || (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 0)) {
+            // Harsh Aortic Stenosis / Carotid Bruit Crescendo-Decrescendo Diamond Murmur
+            playFilteredNoiseBurst(audioCtx, t0 + 0.18, 0.22, 340, 2.2, 0.28);
+          } else if (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 1) {
+            // Blowing Holosystolic Mitral Regurgitation Murmur
+            playFilteredNoiseBurst(audioCtx, t0 + 0.14, 0.28, 580, 1.8, 0.26);
+          }
+          // S2 ("Dub" — Aortic A2 + Pulmonic P2 closure)
+          playThud(audioCtx, t0 + 0.42, 98, 58, 0.085, s2Vol);
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 0) {
+            // Physiologic Split S2 (P2 55ms after A2)
+            playThud(audioCtx, t0 + 0.475, 92, 54, 0.08, s2Vol * 0.85);
+          }
+          // S3 Ventricular Gallop ("Ken-tuck-y" — 120ms after S2)
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 1) {
+            playThud(audioCtx, t0 + 0.55, 50, 34, 0.09, useBellMode ? 0.36 : 0.20);
+          }
+          // Diastolic Murmur (AR / MS)
+          if (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 2) {
+            playFilteredNoiseBurst(audioCtx, t0 + 0.50, 0.25, useBellMode ? 130 : 680, 2.5, 0.24);
+          }
+        }
+      } else if ('heart' === 'lungs') {
+        if (currentKey === 'percussion_ladder') {
+          // Realistic Thoracic Percussion Notes (Resonance vs Hyperresonance vs Dullness)
+          for (let tap = 0; tap < 2; tap++) {
+            const t0 = now + tap * 0.28;
+            if (currentModeIdx === 0) playThud(audioCtx, t0, 115, 78, 0.18, 0.38); // Hollow Resonance
+            else if (currentModeIdx === 1) playThud(audioCtx, t0, 165, 130, 0.26, 0.44); // Booming Hyperresonance (Pneumothorax)
+            else playThud(audioCtx, t0, 240, 180, 0.06, 0.28); // Short Flat Dullness (Consolidation/Effusion)
+          }
+          return;
+        }
+        // Realistic Breath Cycle (Inspiration 0..1.1s + Expiration 1.2..2.2s)
+        const isBronchial = (currentKey === 'normal_breath_sounds' && currentModeIdx === 2);
+        const isBV = (currentKey === 'normal_breath_sounds' && currentModeIdx === 1);
+        // Inspiration filtered noise
+        playFilteredNoiseBurst(audioCtx, now + 0.05, 1.05, isBronchial ? 720 : (isBV ? 440 : 260), 1.6, 0.24);
+        // Expiration filtered noise
+        playFilteredNoiseBurst(audioCtx, now + 1.20, isBronchial ? 1.15 : (isBV ? 0.95 : 0.55), isBronchial ? 780 : (isBV ? 420 : 220), 1.6, isBronchial ? 0.28 : 0.14);
+
+        if (currentKey === 'adventitious_vocal') {
+          if (currentModeIdx === 0) {
+            // Fine Late-Inspiratory Crackles (12 rapid Velcro micro-popping impulses at 0.55..1.05s)
+            for (let c = 0; c < 12; c++) {
+              const tc = now + 0.52 + c * 0.042 + (Math.random() * 0.015);
+              playFilteredNoiseBurst(audioCtx, tc, 0.014, 1350, 4.5, 0.32);
+            }
+          } else if (currentModeIdx === 1) {
+            // High-Pitched Musical Polyphonic Expiratory Wheezes (1.18..2.15s)
+            [410, 565, 710].forEach((freq, idx) => {
+              const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+              o.type = 'sawtooth'; o.frequency.setValueAtTime(freq, now + 1.18);
+              o.frequency.linearRampToValueAtTime(freq * 0.94, now + 2.10);
+              g.gain.setValueAtTime(0.001, now + 1.18);
+              g.gain.linearRampToValueAtTime(0.055, now + 1.35);
+              g.gain.exponentialRampToValueAtTime(0.001, now + 2.15);
+              o.connect(g); g.connect(audioCtx.destination);
+              o.start(now + 1.18); o.stop(now + 2.18);
+            });
+          } else {
+            // High-Pitched Inspiratory Stridor (0.08..1.05s)
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = 'triangle'; o.frequency.setValueAtTime(640, now + 0.08);
+            o.frequency.linearRampToValueAtTime(760, now + 0.65);
+            g.gain.setValueAtTime(0.001, now + 0.08);
+            g.gain.linearRampToValueAtTime(0.22, now + 0.45);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 1.05);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now + 0.08); o.stop(now + 1.08);
+          }
+        }
+      } else {
+        // Eye stimulus confirmation tone
+        playThud(audioCtx, now, 520, 660, 0.18, 0.18);
+      }
+    } catch (e) {}
+  }
+
+  function toggleLanguage() {
+    currentLang = (currentLang === 'en') ? 'ar' : 'en';
+    const isAr = (currentLang === 'ar');
+    const root = document.getElementById('html-root');
+    root.lang = currentLang;
+    root.dir = isAr ? 'rtl' : 'ltr';
+    document.getElementById('ui-lang-btn').textContent = isAr ? 'English (EN)' : 'العربية (AR)';
+    document.getElementById('ui-title').textContent = isAr ? 'محاكي فحص القلب وأوعية العنق والأطراف العلوية والسفلية خطوة بخطوة (حسب التشيك ليست)' : 'Cardiac, Neck Vessels & Peripheral Vascular (Extremities) Step-by-Step Simulator';
+    document.getElementById('ui-subtitle').textContent = isAr ? '12 محطة تفاعلية خطوة بخطوة: السباتي والوداجي JVP، البؤر الخمس وأصوات القلب، وفحص الأطراف العلوية والسفلية (CRT، اختبار ألين، النبضات الأربعة، والوذمة الانطباعية 1+ إلى 4+)' : '12 Interactive Stations: Carotid & JVP (30–45°) • PMI & 5 Cardiac Areas • S2/S3/S4 & Murmurs • Upper/Lower Extremities, CRT (<2s), Allen Test (<7s), 4 Lower Pulses & Pitting Edema (1+–4+)';
+    document.getElementById('ui-back-pe').textContent = isAr ? 'الرجوع إلى صفحة الفحص السريري (Physical Exam)' : 'Back to Physical Examination Hub';
+    document.getElementById('lbl-sb-head').textContent = isAr ? 'محطات الفحص السريري خطوة بخطوة' : 'Step-by-Step Checklist Stations';
+    document.getElementById('lbl-step-guide').textContent = isAr ? 'محاكي تطبيق خطوات الفحص السريري خطوة بخطوة حسب التشيك ليست' : 'Interactive Step-by-Step Procedure Walkthrough (University Checklist)';
+    document.getElementById('lbl-prev-step').textContent = isAr ? 'الخطوة السابقة' : 'Prev Step';
+    document.getElementById('lbl-next-step').textContent = isAr ? 'الخطوة التالية' : 'Next Step';
+    document.getElementById('lbl-sim-mode').textContent = isAr ? 'اختر حالة المريض للمحاكاة:' : 'Simulate Patient Condition:';
+    document.getElementById('lbl-audio-btn').textContent = isAr ? 'تشغيل الصوت السريري / المنبه' : 'Play Clinical Sound / Stimulus';
+    if (document.getElementById('lbl-sec-all')) {
+      document.getElementById('lbl-sec-all').textContent = isAr ? 'جميع محطات القلب والأطراف (12 محطة)' : 'All Cardiac & Peripheral Stations (12)';
+      document.getElementById('lbl-sec-cardiac').textContent = isAr ? '❤️ فحص القلب والعنق (6)' : '❤️ Heart & Neck (6)';
+      document.getElementById('lbl-sec-pvs').textContent = isAr ? '🦵 فحص الأطراف والأوعية (6)' : '🦵 Extremities / PVS (6)';
+    }
+    document.getElementById('box1-title').innerHTML = `<i class="fa-solid fa-user-doctor text-sky-600"></i> <span>${isAr ? 'طريقة إجراء الفحص خطوة بخطوة وما تقوله للمريض:' : 'Step-by-Step Procedure & Patient Script (Checklist):'}</span>`;
+    document.getElementById('box2-title').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>${isAr ? 'النتيجة الطبيعية والتفسير الفيزيولوجي:' : 'Normal Finding & Physiological Mechanism:'}</span>`;
+    document.getElementById('box3-title').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600"></i> <span>${isAr ? 'النتائج غير الطبيعية والتشخيص التفريقي:' : 'Abnormal Findings & Clinical Differential:'}</span>`;
+    document.getElementById('box4-title').innerHTML = `<i class="fa-solid fa-lightbulb text-amber-600"></i> <span>${isAr ? 'التوثيق المطلوب بالتشيك ليست (Record) وتنبيهات الـ OSCE:' : 'OSCE Checklist Evaluation & Documentation ("Record"):'}</span>`;
+    renderOSCEChecklist();
+    selectItem(currentKey);
+  }
+
+  function drawSim() {
+    tick++;
+    if (pressTimer > 0) pressTimer--;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 10 && rect.height > 10) {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.direction = 'ltr';
+      
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, w, h);
+
+  if (ITEMS[currentKey] && ITEMS[currentKey].sec === 'pvs') {
+    // PERIPHERAL VASCULAR & EXTREMITIES INTERACTIVE SIMULATOR
+    const lx = w * 0.28, ly = h * 0.52;
+    const rx = w * 0.72, ry = h * 0.52;
+
+    if (currentKey === 'pvs_allen_test' || currentKey.startsWith('pvs_upper')) {
+      // Left: Hand & Forearm Arterial Arch + CRT / Allen Test Animation
+      const flushProg = pressTimer > 0 ? Math.max(0, 1 - pressTimer / 90) : 1;
+      const isIschemic = (currentModeIdx === 2) || (currentKey === 'pvs_upper_inspection_crt' && currentModeIdx === 1);
+      const handCol = isIschemic ? '#cbd5e1' : (pressTimer > 45 ? '#f1f5f9' : '#fda4af');
+
+      // Draw Forearm & Palm
+      ctx.fillStyle = handCol; ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.roundRect(lx - 48, ly - 95, 96, 120, 32); ctx.fill(); ctx.stroke();
+      ctx.beginPath(); ctx.roundRect(lx - 36, ly + 20, 72, 75, 12); ctx.fill(); ctx.stroke();
+
+      // Radial (lateral) & Ulnar (medial) Arteries + Superficial Palmar Arch
+      ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 3.5;
+      ctx.beginPath(); ctx.moveTo(lx - 26, ly + 92); ctx.lineTo(lx - 26, ly - 15); ctx.stroke(); // Radial
+      ctx.strokeStyle = (currentKey === 'pvs_allen_test' && currentModeIdx === 2) ? '#64748b' : '#ef4444';
+      ctx.beginPath(); ctx.moveTo(lx + 26, ly + 92); ctx.lineTo(lx + 26, ly - 15); ctx.stroke(); // Ulnar
+      ctx.beginPath(); ctx.arc(lx, ly - 15, 26, Math.PI, 0, false); ctx.stroke(); // Palmar Arch
+
+      // Pulse / Occlusion Indicators
+      const pulseWave = Math.sin(tick * 0.15) * 4;
+      ctx.fillStyle = '#facc15';
+      ctx.beginPath(); ctx.arc(lx - 26, ly + 42, 7 + (currentModeIdx === 1 ? 0 : pulseWave * 0.3), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(lx + 26, ly + 42, 7 + pulseWave * 0.3, 0, Math.PI * 2); ctx.fill();
+
+      ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 11.5px Inter, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText('Radial Artery (Lateral)', lx - 64, ly + 46);
+      ctx.fillText('Ulnar Artery (Medial)', lx + 64, ly + 46);
+      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.fillText(
+        currentKey === 'pvs_allen_test'
+          ? (currentModeIdx === 0 ? 'Modified Allen Test: Ulnar Flush in 3.5 sec (<7s = Positive/Normal)' : (currentModeIdx === 1 ? 'Borderline Return: 10 sec (Caution)' : 'Negative Allen Test (>15s Pale Palm) — DO NOT Puncture Radial!'))
+          : (currentKey === 'pvs_upper_inspection_crt'
+            ? (currentModeIdx === 0 ? 'Capillary Refill Time (CRT): < 1.5 sec (Warm Pink Nailbed, 160° Angle)' : (currentModeIdx === 1 ? 'Delayed CRT: 4.2 sec (Cool Cyanotic Nailbed)' : 'Digital Clubbing: Angle ≥ 180° (Loss of Schamroth Window)'))
+            : 'Upper Extremity Pulses: Radial 2+, Ulnar 2+, Brachial 2+ (Symmetric)'),
+        w * 0.5, 26
+      );
+
+      // Right Side: Nailbed CRT & Schamroth Window / Pulse Scale Bar
+      ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.roundRect(w * 0.52, 52, w * 0.44, h - 76, 16); ctx.fill(); ctx.stroke();
+      const rxMid = w * 0.74;
+      ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 12px Inter, sans-serif';
+      ctx.fillText('Click Canvas to Simulate Nailbed Blanch / Allen Release!', rxMid, 82);
+
+      // Pulse Grading Scale (0 to 3+)
+      ['0 = Absent (No pulse)', '1+ = Weak / Thready (PAD / Shock)', '2+ = Normal / Brisk (Expected)', '3+ = Full / Bounding (Hyperdynamic)'].forEach((txt, i) => {
+        const y0 = 115 + i * 38;
+        const isHi = (currentModeIdx === 0 && i === 2) || (currentModeIdx === 1 && i === 1) || (currentModeIdx === 2 && (i === 0 || i === 3));
+        ctx.fillStyle = isHi ? '#0d9488' : '#0f172a';
+        ctx.beginPath(); ctx.roundRect(w * 0.55, y0, w * 0.38, 30, 8); ctx.fill();
+        ctx.fillStyle = isHi ? '#ffffff' : '#94a3b8'; ctx.font = 'bold 11px Inter, sans-serif'; ctx.textAlign = 'left';
+        ctx.fillText(txt, w * 0.57, y0 + 19);
+      });
+    } else {
+      // Lower Extremities: 4 Pulses Map (Femoral, Popliteal, PT, DP) + Interactive Pitting Edema Presser (1+ to 4+)
+      ctx.fillStyle = '#ffffff'; ctx.font = 'bold 12px Inter, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(
+        currentKey === 'pvs_pitting_edema_dvt'
+          ? (currentModeIdx === 0 ? 'No Pitting Edema (0 mm) & Normal ABI = 1.08 (0.90–1.30)' : (currentModeIdx === 1 ? '1+ (2 mm) to 2+ (4 mm) Moderate Pitting Edema' : '3+ (6 mm) to 4+ (8 mm) Deep Pitting Edema / Unilateral Calf DVT'))
+          : 'Lower Extremity 4 Arterial Pulses: Femoral → Popliteal → Posterior Tibial (PT) → Dorsalis Pedis (DP)',
+        w * 0.5, 26
+      );
+
+      // Left: Lower Limb Anatomical Pulse Map
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.roundRect(lx - 45, 50, 90, h - 75, 28); ctx.stroke();
+      const legPulses = [
+        { name: '1. Femoral (Mid-Inguinal)', y: 82, col: '#f43f5e' },
+        { name: '2. Popliteal (Behind Knee)', y: 148, col: '#f59e0b' },
+        { name: '3. Posterior Tibial (Behind Medial Malleolus)', y: 218, col: '#10b981' },
+        { name: '4. Dorsalis Pedis (Lateral to EHL Tendon)', y: 274, col: '#38bdf8' }
+      ];
+      legPulses.forEach((p, idx) => {
+        const rPulse = (currentModeIdx >= 1 && idx >= 2) ? 4 : (7 + Math.sin(tick * 0.16) * 2.2);
+        ctx.fillStyle = (currentModeIdx >= 1 && idx >= 2) ? '#64748b' : p.col;
+        ctx.beginPath(); ctx.arc(lx, p.y, rPulse, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#e2e8f0'; ctx.font = 'bold 10.5px Inter, sans-serif'; ctx.textAlign = 'center';
+        ctx.fillText(p.name, lx, p.y - 12);
+      });
+
+      // Right: Interactive Pitting Edema Depth Visualizer (2mm, 4mm, 6mm, 8mm)
+      const pitBoxX = w * 0.53, pitBoxW = w * 0.43;
+      ctx.fillStyle = '#1e293b';
+      ctx.beginPath(); ctx.roundRect(pitBoxX, 52, pitBoxW, h - 76, 16); ctx.fill();
+
+      const pitDepthMm = currentModeIdx === 0 ? 0 : (currentModeIdx === 1 ? 4 : 8);
+      const skinY = 155;
+      ctx.fillStyle = '#fda4af';
+      ctx.beginPath();
+      ctx.moveTo(pitBoxX + 24, skinY);
+      ctx.quadraticCurveTo(pitBoxX + pitBoxW * 0.5, skinY + pitDepthMm * 7.5, pitBoxX + pitBoxW - 24, skinY);
+      ctx.lineTo(pitBoxX + pitBoxW - 24, skinY + 75);
+      ctx.lineTo(pitBoxX + 24, skinY + 75);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 12px Inter, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(`Pretibial Pitting Depth: ${pitDepthMm} mm (${pitDepthMm === 0 ? '0 Normal' : (pitDepthMm === 4 ? '2+ Moderate [4mm]' : '4+ Very Deep [8mm]')})`, pitBoxX + pitBoxW * 0.5, 86);
+      ctx.fillStyle = '#fde047'; ctx.font = 'bold 11px Inter, monospace';
+      ctx.fillText('1+ = 2 mm | 2+ = 4 mm | 3+ = 6 mm | 4+ = 8 mm', pitBoxX + pitBoxW * 0.5, h - 42);
+    }
+    ctx.textAlign = 'left';
+  } else {
+    // CARDIAC & NECK VESSELS INTERACTIVE SIMULATOR (Chest 5 Areas + Carotid/JVP + Live Phonocardiogram)
+    const chestX = w * 0.27, chestY = h * 0.54;
+    ctx.strokeStyle = '#334155'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.roundRect(chestX - 95, chestY - 102, 190, 206, 28); ctx.stroke();
+
+    // Neck Carotid & Internal Jugular Vein (JVP) above clavicle
+    ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 3.5;
+    ctx.beginPath(); ctx.moveTo(chestX - 22, chestY - 102); ctx.lineTo(chestX - 22, chestY - 142); ctx.stroke(); // Carotid
+    ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = (currentKey === 'neck_jvp' && currentModeIdx > 0) ? 6 : 3;
+    ctx.beginPath(); ctx.moveTo(chestX - 38, chestY - 102); ctx.lineTo(chestX - 38, chestY - 142); ctx.stroke(); // IJV
+
+    const spots = [
+      { name: '1. Aortic (2nd R ICS)',    x: chestX - 38, y: chestY - 58, col: '#f43f5e' },
+      { name: '2. Pulmonic (2nd L ICS)',  x: chestX + 36, y: chestY - 58, col: '#38bdf8' },
+      { name: "3. Erb's Point (3rd L)",   x: chestX + 34, y: chestY - 18, col: '#a855f7' },
+      { name: '4. Tricuspid (4th LLSB)',  x: chestX + 32, y: chestY + 22, col: '#f59e0b' },
+      { name: '5. Mitral / PMI (5th MCL)',x: chestX + 70, y: chestY + 58, col: '#10b981' }
+    ];
+
+    spots.forEach(sp => {
+      const rDot = (currentKey === 'precordium_pmi' && sp.name.includes('Mitral') && currentModeIdx === 1) ? 14 : 9;
+      ctx.fillStyle = sp.col;
+      ctx.beginPath(); ctx.arc(sp.x, sp.y, rDot, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#e2e8f0'; ctx.font = 'bold 9.5px Inter, sans-serif'; ctx.textAlign = 'center';
+      ctx.fillText(sp.name, sp.x, sp.y - 13);
+    });
+
+    // Stethoscope head following cursor
+    const sx = Math.min(w * 0.48, Math.max(24, mouseX * w)), sy = Math.max(24, Math.min(h - 24, mouseY * h));
+    ctx.strokeStyle = '#2dd4bf'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(sx, sy, 14, 0, Math.PI * 2); ctx.stroke();
+
+    // Right Side: Live Synchronized Phonocardiogram + ECG Strip
+    const px0 = w * 0.53, pw = w * 0.43, pyMid = h * 0.56;
+    ctx.strokeStyle = '#475569'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(px0, pyMid); ctx.lineTo(px0 + pw, pyMid); ctx.stroke();
+    ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 11.5px Inter, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('Live Phonocardiogram (S1 — Systole — S2 — Diastole)', px0, 28);
+
+    ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2.3;
+    ctx.beginPath();
+    for (let x = 0; x <= pw; x += 2) {
+      const u = ((x / pw) * 2 + (tick * 0.012)) % 1;
+      let amp = 0;
+      if (Math.abs(u - 0.18) < 0.038) amp = 46 * Math.sin(x * 1.4); // S1 (Lub)
+      if (Math.abs(u - 0.50) < 0.035) amp = 38 * Math.sin(x * 1.6); // A2
+      if (currentKey === 'split_s2_gallops' && currentModeIdx === 0 && Math.abs(u - 0.55) < 0.03) amp = 32 * Math.sin(x * 1.6); // Split P2
+      if (currentKey === 'split_s2_gallops' && currentModeIdx === 1 && Math.abs(u - 0.64) < 0.035) amp = 26 * Math.sin(x * 0.9); // S3 Gallop
+      if (currentKey === 'split_s2_gallops' && currentModeIdx === 2 && Math.abs(u - 0.09) < 0.035) amp = 24 * Math.sin(x * 0.9); // S4 Gallop
+      if ((currentKey === 'systolic_diastolic_murmurs' || (currentKey === 'neck_carotid' && currentModeIdx === 1)) && u > 0.22 && u < 0.47) {
+        amp = 30 * Math.sin(((u - 0.22) / 0.25) * Math.PI) * Math.sin(x * 2.2); // Systolic Murmur / Carotid Bruit
+      }
+      const y = pyMid + amp;
+      if (x === 0) ctx.moveTo(px0 + x, y); else ctx.lineTo(px0 + x, y);
+    }
+    ctx.stroke();
+
+    ctx.fillStyle = '#fde047'; ctx.font = 'bold 11px Inter, monospace';
+    ctx.fillText('S1 (Lub: M1/T1 Closure)   |   S2 (Dub: A2/P2 Closure)   |   Bell = Low Pitch (S3/S4/MS)', px0, h - 16);
+  }
+
+    }
+    requestAnimationFrame(drawSim);
+  }
+
+  renderOSCEChecklist();
+  selectItem(ITEM_KEYS[0]);
+  requestAnimationFrame(drawSim);
+</script>
+</body>
+</html>
