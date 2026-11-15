@@ -1,1 +1,984 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root" class="light" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CliniX Lab | Invasive Lines, Hemodynamic Monitor, Chest Tubes & ICU Tubes Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root, #html-root, body {
+      color-scheme: light !important;
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-family: 'Inter', 'Cairo', sans-serif;
+      margin: 0;
+    }
+    .panel-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      box-shadow: 0 8px 22px -6px rgba(15, 23, 42, 0.06);
+    }
+    #clinix-v7-split-shell {
+      max-width: 1720px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    @media (min-width: 1024px) {
+      #html-root[dir="rtl"] #clinix-v7-split-shell { grid-template-columns: 400px minmax(0, 1fr); }
+      #html-root[dir="ltr"] #clinix-v7-split-shell { grid-template-columns: minmax(0, 1fr) 400px; }
+      #html-root[dir="rtl"] #clinix-sidebar-col { order: 1; }
+      #html-root[dir="rtl"] #clinix-main-col { order: 2; }
+      #html-root[dir="ltr"] #clinix-main-col { order: 1; }
+      #html-root[dir="ltr"] #clinix-sidebar-col { order: 2; }
+      #clinix-sidebar-col {
+        position: sticky;
+        top: 12px;
+        max-height: calc(100vh - 24px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+    }
+    #clinix-sidebar-scroll {
+      overflow-y: auto;
+      max-height: calc(100vh - 280px);
+      padding-inline-end: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sc-card {
+      width: 100%;
+      text-align: start;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.16s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sc-card:hover { border-color: #0d9488; background: #f8fafc; transform: translateY(-1px); }
+    .sc-card.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+      border-color: #0f766e !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.42) !important;
+    }
+    .cat-btn.active {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+      color: #ffffff !important;
+      border-color: #0284c7 !important;
+    }
+    .num-ltr { direction: ltr !important; unicode-bidi: embed; font-family: 'Inter', monospace !important; }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-3 lg:p-4">
 
+  <header class="max-w-[1720px] mx-auto mb-3 panel-card p-3 sm:p-4 border-b-2 border-cyan-500/40">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-cyan-600 to-teal-600 flex items-center justify-center text-white text-xl shadow-md">
+          <i class="fa-solid fa-Wave-square fa-chart-line"></i>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 id="ui-title" class="text-lg sm:text-2xl font-black text-slate-900">
+              CliniX Lab — Invasive Lines, ICU Monitor, Chest Tubes (Pleur-evac) & Airway/Gastric Tubes
+            </h1>
+            <span class="num-ltr px-2 py-0.5 rounded bg-cyan-50 text-cyan-800 border border-cyan-200 text-[10.5px] font-mono font-extrabold">
+              /CliniXLab/Hemodynamics
+            </span>
+          </div>
+          <p id="ui-subtitle" class="text-xs text-slate-500 font-semibold">
+            18 Scenarios: Live ICU Monitor Waveforms • Anatomical Entry Site & Exact Tip Target • 3-Chamber Chest Tube System • A-Line, CVP, Swan-Ganz, IABP, ETT & NGT
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="../index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('hub');return false;}"
+          class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1.5">
+          <i class="fa-solid fa-house text-cyan-600"></i>
+          <span id="ui-back-hub">Back to Hub</span>
+        </a>
+        <button type="button" onclick="toggleLanguage()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-sky-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+          <i class="fa-solid fa-globe"></i>
+          <span id="ui-lang-btn">العربية (AR)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="clinix-v7-split-shell">
+    <!-- SIDEBAR: 18 INVASIVE LINES, CHEST TUBES & ICU TUBES -->
+    <aside id="clinix-sidebar-col" class="panel-card p-3">
+      <div class="mb-2.5 pb-2 border-b border-slate-200">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span id="ui-sb-title" class="text-xs sm:text-sm font-black text-teal-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-sliders text-cyan-600"></i>
+            <span>Invasive Lines & ICU Tubes (18)</span>
+          </span>
+          <span id="ui-sb-count" class="num-ltr px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 text-[11px] font-extrabold">18 / 18</span>
+        </div>
+        <input type="search" id="hemo-search" oninput="renderHemoSidebar()" placeholder="Search A-Line, CVP, Swan-Ganz, Chest Tube, ETT..."
+          class="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600 mb-2" />
+        <div class="grid grid-cols-2 gap-1.5">
+          <button type="button" onclick="setHemoCat('all')" id="hcat-all" class="cat-btn active col-span-2 px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">All Lines, Tubes & Waveforms (18)</button>
+          <button type="button" onclick="setHemoCat('aline')" id="hcat-aline" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">1. A-Line & Damping (4)</button>
+          <button type="button" onclick="setHemoCat('cvp')" id="hcat-cvp" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">2. CVC / CVP Waves (4)</button>
+          <button type="button" onclick="setHemoCat('pac')" id="hcat-pac" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">3. Swan-Ganz & Shock (4)</button>
+          <button type="button" onclick="setHemoCat('iabp')" id="hcat-iabp" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">4. IABP Balloon (2)</button>
+          <button type="button" onclick="setHemoCat('chest')" id="hcat-chest" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">5. Chest Tubes (2)</button>
+          <button type="button" onclick="setHemoCat('tubes')" id="hcat-tubes" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">6. ETT / Trach / NGT (2)</button>
+        </div>
+      </div>
+      <div id="clinix-sidebar-scroll"></div>
+    </aside>
+
+    <!-- MAIN WORKSPACE -->
+    <main id="clinix-main-col" class="flex flex-col gap-3.5 min-w-0">
+
+      <section class="panel-card p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
+          <div>
+            <span id="hemo-cat-badge" class="px-2.5 py-0.5 rounded-md bg-cyan-100 text-cyan-900 border border-cyan-300 text-[11px] font-extrabold"></span>
+            <h2 id="hemo-main-title" class="text-base sm:text-xl font-black text-slate-900 mt-1"></h2>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <div class="flex items-center gap-1 bg-slate-100 px-2 py-1 rounded-xl border border-slate-300 num-ltr text-[11px] font-extrabold">
+              <button type="button" onclick="setHemoSpeed(0)" id="hspd-0" class="px-2 py-0.5 rounded text-slate-700">⏸</button>
+              <button type="button" onclick="setHemoSpeed(0.5)" id="hspd-0.5" class="px-2 py-0.5 rounded text-slate-700">0.5x</button>
+              <button type="button" onclick="setHemoSpeed(1)" id="hspd-1" class="px-2 py-0.5 rounded bg-teal-600 text-white">1x Sec-by-Sec</button>
+              <button type="button" onclick="setHemoSpeed(2)" id="hspd-2" class="px-2 py-0.5 rounded text-slate-700">2x</button>
+            </div>
+            <button type="button" onclick="triggerSquareWaveFlush()" class="px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-bolt"></i>
+              <span id="lbl-flush-btn">Fast-Flush Square-Wave (300 mmHg)</span>
+            </button>
+            <button type="button" onclick="toggleChestAirLeak()" class="px-3 py-1.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-soap"></i>
+              <span id="lbl-leak-btn">Toggle Air-Leak / Cough Test</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- 6 Live ICU Monitor Telemetry Parameters -->
+        <div class="grid grid-cols-2 sm:grid-cols-6 gap-2 mb-3 text-center">
+          <div class="p-2 rounded-xl bg-rose-50 border border-rose-200">
+            <span class="text-[10.5px] font-extrabold text-rose-800 block">ABP (MAP)</span>
+            <strong id="htel-abp" class="num-ltr text-sm sm:text-base font-black text-rose-900">120/80 (93)</strong>
+          </div>
+          <div class="p-2 rounded-xl bg-sky-50 border border-sky-200">
+            <span class="text-[10.5px] font-extrabold text-sky-800 block">CVP (RA)</span>
+            <strong id="htel-cvp" class="num-ltr text-sm sm:text-base font-black text-sky-900">6 mmHg</strong>
+          </div>
+          <div class="p-2 rounded-xl bg-amber-50 border border-amber-200">
+            <span class="text-[10.5px] font-extrabold text-amber-800 block">PAP / PCWP</span>
+            <strong id="htel-pap" class="num-ltr text-sm sm:text-base font-black text-amber-900">25/10 (Wedge 9)</strong>
+          </div>
+          <div class="p-2 rounded-xl bg-emerald-50 border border-emerald-200">
+            <span class="text-[10.5px] font-extrabold text-emerald-800 block">CO / CI</span>
+            <strong id="htel-co" class="num-ltr text-sm sm:text-base font-black text-emerald-900">5.2 L | 2.9</strong>
+          </div>
+          <div class="p-2 rounded-xl bg-purple-50 border border-purple-200">
+            <span class="text-[10.5px] font-extrabold text-purple-800 block">SVR (dyn·s/cm⁵)</span>
+            <strong id="htel-svr" class="num-ltr text-sm sm:text-base font-black text-purple-900">1100 (Norm)</strong>
+          </div>
+          <div class="p-2 rounded-xl bg-slate-100 border border-slate-300">
+            <span class="text-[10.5px] font-extrabold text-slate-700 block">SvO2 / SpO2 / EtCO2</span>
+            <strong id="htel-svo2" class="num-ltr text-sm sm:text-base font-black text-slate-900">SvO2 72%</strong>
+          </div>
+        </div>
+
+        <!-- DUAL INTERACTIVE SCREEN: Left = Live ICU Monitor & 3-Chamber Pleur-evac; Right = Anatomical Entry & Tip Target Map -->
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-3 mb-3">
+          <div class="xl:col-span-7 relative w-full h-80 sm:h-96 rounded-xl bg-slate-950 border-2 border-slate-300 overflow-hidden">
+            <canvas id="hemo-canvas" class="w-full h-full block"></canvas>
+          </div>
+          <div class="xl:col-span-5 relative w-full h-80 sm:h-96 rounded-xl bg-slate-900 border-2 border-teal-400 overflow-hidden">
+            <canvas id="anatomy-tube-canvas" class="w-full h-full block"></canvas>
+          </div>
+        </div>
+
+        <!-- 4 Structured Explanation Cards: Monitor Meaning, Entry/Tip Anatomy, Types/Sizes, and Critical ICU Rules -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-xs">
+          <div class="p-3.5 rounded-xl bg-sky-50/85 border border-sky-200">
+            <h3 id="hbox-1-t" class="font-black text-sm text-sky-900 mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-desktop text-sky-600"></i>
+              <span>1. What the ICU Monitor / System Displays & Waveform Interpretation</span>
+            </h3>
+            <p id="hbox-1-b" class="text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-emerald-50/85 border border-emerald-200">
+            <h3 id="hbox-2-t" class="font-black text-sm text-emerald-900 mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-location-crosshairs text-emerald-600"></i>
+              <span>2. Where It Enters the Body, Exact Tip Location & CXR Confirmation</span>
+            </h3>
+            <p id="hbox-2-b" class="text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-amber-50/85 border border-amber-200">
+            <h3 id="hbox-3-t" class="font-black text-sm text-amber-900 mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-layer-group text-amber-600"></i>
+              <span>3. Types, Catheter/Tube Sizes (Fr / Gauge), Lumens & Chambers</span>
+            </h3>
+            <p id="hbox-3-b" class="text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-rose-50/85 border border-rose-200">
+            <h3 id="hbox-4-t" class="font-black text-sm text-rose-900 mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+              <span>4. Critical ICU Nursing Rules, Zeroing & Emergency Troubleshooting</span>
+            </h3>
+            <p id="hbox-4-b" class="text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+        </div>
+      </section>
+
+      <footer class="panel-card py-3 px-6 text-center text-sm font-black text-slate-700">
+        By: MSN, RN Saif AlDeen Ghanem
+      </footer>
+    </main>
+  </div>
+
+<script>
+  let currentLang = 'en';
+  let hemoCat = 'all';
+  let currentHemoKey = 'aline_norm';
+  let flushTimer = 0;
+  let airLeakActive = false;
+  let hemoSpeed = 1;
+  let hemoPaused = false;
+  let hTime = 0;
+  function setHemoSpeed(spd) {
+    if (spd === 0) hemoPaused = !hemoPaused;
+    else { hemoPaused = false; hemoSpeed = spd; }
+    [0, 0.5, 1, 2].forEach(s => {
+      const b = document.getElementById('hspd-' + s);
+      if (!b) return;
+      const act = (s === 0 && hemoPaused) || (s !== 0 && !hemoPaused && hemoSpeed === s);
+      b.className = act ? 'px-2 py-0.5 rounded bg-teal-600 text-white' : 'px-2 py-0.5 rounded text-slate-700';
+    });
+  }
+
+  const HEMO_SCENARIOS = {
+    aline_norm: {
+      cat: 'aline', abp: '120/80 (93)', cvp: '6 mmHg', pap: '25/10 (9)', co: '5.2 L | 2.9', svr: '1100', svo2: 'SvO2 72%',
+      entryPt: [0.18, 0.64], tipPt: [0.22, 0.56], pathPts: [[0.18, 0.64], [0.22, 0.56]],
+      en: {
+        name: '1. Normal Radial Arterial Line (A-Line — Upstroke, Dicrotic Notch & MAP)',
+        morph: 'Displays continuous beat-to-beat Arterial Blood Pressure (SBP/DBP and MAP = [SBP + 2×DBP]/3 = 70–105 mmHg): 1) Rapid Systolic Upstroke (anacrotic limb) right after ECG QRS, 2) Peak Systolic Pressure (90–140 mmHg), 3) Dicrotic Notch = closure of the Aortic Valve marking onset of diastole, 4) Diastolic Runoff (60–90 mmHg).',
+        anat: 'Entry Site: Radial Artery at wrist (1st choice after Modified Allen Test <7 sec; alternatives: Femoral, Brachial, Dorsalis Pedis). Where It Reaches: Tip sits 3–5 cm inside the distal Radial Artery lumen.',
+        types: '20G radial arterial cannula connected via rigid non-compliant pressure tubing to a transducer and a pressurized 0.9% NaCl flush bag inflated to 300 mmHg (delivers 3–5 mL/hr continuous flush to prevent clot occlusion).',
+        clin: 'Level & Zero transducer at the Phlebostatic Axis (4th intercostal space, midpoint of anterior-posterior chest diameter = Right Atrium; every 1 inch off-level causes a 2 mmHg error!). Check distal hand perfusion (CRT, warmth, sensation) hourly.'
+      },
+      ar: {
+        name: '1. الخط الشرياني الطبيعي (A-Line — الصعود الانقباضي والثلمة ثنائية التموج Dicrotic Notch)',
+        morph: 'يعرض المونيتور ضغط الدم الشرياني لحظة بلحظة (الانقباضي/الانبساطي ومتوسط الضغط الشرياني MAP = 70–105 mmHg): 1) صعود انقباضي سريع يلي QRS، 2) ذروة الضغط الانقباضي (90-140)، 3) الثلمة ثنائية التموج (Dicrotic Notch وتمثل إغلاق الصمام الأبهري وبداية الانبساط)، 4) الانحدار الانبساطي (60-90).',
+        anat: 'مكان الدخول بالجسم: الشريان الكعبري عند المعصم (الخيار الأول بعد التأكد من اختبار ألين <7 ثوانٍ؛ البدائل: الفخذي أو العضدي أو ظهر القدم). أين يصل: يستقر رأس القسطرة بمسافة 3-5 سم داخل لمعة الشريان الكعبري.',
+        types: 'قسطرة شريانية مقاس 20G موصولة بأنابيب صلبة غير قابلة للتمدد ومحول ضغط (Transducer) وكيس محلول ملحي مضغوط عند 300 mmHg (يضخ 3-5 مل/ساعة لمنع التجلط).',
+        clin: 'يُصفّر المحول عند المحور الوريدي السكوني (Phlebostatic Axis: الورب الرابع في منتصف القطر الأمامي-الخلفي للصدر بمستوى الأذين الأيمن؛ كل انحراف 1 إنش يسبب خطأ 2 mmHg).'
+      }
+    },
+    aline_overdamped: {
+      cat: 'aline', abp: '94/76 (82)', cvp: '6 mmHg', pap: '25/10 (9)', co: '5.2 L | 2.9', svr: '1100', svo2: 'SvO2 72%',
+      entryPt: [0.18, 0.64], tipPt: [0.22, 0.56], pathPts: [[0.18, 0.64], [0.22, 0.56]],
+      en: {
+        name: '2. Overdamped A-Line Waveform (Slurred Trace, Lost Dicrotic Notch & Falsely Low SBP)',
+        morph: 'Monitor shows a rounded, slurred arterial wave with COMPLETE LOSS of the Dicrotic Notch, falsely LOW Systolic BP (94 mmHg instead of true 120 mmHg), and falsely HIGH Diastolic BP (76 mmHg). On the Fast-Flush Square-Wave Test, there are ZERO oscillations after release.',
+        anat: 'Entry Site: Radial or Femoral artery. Problem occurs along the fluid pathway between the arterial catheter tip (clot/kink against vessel wall) and the pressure transducer (air bubble or loose connection).',
+        types: 'Causes of Overdamping: 1) Air bubbles in tubing/transducer dome (most common!), 2) Blood clot or fibrin sheath at catheter tip, 3) Kinked radial cannula (wrist flexion), 4) Pressure bag deflated below 300 mmHg.',
+        clin: 'Troubleshooting: Inspect tubing and flush out any air bubbles through the stopcock, aspirate (never forcefully flush a clot into the hand!), extend/splint the wrist on an armboard, and re-inflate pressure bag to 300 mmHg.'
+      },
+      ar: {
+        name: '2. موجة شريانية مفرطة التخميد (Overdamped — اختفاء الثلمة وانخفاض كاذب في SBP)',
+        morph: 'يعرض المونيتور موجة عريضة ممسوحة مع اختفاء الثلمة ثنائية التموج (Dicrotic Notch)، وقراءة منخفضة كاذبة للضغط الانقباضي ومرتفعة كاذبة للانبساطي، وفي اختبار المربع (Square-Wave) لا يظهر أي ارتداد (0 تذبذب).',
+        anat: 'مكان الدخول: الشريان الكعبري أو الفخذي، وتكون المشكلة في رأس القسطرة داخل الشريان (خثرة أو انثناء) أو في أنابيب التوصيل (فقاعة هواء).',
+        types: 'أسباب فرط التخميد: 1) فقاعات هواء في الأنابيب أو المحول (الأشيع)، 2) خثرة دموية على رأس القسطرة، 3) انثناء المعصم، 4) هبوط ضغط كيس المحلول عن 300 mmHg.',
+        clin: 'التدبير التمريضي: اسحب الخثرة وتخلص من فقاعات الهواء، ثبت المعصم، وأعد نفخ كيس المحلول إلى 300 mmHg.'
+      }
+    },
+    aline_underdamped: {
+      cat: 'aline', abp: '148/68 (93)', cvp: '6 mmHg', pap: '25/10 (9)', co: '5.2 L | 2.9', svr: '1100', svo2: 'SvO2 72%',
+      entryPt: [0.18, 0.64], tipPt: [0.22, 0.56], pathPts: [[0.18, 0.64], [0.22, 0.56]],
+      en: {
+        name: '3. Underdamped / Resonant Whip A-Line (Overshoot Spike & Falsely High SBP)',
+        morph: 'Monitor shows a narrow needle-like systolic overshoot spike that overestimates Systolic BP (148 mmHg instead of true 120 mmHg) and underestimates Diastolic BP (68 mmHg), while MAP remains accurate. Fast-Flush Square-Wave Test shows >2–3 prolonged ringing oscillations.',
+        anat: 'Entry Site: Radial/Femoral artery. Harmonic resonance occurs across overly long tubing or hyperdynamic stiff arteries.',
+        types: 'Causes: Excessively long pressure tubing (>120 cm), multiple extra stopcocks/extensions, tachycardia, or severe atherosclerosis.',
+        clin: 'Troubleshooting: Remove unnecessary extension tubing/stopcocks, verify with a manual/oscillometric brachial cuff, and titrate vasopressors using the Mean Arterial Pressure (MAP ≥ 65 mmHg) rather than the artifactual systolic spike.'
+      },
+      ar: {
+        name: '3. موجة شريانية ناقصة التخميد (Underdamped — ذروة رنين كاذبة وارتفاع كاذب في SBP)',
+        morph: 'يعرض المونيتور ذروة إبرية حادة ترفع الضغط الانقباضي كذباً (148 بدل 120 mmHg) وتخفض الانبساطي كذباً مع تذبذبات رنينية متعددة (>3 تذبذبات في اختبار المربع).',
+        anat: 'مكان الدخول: الشريان الكعبري أو الفخذي، ويحدث الرنين في أنابيب التوصيل الطويلة.',
+        types: 'الأسباب: طول مفرط في أنابيب التوصيل، كثرة الوصلات الثلاثية (Stopcocks)، أو تسرع القلب الشديد.',
+        clin: 'التدبير: تقصير الأنابيب وإزالة الوصلات الزائدة، والاعتماد على متوسط الضغط الشرياني (MAP) في معايرة الأدوية الرافعة للضغط.'
+      }
+    },
+    aline_pulsus_paradoxus: {
+      cat: 'aline', abp: '110/74 → 86/68', cvp: '16 mmHg ↑', pap: '28/16 (16)', co: '3.1 L | 1.8', svr: '1650', svo2: 'SvO2 56%',
+      entryPt: [0.18, 0.64], tipPt: [0.22, 0.56], pathPts: [[0.18, 0.64], [0.22, 0.56]],
+      en: {
+        name: '4. Pulsus Paradoxus (>10 mmHg Drop) & Pulse Pressure Variation (PPV > 13%)',
+        morph: 'Monitor shows cyclical respiratory swing in A-Line amplitude: Systolic BP drops by >10 mmHg during spontaneous inspiration (Pulsus Paradoxus in Tamponade/Severe Asthma), or Pulse Pressure Variation (PPV) exceeds 13% on mechanical ventilation.',
+        anat: 'Entry Site: Radial or Femoral A-Line reflecting Left Ventricular stroke volume changes across the respiratory cycle.',
+        types: '1) Pulsus Paradoxus (SBP drop >10 mmHg on inspiration): Cardiac Tamponade, Tension Pneumothorax, Status Asthmaticus. 2) PPV > 13% on controlled mechanical ventilation: Fluid-Responsive Hypovolemia (patient lies on steep Frank-Starling curve).',
+        clin: 'In Tamponade, prepare for emergent Pericardiocentesis; in mechanically ventilated septic/hypovolemic patients with PPV >13%, administer an IV crystalloid fluid challenge (250–500 mL).'
+      },
+      ar: {
+        name: '4. النبض التناقضي (Pulsus Paradoxus) وتفاوت ضغط النبض التنفسي (PPV > 13%)',
+        morph: 'يعرض المونيتور تموجاً دورياً في ارتفاع الموجة الشريانية مع التنفس؛ حيث يهبط الضغط الانقباضي بأكثر من 10 mmHg أثناء الشهيق في اندحاس القلب، أو يتجاوز تفاوت ضغط النبض (PPV) نسبة 13% على المنفسة.',
+        anat: 'مكان الدخول: الشريان الكعبري أو الفخذي ليعكس تغير حجم الضربة البطينية اليسرى مع تغيرات الضغط داخل الصدر.',
+        types: '1) النبض التناقضي (>10 mmHg): اندحاس القلب، استرواح الصدر الضاغط، والربو الشديد. 2) PPV > 13%: نقص الحجم المستجيب لتعويض السوائل.',
+        clin: 'التدبير: بزل التامور الإسعافي في حال اندحاس القلب، أو إعطاء دفعة سوائل وريدية في حال نقص الحجم.'
+      }
+    },
+    cvp_normal: {
+      cat: 'cvp', abp: '120/80 (93)', cvp: '5 mmHg', pap: '24/10 (9)', co: '5.2 L | 2.9', svr: '1100', svo2: 'ScvO2 73%',
+      entryPt: [0.44, 0.20], tipPt: [0.47, 0.36], pathPts: [[0.44, 0.20], [0.46, 0.28], [0.47, 0.36]],
+      en: {
+        name: '5. Central Venous Catheter (CVC) & Normal CVP Waveform (a, c, x, v, y — 2 to 8 mmHg)',
+        morph: 'Monitor displays Right Atrial / Venous Preload (Normal 2–8 mmHg) with 5 distinct waves: 1) "a" wave = Right Atrial contraction (after ECG P wave), 2) "c" wave = Tricuspid valve closure/bulging in early RV systole (after QRS), 3) "x" descent = Atrial relaxation, 4) "v" wave = Passive venous filling of RA against closed tricuspid valve (after T wave), 5) "y" descent = Tricuspid valve opens in early diastole.',
+        anat: 'Where It Enters the Body: 1) Right Internal Jugular Vein (RIJ — straightest path to SVC, lowest pneumothorax risk), 2) Subclavian Vein (lowest infection risk, higher pneumothorax risk), or 3) Femoral Vein. Where the Tip Reaches: Lower 1/3 of the Superior Vena Cava (SVC) at the Cavoatrial Junction (1–2 cm above the Right Atrium, around right tracheobronchial angle / T5–T6 on CXR).',
+        types: 'Triple-Lumen CVC (7 Fr, 15–20 cm): 1) Distal Lumen (16G, Brown) -> connected to CVP transducer & blood draws, 2) Medial Lumen (18G, Blue) -> TPN / Antibiotics, 3) Proximal Lumen (18G, White) -> Vasopressors / Sedation.',
+        clin: 'CRITICAL RULES: Place patient in Trendelenburg (head down 15°) during RIJ/Subclavian insertion/removal and instruct Valsalva/exhale to prevent Venous Air Embolism! Confirm tip on CXR BEFORE infusing vasopressors/TPN. Always read CVP at end-expiration at the base of the "c" wave.'
+      },
+      ar: {
+        name: '5. القسطرة الوريدية المركزية (CVC) وموجة CVP الطبيعية (موجات a, c, x, v, y — 2 إلى 8 mmHg)',
+        morph: 'يعرض المونيتور ضغط الأذين الأيمن والحمل القبلي (الطبيعي 2-8 mmHg) عبر 5 مركبات: 1) موجة a = انقباض الأذين الأيمن (بعد موجة P)، 2) موجة c = إغلاق وتبارز صمام مثلث الشرف بداية انقباض البطين (بعد QRS)، 3) منحدر x = استرخاء الأذين، 4) موجة v = امتلاء الأذين السلبي والصمام مغلق (بعد موجة T)، 5) منحدر y = فتح صمام مثلث الشرف.',
+        anat: 'أين يدخل بالجسم: 1) الوريد الوداجي الباطن الأيمن (Right Internal Jugular — المسار الأبعد عن الرئة والمستقيم)، 2) الوريد تحت الترقوة (Subclavian — الأقل إنتاناً والأعلى خطراً لاسترواح الصدر)، أو 3) الوريد الفخذي (Femoral). أين يصل رأس القسطرة: الثلث السفلي للوريد الأجوف العلوي (SVC) عند الملتقى الأجوفي-الأذيني (Cavoatrial Junction فوق الأذين الأيمن بـ 1-2 سم، ويُؤكد بصورة الصدر CXR).',
+        types: 'قسطرة مركزية ثلاثية اللمعة (Triple-Lumen CVC): 1) اللمعة البعيدة Distal (بنية 16G) لقياس CVP، 2) اللمعة المتوسطة Medial (زرقاء 18G)، 3) اللمعة القريبة Proximal (بيضاء 18G).',
+        clin: 'قواعد حرجة: وضعية ترندلنبورغ (Trendelenburg رأس لأسفل) عند الإدخال أو السحب لمنع الصمة الهوائية (Air Embolism)، وتأكيد موقع الرأس بالأشعة CXR قبل ضخ الأدوية، وقياس CVP بنهاية الزفير.'
+      }
+    },
+    cvp_cannon_a: {
+      cat: 'cvp', abp: '104/66 (79)', cvp: '16 mmHg (Cannon a)', pap: '26/12 (10)', co: '3.6 L | 2.0', svr: '1380', svo2: 'ScvO2 63%',
+      entryPt: [0.44, 0.20], tipPt: [0.47, 0.36], pathPts: [[0.44, 0.20], [0.46, 0.28], [0.47, 0.36]],
+      en: {
+        name: '6. Cannon "a" Waves on CVP (Complete Heart Block AVB3 / VT / Junctional)',
+        morph: 'Monitor shows giant spiked "a" waves (>15–20 mmHg) on the CVP waveform whenever the Right Atrium contracts against a CLOSED Tricuspid Valve during simultaneous ventricular systole (AV Dissociation).',
+        anat: 'Entry Site: Right IJ or Subclavian CVC -> Tip at Cavoatrial Junction (lower SVC).',
+        types: 'Classic Differential of "a" Wave Changes: 1) Cannon "a" waves = 3rd-Degree AV Block, Ventricular Tachycardia, Junctional Rhythm. 2) Large regular "a" waves = Tricuspid Stenosis, Pulmonary Hypertension. 3) ABSENT "a" waves = Atrial Fibrillation!',
+        clin: 'Correlate CVP trace with the Lead II ECG strip to identify AV dissociation and prepare transcutaneous/transvenous pacing if Complete Heart Block is present.'
+      },
+      ar: {
+        name: '6. موجات a المدفعية العملاقة على CVP (Cannon "a" Waves — حصار القلب التام AVB3 وتسرع البطين)',
+        morph: 'يعرض المونيتور موجات a شاهقة الارتفاع (>15-20 mmHg) تحدث عندما ينقبض الأذين الأيمن في نفس لحظة انقباض البطين الأيمن وصمام مثلث الشرف مغلق!',
+        anat: 'مكان الدخول: الوريد الوداجي الباطن أو تحت الترقوة ← الرأس في أسفل الوريد الأجوف العلوي SVC.',
+        types: 'التشخيص التفريقي لموجة a: 1) موجات a المدفعية = الانفصال الأذيني البطيني (حصار درجة ثالثة أو تسرع بطيني VT). 2) اختفاء موجة a تماماً = الرجفان الأذيني (AFib).',
+        clin: 'اربط موجة الـ CVP مع تخطيط القلب الكهربائي وجهز ناظم الخطى المؤقت في حال حصار القلب التام.'
+      }
+    },
+    cvp_giant_v: {
+      cat: 'cvp', abp: '108/68 (81)', cvp: '15 mmHg (Giant v)', pap: '38/16 (12)', co: '3.8 L | 2.1', svr: '1290', svo2: 'ScvO2 64%',
+      entryPt: [0.44, 0.20], tipPt: [0.47, 0.36], pathPts: [[0.44, 0.20], [0.46, 0.28], [0.47, 0.36]],
+      en: {
+        name: '7. Giant "v" Waves / C-V Fusion on CVP (Severe Tricuspid Regurgitation)',
+        morph: 'Monitor shows obliteration of the "x" descent and fusion of the "c" and "v" waves into a tall holosystolic "c-v" wave (Lancisi Sign) peaking around the ECG T wave as blood jets backward from RV into RA.',
+        anat: 'Entry Site: CVC tip in lower SVC just above the Right Atrium sensing regurgitant systolic pressure jets across the incompetent Tricuspid Valve.',
+        types: 'Causes: Severe Tricuspid Regurgitation (functional RV dilation from Pulmonary Hypertension / Cor Pulmonale, or Infective Endocarditis in IV drug users).',
+        clin: 'Look for pulsatile hepatomegaly, elevated JVD, and holosystolic murmur at the 4th LLSB that increases on inspiration (Carvallo Sign).'
+      },
+      ar: {
+        name: '7. موجات v العملاقة واندماج c-v على CVP (قصور صمام مثلث الشرف الشديد Tricuspid Regurgitation)',
+        morph: 'يعرض المونيتور اختفاء منحدر x واندماج موجتي c و v في موجة c-v عملاقة متزامنة مع انقباض البطين وموجة T نتيجة ارتجاع الدم للأذين الأيمن.',
+        anat: 'مكان الدخول: قسطرة CVC في أسفل الوريد الأجوف العلوي فوق الأذين الأيمن.',
+        types: 'الأسباب: قصور صمام مثلث الشرف الشديد، قصور البطين الأيمن، أو فرط ضغط الشريان الرئوي.',
+        clin: 'يترافق مع ضخامة كبدية نابضة واحتقان وداجي ونفخة انقباضية تزداد بالشهيق (علامة كارفالو).'
+      }
+    },
+    cvp_tamponade_constrictive: {
+      cat: 'cvp', abp: '88/64 (72)', cvp: '18 mmHg', pap: '32/18 (Wedge 18)', co: '2.9 L | 1.6', svr: '1720', svo2: 'ScvO2 54%',
+      entryPt: [0.44, 0.20], tipPt: [0.47, 0.36], pathPts: [[0.44, 0.20], [0.46, 0.28], [0.47, 0.36]],
+      en: {
+        name: '8. Cardiac Tamponade (Loss of y-Descent & Equalization) vs. Constrictive Pericarditis ("W" Sign)',
+        morph: 'In Cardiac Tamponade, continuous pericardial fluid compression prevents early diastolic RV filling → the "y" descent is BLUNTED/ABSENT and diastolic pressures equalize (CVP ≈ PAD ≈ PCWP ≈ 18 mmHg). In Constrictive Pericarditis, rapid early filling hits a rigid shell → steep "x" and "y" descents ("W" sign).',
+        anat: 'Entry Site: CVC in lower SVC + Pericardial Sac surrounding the heart (Pericardiocentesis needle enters subxiphoid at 30–45° aimed toward left shoulder).',
+        types: 'Beck\'s Triad of Tamponade: 1) Hypotension with Pulsus Paradoxus, 2) Jugular Venous Distension (High CVP), 3) Muffled Heart Sounds.',
+        clin: 'Emergent treatment of Cardiac Tamponade: IV fluid bolus (temporizing) + Immediate Echo-guided Subxiphoid Pericardiocentesis or Pericardial Window!'
+      },
+      ar: {
+        name: '8. اندحاس القلب (غياب منحدر y وتساوي الضغوط) مقابل التهاب التامور العاصر (علامة W)',
+        morph: 'في اندحاس القلب يمنع السائل التاموري امتلاء البطين بداية الانبساط فيختفي منحدر y وتتساوى الضغوط الانبساطية (CVP = PAD = PCWP = 18 mmHg).',
+        anat: 'قسطرة CVC في الوريد الأجوف العلوي؛ وفي حال بزل التامور (Pericardiocentesis) تدخل الإبرة تحت الرهابة (Subxiphoid) بزاوية 30-45° باتجاه الكتف الأيسر.',
+        types: 'ثلاثية بيك (Beck\'s Triad): هبوط الضغط الشرياني، ارتفاع CVP واحتقان أوردة العنق، وخفوت أصوات القلب.',
+        clin: 'التدبير الإسعافي: بزل التامور الموجه بالإيكو فوراً لتفريغ السائل الضاغط حول القلب.'
+      }
+    },
+    pac_progression: {
+      cat: 'pac', abp: '118/76 (90)', cvp: 'RA: 5 mmHg', pap: 'RV 25/4 → PA 25/10 → PCWP 9', co: '5.1 L | 2.8', svr: '1120', svo2: 'SvO2 72%',
+      entryPt: [0.44, 0.20], tipPt: [0.55, 0.37], pathPts: [[0.44, 0.20], [0.47, 0.36], [0.47, 0.43], [0.51, 0.46], [0.52, 0.38], [0.55, 0.37]],
+      en: {
+        name: '9. Swan-Ganz Pulmonary Artery Catheter (PAC — RA → RV → PA → PCWP Wedge)',
+        morph: 'Monitor displays 4 distinct pressure zones as the balloon-tipped catheter floats through the right heart: 1) Right Atrium (RA: 2–8 mmHg, ~20 cm mark), 2) Right Ventricle (RV: 15–30 / 0–8 mmHg tall sawtooth spikes with near-zero diastolic, ~30 cm mark), 3) Pulmonary Artery (PA: 15–30 / 8–15 mmHg — diastolic steps UP + Dicrotic Notch from Pulmonic Valve closure, ~40 cm mark), 4) Wedge / PCWP (6–12 mmHg Left Atrial trace when 1.5 mL balloon is inflated, ~50 cm mark).',
+        anat: 'Where It Enters the Body: Right Internal Jugular or Left Subclavian Vein through an 8.5 Fr Introducer Sheath. Pathway: SVC → Right Atrium → Tricuspid Valve → Right Ventricle → Pulmonic Valve → Main Pulmonary Artery. Where Tip Reaches: Resting in a main branch of the Pulmonary Artery (West Zone 3, within 2 cm of cardiac hilum on CXR).',
+        types: '4–5 Lumens of Swan-Ganz (7.5 Fr, 110 cm): 1) Blue Proximal Port (opens in RA at 30 cm -> CVP & Thermodilution injectate), 2) Yellow Distal PA Port (at tip -> PAP, PCWP & mixed venous SvO2), 3) Red Balloon Valve (1.5 mL air syringe ONLY), 4) White/Yellow Thermistor wire -> continuous Cardiac Output.',
+        clin: 'CRITICAL SAFETY: Inflate balloon with max 1.5 mL air for NO MORE THAN 10–15 seconds (2 respiratory cycles), let it deflate PASSIVELY, and NEVER pull catheter backward with balloon inflated (risk of lethal Pulmonary Artery Rupture!). Watch for RV arrhythmias during insertion (keep Lidocaine at bedside).'
+      },
+      ar: {
+        name: '9. قسطرة الشريان الرئوي سوان-غانز (Swan-Ganz PAC — مسار الحجرات الأربع RA → RV → PA → PCWP)',
+        morph: 'يعرض المونيتور 4 موجات متتالية أثناء تقدم القسطرة: 1) الأذين الأيمن RA (2-8 mmHg عند عمق 20 سم)، 2) البطين الأيمن RV (15-30 / 0-8 mmHg ذروة عالية وانبساط قريب من الصفر عند 30 سم)، 3) الشريان الرئوي PA (15-30 / 8-15 mmHg يرتفع الضغط الانبساطي وتظهر ثلمة الصمام الرئوي عند 40 سم)، 4) الضغط الإسفيني الرئوي PCWP (6-12 mmHg يعكس ضغط الأذين الأيسر عند نفخ البالون عند 50 سم).',
+        anat: 'أين تدخل بالجسم: الوريد الوداجي الباطن الأيمن (RIJ) أو تحت الترقوة الأيسر عبر غمد (Introducer Sheath). المسار: الوريد الأجوف العلوي ← الأذين الأيمن ← صمام مثلث الشرف ← البطين الأيمن ← الصمام الرئوي ← الشريان الرئوي. أين يصل الرأس: يستقر في الفرع الرئيسي للشريان الرئوي (Zone 3).',
+        types: 'اللمعات الأربع لقسطرة سوان-غانز: 1) الزرقاء القريبة (Proximal تفتح بالأذين الأيمن لقياس CVP وحقن المحلول لحساب النتاج القلبي)، 2) الصفراء البعيدة (Distal في رأس القسطرة لقياس ضغط الشريان الرئوي و SvO2)، 3) الحمراء (صمام نفخ البالون بـ 1.5 مل هواء)، 4) حساس الحرارة (Thermistor) لحساب النتاج القلبي (CO).',
+        clin: 'قواعد أمان حرجة: لا تترك البالون منفوخاً لأكثر من 10-15 ثانية أبداً لمنع احتشاء أو تمزق الشريان الرئوي القاتل، ولا تسحب القسطرة والبالون منفوخ!'
+      }
+    },
+    shock_hypovolemic: {
+      cat: 'pac', abp: '82/56 (65)', cvp: '1 mmHg ↓↓', pap: '14/4 (Wedge 3 ↓↓)', co: '2.8 L | 1.6 ↓', svr: '1850 ↑↑', svo2: 'SvO2 52% ↓',
+      entryPt: [0.44, 0.20], tipPt: [0.55, 0.37], pathPts: [[0.44, 0.20], [0.47, 0.36], [0.47, 0.43], [0.51, 0.46], [0.52, 0.38], [0.55, 0.37]],
+      en: {
+        name: '10. Hypovolemic / Hemorrhagic Shock Profile (CVP ↓↓, PCWP ↓↓, CO ↓, SVR ↑↑)',
+        morph: 'Monitor displays low-amplitude arterial waveform with wide respiratory variation (PPV > 15%) and depressed flat CVP (1 mmHg) & PCWP (3 mmHg).',
+        anat: 'Measured via Radial/Femoral A-Line + Central Line / Swan-Ganz Catheter.',
+        types: 'Hemodynamic Signature: Preload ↓↓ (CVP < 2, PCWP < 6), Pump Output ↓↓ (CO < 4.0 L/min, CI < 2.2), Compensatory Afterload ↑↑ (SVR > 1500 dyn·s/cm⁵), and Mixed Venous SvO2 ↓ (<60% due to high O2 extraction).',
+        clin: 'Management: Stop hemorrhage + rapid IV warm crystalloid (30 mL/kg) and packed RBC / massive transfusion protocol (1:1:1 PRBC:FFP:Platelets).'
+      },
+      ar: {
+        name: '10. ملف الصدمة بنقص الحجم / النزفية على المونيتور (CVP ↓↓, PCWP ↓↓, CO ↓, SVR ↑↑)',
+        morph: 'يعرض المونيتور موجة شريانية ضعيفة متأثرة بالتنفس مع هبوط شديد في CVP (1 mmHg) و PCWP (3 mmHg).',
+        anat: 'يُقاس عبر الخط الشرياني A-Line وقسطرة CVP / سوان-غانز.',
+        types: 'البصمة الديناميكية: هبوط الحمل القبلي (CVP ↓↓ و PCWP ↓↓)، هبوط النتاج القلبي (CO ↓)، ارتفاع معاوض في المقاومة الوعائية (SVR ↑↑ > 1500)، وهبوط SvO2 (<60%).',
+        clin: 'التدبير: إيقاف النزف وتعويض السوائل البلورية الدافئة ونقل الدم السريع عبر قساطر محيطية واسعة (14G-16G).'
+      }
+    },
+    shock_cardiogenic: {
+      cat: 'pac', abp: '78/54 (62)', cvp: '16 mmHg ↑↑', pap: '46/26 (Wedge 24 ↑↑)', co: '2.2 L | 1.3 ↓↓', svr: '1920 ↑↑', svo2: 'SvO2 46% ↓↓',
+      entryPt: [0.44, 0.20], tipPt: [0.55, 0.37], pathPts: [[0.44, 0.20], [0.47, 0.36], [0.47, 0.43], [0.51, 0.46], [0.52, 0.38], [0.55, 0.37]],
+      en: {
+        name: '11. Cardiogenic Shock Profile (Pump Failure: PCWP ↑↑ >18, CO ↓↓, SVR ↑↑)',
+        morph: 'Monitor displays damped narrow-pulse-pressure A-Line (78/54 mmHg) with markedly elevated Pulmonary Artery (46/26 mmHg) and PCWP Wedge (24 mmHg) waveforms.',
+        anat: 'Swan-Ganz tip in Pulmonary Artery measures high back-pressure from the failing Left Ventricle (PCWP > 18 mmHg causing pulmonary edema).',
+        types: 'Hemodynamic Signature: Preload ↑↑ (CVP > 12, PCWP > 18 mmHg), Cardiac Index ↓↓ (< 1.8–2.2 L/min/m²), Compensatory SVR ↑↑ (> 1600), and critically low SvO2 (< 50%).',
+        clin: 'Management: Avoid fluid boluses! Start Inotrope (Dobutamine 2–20 mcg/kg/min) + Norepinephrine if severely hypotensive, emergent PCI revascularization, and mechanical support (IABP / Impella).'
+      },
+      ar: {
+        name: '11. ملف الصدمة القلبية على المونيتور (Cardiogenic Shock — ارتفاع PCWP > 18 وهبوط CO ↓↓)',
+        morph: 'يعرض المونيتور ضغطاً شريانياً منخفضاً مع ارتفاع شديد في ضغط الشريان الرئوي والضغط الإسفيني الرئوي PCWP (24 mmHg).',
+        anat: 'قسطرة سوان-غانز في الشريان الرئوي تعكس الاحتقان الرئوي الناتج عن فشل ضخ البطين الأيسر.',
+        types: 'البصمة الديناميكية: ارتفاع الحمل القبلي (CVP ↑ و PCWP ↑↑ > 18 mmHg)، هبوط حاد في منسب القلب (CI < 1.8)، ارتفاع SVR ↑↑، وهبوط حاد في SvO2 (< 50%).',
+        clin: 'التدبير: تجنب السوائل الوريدية! إعطاء الدوبوتامين (Dobutamine) والنورإبينفرين، القسطرة التاجية العاجلة، ومضخة البالون الأبهري IABP.'
+      }
+    },
+    shock_septic: {
+      cat: 'pac', abp: '84/40 (55)', cvp: '3 mmHg ↓', pap: '20/7 (Wedge 5 ↓)', co: '8.4 L | 4.6 ↑↑', svr: '480 ↓↓', svo2: 'SvO2 78% ↑',
+      entryPt: [0.44, 0.20], tipPt: [0.55, 0.37], pathPts: [[0.44, 0.20], [0.47, 0.36], [0.47, 0.43], [0.51, 0.46], [0.52, 0.38], [0.55, 0.37]],
+      en: {
+        name: '12. Septic / Distributive Shock Profile (Vasoplegia: SVR ↓↓ <600, CO ↑↑)',
+        morph: 'Monitor shows hyperdynamic arterial waveform with very low Diastolic BP (40 mmHg → wide pulse pressure) and low/delayed dicrotic notch.',
+        anat: 'Systemic arterial & venous vasodilation monitored via A-Line + CVC/PAC.',
+        types: 'Hemodynamic Signature (Warm Shock): Profound drop in Afterload (SVR ↓↓ < 600 dyn·s/cm⁵), Low/Normal CVP & PCWP, High hyperdynamic Cardiac Output (CO = 8.4 L/min), and High/Normal SvO2 (>70% due to impaired cellular O2 utilization / shunting).',
+        clin: 'Hour-1 Sepsis Bundle: Blood cultures -> Broad-spectrum IV antibiotics -> 30 mL/kg Crystalloid for hypotension/lactate ≥4 -> First-line Norepinephrine to target MAP ≥ 65 mmHg (add Vasopressin 0.03 U/min second-line).'
+      },
+      ar: {
+        name: '12. ملف الصدمة الإنتانية / التوزيعية على المونيتور (Septic Shock — هبوط SVR ↓↓ وارتفاع CO ↑↑)',
+        morph: 'يعرض المونيتور موجة شريانية ذات ضغط انبساطي منخفض جداً (40 mmHg) واتساع في ضغط النبض بسبب التوسع الوعائي الشديد.',
+        anat: 'يُراقب عبر الخط الشرياني A-Line والقسطرة المركزية CVC.',
+        types: 'البصمة الديناميكية: هبوط حاد في المقاومة الوعائية الجهازية (SVR ↓↓ < 600)، ارتفاع النتاج القلبي (CO ↑↑ = 8.4 L/min)، وانخفاض CVP و PCWP مع بقاء SvO2 طبيعياً أو مرتفعاً.',
+        clin: 'حزمة الساعة الأولى: سحب مزارع الدم ← المضادات الحيوية ← سوائل 30 مل/كغ ← النورإبينفرين (Levophed) كخط أول لرفع MAP ≥ 65 mmHg.'
+      }
+    },
+    iabp_normal: {
+      cat: 'iabp', abp: '110/60 (Aug 142)', cvp: '8 mmHg', pap: '30/14 (13)', co: '4.6 L | 2.6 ↑', svr: '1050 ↓', svo2: 'SvO2 69%',
+      entryPt: [0.45, 0.78], tipPt: [0.51, 0.34], pathPts: [[0.45, 0.78], [0.49, 0.62], [0.50, 0.48], [0.51, 0.34]],
+      en: {
+        name: '13. Intra-Aortic Balloon Pump (IABP — 1:2 Counterpulsation Timing & Tip Position)',
+        morph: 'Monitor displays 5 points on the arterial waveform in 1:2 mode: 1) Unassisted Systolic Peak (110 mmHg), 2) Dicrotic Notch = Exact point of Balloon INFLATION, 3) Supradiastolic Augmentation Peak (142 mmHg — highest peak on trace, perfusing coronary arteries!), 4) Assisted End-Diastolic Dip (50 mmHg — lowest point created by Balloon DEFLATION just before R-wave), 5) Assisted Systolic Peak (98 mmHg — lower because LV ejects against reduced afterload!).',
+        anat: 'Where It Enters the Body: Common Femoral Artery (percutaneous Seldinger technique in groin). Pathway: Femoral Artery → External/Common Iliac Artery → Abdominal Aorta → Descending Thoracic Aorta. Where Tip Reaches: Proximal Descending Thoracic Aorta, exactly 1–2 cm DISTAL to the origin of the Left Subclavian Artery (at the 2nd–3rd intercostal space / just below aortic knob on CXR) and ABOVE the Renal Arteries!',
+        types: '30–50 mL Helium-filled polyethylene sausage balloon (7.5–8 Fr catheter); Helium gas is used because its low density/viscosity allows ultra-fast inflation and deflation synced to ECG (R-wave deflate, T-wave inflate) or Arterial Pressure wave.',
+        clin: 'CRITICAL NURSING CHECKS: 1) If balloon migrates UPWARD → occludes Left Subclavian Artery (loss of LEFT radial pulse!). 2) If balloon migrates DOWNWARD → occludes Renal/Mesenteric Arteries ( sudden drop in urine output <30 mL/hr!). 3) Keep head of bed ≤ 30° and never flex the cannulated hip. 4) Rust-colored blood flecks in helium tubing = Balloon Rupture (stop IABP immediately!).'
+      },
+      ar: {
+        name: '13. مضخة البالون داخل الأبهر (IABP — التوقيت السليم 1:2 ومكان الدخول وموقع الرأس بالأبهر)',
+        morph: 'يعرض المونيتور: 1) نفخ البالون (Inflation) تماماً عند الثلمة ثنائية التموج (Dicrotic Notch لحظة إغلاق الصمام الأبهري وبداية الانبساط) مما يصنع ذروة التعزيز الانبساطي العالية (142 mmHg) لضخ الدم في الشرايين التاجية، 2) تفريغ البالون (Deflation) قبيل موجة R مباشرة مما يخلق هبوطاً انبساطياً انتهائياً (50 mmHg) يقلل الحمل البعدي (Afterload) عن البطين الأيسر.',
+        anat: 'أين تدخل بالجسم: الشريان الفخذي العام (Femoral Artery) في المنطقة الإربية. المسار: الشريان الفخذي ← الحرقفي ← الأبهر البطني ← الأبهر الصدري النازل. أين يصل رأس البالون: يستقر في الأبهر الصدري النازل على بعد 1-2 سم أسفل منشأ الشريان تحت الترقوة الأيسر (Left Subclavian Artery عند الورب الثاني/الثالث على CXR) وفوق الشرايين الكلوية!',
+        types: 'بالون سعة 30-50 مل يُنفخ بغاز الهيليوم (Helium لسرعة انتقاله الفائقة) ويتزامن مع تخطيط القلب (يتفرغ مع موجة R وينتفخ مع موجة T / الثلمة ثنائية التموج).',
+        clin: 'مراقبة تمريضية حرجة: 1) إذا تحرك البالون للأعلى يسد الشريان تحت الترقوة الأيسر (اختفاء النبض الكعبري الأيسر!). 2) إذا تحرك للأسفل يسد الشرايين الكلوية (انقطاع البول المفاجئ!). 3) يمنع ثني الفخذ أو رفع رأس السرير لأكثر من 30°.'
+      }
+    },
+    iabp_malposition: {
+      cat: 'iabp', abp: '92/64 (Early Infl)', cvp: '12 mmHg', pap: '36/18 (17)', co: '3.2 L | 1.8 ↓', svr: '1480 ↑', svo2: 'SvO2 58%',
+      entryPt: [0.45, 0.78], tipPt: [0.51, 0.34], pathPts: [[0.45, 0.78], [0.49, 0.62], [0.50, 0.48], [0.51, 0.34]],
+      en: {
+        name: '14. IABP Timing Errors (Early Inflation & Late Deflation — Dangerous LV Afterload ↑!)',
+        morph: 'Monitor shows the diastolic augmentation wave encroaching prematurely onto the systolic upstroke BEFORE the Dicrotic Notch (Early Inflation) or failing to dip before the next systolic upstroke (Late Deflation).',
+        anat: 'Balloon in descending thoracic aorta inflating while the Aortic Valve is still OPEN!',
+        types: '4 Classic IABP Timing Errors: 1) Early Inflation (most dangerous: premature aortic valve closure, acute AR, ↓ SV), 2) Late Inflation (suboptimal coronary perfusion), 3) Early Deflation (retrograde coronary/carotid steal), 4) Late Deflation (most dangerous: LV must eject against an inflated balloon → massive ↑ afterload & myocardial oxygen demand!).',
+        clin: 'Immediately adjust inflation marker strictly to the Dicrotic Notch and deflation marker just before the R-wave / systolic upstroke.'
+      },
+      ar: {
+        name: '14. أخطاء توقيت مضخة البالون الأبهري (النفخ المبكر والتفريغ المتأخر — خطر إغلاق الأبهر المبكر)',
+        morph: 'يعرض المونيتور تداخل موجة نفخ البالون مع موجة الانقباض قبل ظهور الثلمة ثنائية التموج (نفخ مبكر) أو بقاء الضغط مرتفعاً عند بدء الانقباض التالي (تفريغ متأخر).',
+        anat: 'انتفاخ البالون داخل الأبهر الصدري بينما الصمام الأبهري لا يزال مفتوحاً!',
+        types: 'الأخطاء الأربعة: 1) النفخ المبكر (الأخطر: يغلق الصمام الأبهري مبكراً ويقلل النتاج القلبي)، 2) النفخ المتأخر (ضعف تروية الشرايين التاجية)، 3) التفريغ المبكر، 4) التفريغ المتأخر (الأخطر: يضخ البطين الأيسر ضد بالون منفوخ!).',
+        clin: 'اضبط توقيت النفخ بدقة على الثلمة ثنائية التموج (Dicrotic Notch) والتفريغ قبل مركب QRS مباشرة.'
+      }
+    },
+    chest_pneumothorax: {
+      cat: 'chest', abp: '116/74 (88)', cvp: '7 mmHg', pap: '24/10 (9)', co: '5.0 L | 2.8', svr: '1120', svo2: 'SpO2 98%',
+      entryPt: [0.34, 0.38], tipPt: [0.39, 0.25], pathPts: [[0.34, 0.38], [0.37, 0.31], [0.39, 0.25]],
+      en: {
+        name: '15. Chest Tube for Pneumothorax (Air Evacuation — Apical Tip & 3-Chamber Water-Seal Bubbling)',
+        morph: 'Interactive 3-Chamber Pleur-evac System displays: 1) Chamber 1 (Collection): Minimal fluid, 2) Chamber 2 (Water-Seal filled to 2 cm line): Shows normal respiratory TIDALING (water rises on inspiration, falls on expiration in spontaneous breathing; reversed on positive-pressure ventilation) + intermittent bubbling when air evacuates from pleural space (CONTINUOUS bubbling = Persistent Bronchopleural Air Leak or loose system connection!), 3) Chamber 3 (Wet Suction at -20 cmH2O with gentle bubbling, or Dry Suction regulator).',
+        anat: 'Where It Enters the Body: 4th or 5th Intercostal Space (ICS) in the Anterior or Mid-Axillary Line ("Triangle of Safety": lateral border of pectoralis major, anterior border of latissimus dorsi, apex below axilla), inserted strictly ABOVE the UPPER BORDER of the lower rib (to avoid the Subcostal Vein-Artery-Nerve [VAN] neurovascular bundle running under each rib!). Where Tip Reaches: Directed ANTERIORLY and SUPERIORLY toward the Lung APEX (2nd ICS) because air rises! (Emergency Needle Decompression = 2nd ICS Midclavicular Line or 5th ICS Anterior Axillary Line).',
+        types: 'Types & Sizes for Air: 1) Small-bore Pigtail Catheter (8–14 Fr, Seldinger wire) or 16–24 Fr surgical chest tube, 2) Heimlich One-Way Flutter Valve (for ambulatory pneumothorax/transport).',
+        clin: 'CRITICAL EMERGENCY RULES: 1) If tube disconnects from drainage unit → immediately submerge distal end in 2 cm of Sterile Water! 2) If tube pulls out of patient\'s chest → cover immediately with a 3-SIDED sterile Petrolatum/Vaseline Occlusive Dressing (taped on 3 sides only so air escapes on expiration without entering on inspiration!). 3) NEVER clamp a chest tube during transport (causes lethal Tension Pneumothorax!).'
+      },
+      ar: {
+        name: '15. أنبوب الصدر لاسترواح الصدر (Chest Tube for Pneumothorax — تفريغ الهواء ونظام الغرف الثلاث)',
+        morph: 'يعرض نظام التصريف ذو الغرف الثلاث (Pleur-evac): 1) حجرة التجميع (Collection)، 2) حجرة الختم المائي (Water-Seal بعمق 2 سم ماء): تُظهر التموج التنفسي الطبيعي (Tidaling: يرتفع السائل بالشهيق ويهبط بالزفير، ويختفي عند تمام توسع الرئة أو انسداد الأنبوب) + فقاعات متقطعة عند خروج الهواء (بينما الفقاعات المستمرة = تسريب هوائي مستمر Air Leak!)، 3) حجرة الشفط (Suction عند -20 cmH2O).',
+        anat: 'أين يدخل بالجسم: الورب الرابع أو الخامس (4th–5th ICS) على الخط الإبطي الأمامي أو المتوسط ضمن "مثلث الأمان" (Triangle of Safety)، ويُدخل دائماً فوق الحافة العلوية للضلع السفلي (لتجنب الحزمة الوعائية العصبية VAN في الحافة السفلية للضلع!). أين يصل رأس الأنبوب: يُوجه للأعلى والأمام نحو قمة الرئة (Lung Apex) لأن الهواء يصعد للأعلى! (إبرة تخفيف الضغط الإسعافية توضع بالورب الثاني خط منتصف الترقوة 2nd ICS MCL).',
+        types: 'أنواع ومقاسات الشيست تيوب للهواء: قسطرة ذيل الخنزير (Pigtail 8–14 Fr)، أو أنبوب جراحي مقاس 16–24 Fr، أو صمام هيملخ وحيد الاتجاه (Heimlich Flutter Valve).',
+        clin: 'قواعد الطوارئ الحرجة للشيست تيوب: 1) إذا انفصل الأنبوب عن الجهاز ← اغمر طرفه فوراً في زجاجة ماء معقم بعمق 2 سم! 2) إذا خرج الأنبوب من صدر المريض ← ضع فوراً ضماداً فازلينياً كاتماً مثبتاً من 3 جهات فقط (3-Sided Occlusive Dressing) ليسمح بخروج الهواء بالزفير ويمنع دخوله بالشهيق! 3) يُمنع لقط (Clamp) أنبوب الصدر أثناء نقل المريض (يسبب استرواح صدر ضاغط قاتل!).'
+      }
+    },
+    chest_hemothorax: {
+      cat: 'chest', abp: '112/72 (85)', cvp: '6 mmHg', pap: '24/10 (9)', co: '4.9 L | 2.7', svr: '1150', svo2: 'Drain 80 mL/hr',
+      entryPt: [0.34, 0.44], tipPt: [0.40, 0.51], pathPts: [[0.34, 0.44], [0.37, 0.48], [0.40, 0.51]],
+      en: {
+        name: '16. Chest Tube for Hemothorax / Pleural Effusion & Mediastinal Tube (Basal Tip & 3-Chamber Drainage)',
+        morph: '3-Chamber Pleur-evac System displays: 1) Chamber 1 (Calibrated Collection Chamber): Collects and measures blood/serosanguineous pleural fluid hourly, 2) Chamber 2 (Water-Seal 2 cm): One-way valve preventing atmospheric air entry; shows respiratory Tidaling, 3) Chamber 3 (Suction Control -20 cmH2O): Regulated by water column height (-20 cm) or dry dial, NOT by the wall vacuum gauge!',
+        anat: 'Where It Enters the Body: 4th or 5th Intercostal Space (ICS) in the Mid-Axillary Line (above the upper border of the rib). Where Tip Reaches: Directed POSTERIORLY and INFERIORLY toward the Lung BASE / Costophrenic Angle because blood and fluid settle by gravity at the bottom of the pleural cavity! (Mediastinal tubes enter subxiphoid to sit anterior/posterior to the pericardium after CABG).',
+        types: 'Types & Sizes for Blood/Fluid: Large-bore surgical Thoracostomy Tube (28–36 Fr in adults) to prevent clotting, with radiopaque white stripe running through the proximal drainage eyelets (on CXR, the gap in the radiopaque line must lie INSIDE the rib cage!).',
+        clin: 'CRITICAL NURSING RULES: 1) Notify surgeon immediately if chest tube drainage exceeds > 100–200 mL/hr (or >1,500 mL immediately upon insertion → indicates active surgical bleeding requiring Thoracotomy!). 2) Keep drainage unit strictly BELOW chest level at all times. 3) NEVER "strip" or "milk" chest tubing (creates >-100 to -400 cmH2O suction that damages lung tissue!). 4) In a mediastinal tube post-CABG, sudden cessation of drainage + ↑ CVP + ↓ BP = Cardiac Tamponade from clotted tube!'
+      },
+      ar: {
+        name: '16. أنبوب الصدر لتدمي الصدر والانصباب الجنبي وأنابيب المنصف (Hemothorax & Mediastinal Chest Tube)',
+        morph: 'يعرض نظام التصريف ذو الغرف الثلاث: 1) الغرفة الأولى (تجميع السوائل والدم Collection): تقيس كمية ولون النزف بالساعة، 2) الغرفة الثانية (الختم المائي Water-Seal 2 cm): صمام وحيد الاتجاه يمنع رجوع الهواء للصدر ويُظهر التموج التنفسي (Tidaling)، 3) الغرفة الثالثة (التحكم بالشفط Suction -20 cmH2O): يحدد قوة الشفط ارتفاع عمود الماء (-20 سم) وليس ساعة الحائط!',
+        anat: 'أين يدخل بالجسم: الورب الرابع أو الخامس (4th–5th ICS) على الخط الإبطي المتوسط فوق الحافة العلوية للضلع. أين يصل رأس الأنبوب: يُوجه للأسفل والخلف نحو قاعدة الرئة (Lung Base / الزاوية الضلعية الحجابية) لأن الدم والسوائل تتجمع بالجاذبية في الأسفل! (بينما أنبوب المنصف Mediastinal بعد عمليات القلب المفتوح CABG يدخل تحت الرهابة لتصريف الدم حول التامور).',
+        types: 'المقاسات والأنواع للدم والسوائل: أنبوب صدري جراحي واسع القطر (28–36 Fr) لمنع انسداده بالخثرات الدموية، ويحتوي على خط ظليل للأشعة (Radiopaque Line) للتأكد من وجود جميع ثقوب التصريف داخل جوف الجنب.',
+        clin: 'قواعد تمريضية حرجة: 1) أبلغ الطبيب فوراً إذا تجاوز التصريف الدموي أكثر من 100–200 مل/ساعة (أو >1500 مل فور التركيب ← نزف شرياني يستدعي فتح الصدر). 2) إبقاء الجهاز تحت مستوى صدر المريض دائماً. 3) يُمنع عصر أو حلب الأنبوب (Stripping/Milking). 4) توقف التصريف فجأة بعد عملية القلب المفتوح مع هبوط الضغط وارتفاع CVP = انسداد الأنبوب بخثرة وحدوث اندحاس القلب (Tamponade)!'
+      }
+    },
+    tube_ett_trach: {
+      cat: 'tubes', abp: '122/78 (93)', cvp: '6 mmHg', pap: '24/10 (9)', co: '5.3 L | 2.9', svr: '1100', svo2: 'EtCO2 38 mmHg',
+      entryPt: [0.49, 0.08], tipPt: [0.49, 0.25], pathPts: [[0.49, 0.08], [0.49, 0.17], [0.49, 0.25]],
+      en: {
+        name: '17. Endotracheal Tube (ETT) & Tracheostomy + Waveform Capnography (EtCO2 35–45 mmHg)',
+        morph: 'Monitor displays Rectangular Waveform Capnography (EtCO2 35–45 mmHg): Phase I = Inspiratory baseline (0 mmHg), Phase II = Expiratory upstroke, Phase III = Alveolar plateau (peaks at end-tidal EtCO2 38 mmHg; "Shark-Fin" sloped plateau = Bronchospasm/Asthma/COPD!), Phase 0 = Inspiratory downstroke. Flatline EtCO2 (0 mmHg) = Esophageal Intubation or Disconnection!',
+        anat: 'Where It Enters the Body: Mouth (Orotracheal ETT: 21 cm at teeth/lip in adult females, 23 cm in adult males) or Anterior Neck at 2nd–3rd tracheal rings (Tracheostomy). Pathway: Oropharynx → Larynx (between Vocal Cords) → Trachea. Where Tip Reaches: Mid-Trachea, exactly 3 to 5 cm ABOVE the Carina (at the level of T2–T4 vertebrae / clavicular heads on CXR). If pushed too deep (>24–25 cm), it enters the RIGHT Mainstem Bronchus (more vertical/wider) → absent LEFT breath sounds!',
+        types: 'Adult ETT Sizes: 7.0–7.5 mm ID (Females), 8.0–8.5 mm ID (Males) with high-volume low-pressure cuff and subglottic suction port (VAP prevention).',
+        clin: 'CRITICAL ICU RULES: 1) Gold-standard immediate confirmation of ETT placement = Continuous Waveform Capnography (EtCO2) + 5-point auscultation (epigastrium first, then bilateral bases & apices) + CXR for exact depth above Carina. 2) Maintain ETT Cuff Pressure at 20–30 cmH2O (15–22 mmHg): >30 cmH2O causes tracheal mucosal ischemia/necrosis; <20 cmH2O causes microaspiration & VAP!'
+      },
+      ar: {
+        name: '17. الأنبوب الرغامي (ETT) وخزع الرغامى (Tracheostomy) وموجة الكابنوجرافي (EtCO2 35–45 mmHg)',
+        morph: 'يعرض المونيتور موجة الكابنوجرافي المستطيلة (EtCO2 35–45 mmHg): المرحلة I خط الأساس الشهيقي (0)، المرحلة II الصعود الزفيري، المرحلة III الهضبة السنخية (تنتهي بقراءة EtCO2؛ وتتحول لشكل زعانف القرش Shark-Fin في التشنج القصبي والربو!)، بينما انعدام الموجة (0) يعني التنبيب المريئي الخاطئ أو انفصال الأنبوب!',
+        anat: 'أين يدخل بالجسم: عبر الفم (عند علامة 21 سم على الشفة للإناث و23 سم للذكور) أو عبر العنق بين الحلقتين الرغاميتين الثانية والثالثة (Tracheostomy). المسار: البلعوم ← الحنجرة (بين الحبلين الصوتيين) ← الرغامى. أين يصل رأس الأنبوب: منتصف الرغامى على بعد 3 إلى 5 سم فوق الجؤجؤ (Carina — بمستوى الفقرات T2–T4 على CXR). إذا دخل بعمق زائد يدخل في القصبة الرئيسية اليمنى (لأنها أوسع وأكثر عمودية) مما يؤدي لغياب أصوات التنفس بالرئة اليسرى!',
+        types: 'مقاسات الأنبوب الرغامي للبالغين: 7.0–7.5 مم للإناث، و 8.0–8.5 مم للذكور، مزود ببالون (Cuff) ومنفذ شفط فوق البالون لمنع ذات الرئة المرتبطة بالمنفسة (VAP).',
+        clin: 'قواعد العناية الحثيثة الحرجة: 1) المعيار الذهبي الفوري لتأكيد وجود الأنبوب بالرغامى هو موجة EtCO2 المستمرة + الإصغاء لخمس نقاط (المعدة أولاً ثم الرئتين) + صورة الصدر CXR لتحديد البعد عن الكارينا (3-5 سم). 2) ضبط ضغط بالون الأنبوب (Cuff Pressure) بين 20–30 cmH2O (أعلى من 30 يسبب تنخر الرغامى، وأقل من 20 يسبب استنشاق المفرزات و VAP).'
+      }
+    },
+    tube_ngt_ogt: {
+      cat: 'tubes', abp: '120/78 (92)', cvp: '6 mmHg', pap: '24/10 (9)', co: '5.2 L | 2.9', svr: '1100', svo2: 'Gastric pH ≤ 5.5',
+      entryPt: [0.49, 0.06], tipPt: [0.55, 0.58], pathPts: [[0.49, 0.06], [0.49, 0.18], [0.49, 0.35], [0.51, 0.50], [0.55, 0.58]],
+      en: {
+        name: '18. Nasogastric / Orogastric Tube (NGT / OGT — NEX Measurement, Gastric vs Post-Pyloric Tip & CXR)',
+        morph: 'Monitor / Bedside Verification: Confirm placement by 1) Chest/Abdominal X-Ray (GOLD STANDARD before first enteral feeding or medication!), 2) Gastric aspirate pH ≤ 5.5 (fasting), and 3) Checking external centimeter mark at nostril/lip (NEVER rely on the "whoosh" air auscultation test alone!).',
+        anat: 'Where It Enters the Body: Nostril (NGT) or Mouth (OGT — mandatory in Basilar Skull Fracture / facial trauma to prevent intracranial cribriform plate penetration!). Measurement Rule (NEX): Measure from Tip of NOSE → EARLOBE → XIPHOID Process (typically 50–60 cm in adults). Pathway: Nasopharynx → Esophagus → Lower Esophageal Sphincter (LES) → Stomach. Where Tip Reaches: Body/Antrum of the Stomach below the left hemidiaphragm (or D2/Jejunum beyond pylorus for post-pyloric Dobhoff feeding tubes).',
+        types: '1) Salem Sump Tube (14–18 Fr Dual-Lumen with Blue Pigtail Air Vent): Used for gastric decompression / suction (keep Blue Pigtail open and above stomach level; never clamp it!). 2) Fine-Bore Dobhoff / Levin Tube (8–12 Fr with weighted radiopaque tip): Used for enteral nutrition.',
+        clin: 'CRITICAL SAFETY RULES: 1) In suspected Basilar Skull Fracture (Battle sign, Raccoon eyes, CSF rhinorrhea), NEVER insert a nasal NGT — insert an OROGASTRIC (OGT) tube instead! 2) Keep head of bed elevated 30°–45° during all enteral feedings to prevent aspiration pneumonia. 3) Flush with 30 mL water before/after meds and every 4 hours.'
+      },
+      ar: {
+        name: '18. الأنبوب الأنفي المعدي والفموي المعدي (NGT / OGT — قياس NEX وموقع الرأس وتأكيد الأشعة)',
+        morph: 'التحقق السريري: 1) صورة الأشعة (X-Ray) هي المعيار الذهبي القاطع لتأكيد الموقع قبل البدء بالتغذية أو إعطاء الأدوية، 2) فحص حموضة رشافة المعدة (pH ≤ 5.5)، 3) مراقبة علامة السنتمتر عند فتحة الأنف (لا يُعتمد على سماع صوت حقن الهواء بالسماعة لوحده!).',
+        anat: 'أين يدخل بالجسم: فتحة الأنف (NGT) أو الفم (OGT — إجباري في كسور قاعدة الجمجمة وإصابات الوجه لمنع اختراق الصفيحة المصفوية للدماغ!). طريقة القياس (NEX): من قمة الأنف (Nose) ← شحمة الأذن (Earlobe) ← الناتئ الرهابي للقص (Xiphoid) (حوالي 50–60 سم للبالغ). المسار: البلعوم ← المريء ← الفؤاد ← المعدة. أين يصل الرأس: جسم/غار المعدة تحت الحجاب الحاجز الأيسر (أو الاثني عشر/الصائم لأنابيب التغذية ما بعد البواب).',
+        types: '1) أنبوب سالم المزدوج (Salem Sump 14–18 Fr ذو الذيل الأزرق الهوائي Blue Pigtail): لتفريغ المعدة والشفط المتقطع (يبقى الذيل الأزرق مفتوحاً للهواء لمنع التصاق الأنبوب بجدار المعدة!). 2) أنبوب التغذية الرفيع (Dobhoff 8–12 Fr): للتغذية المعوية.',
+        clin: 'قواعد أمان حرجة: 1) يمنع منعاً باتاً إدخال أنبوب أنفي (NGT) عند الاشتباه بكسر قاعدة الجمجمة (تُستخدم الطريق الفموية OGT حصراً). 2) رفع رأس السرير 30°–45° طوال فترة التغذية المعوية لمنع الاستنشاق الرئوي.'
+      }
+    }
+  };
+
+  function setHemoCat(c) {
+    hemoCat = c;
+    ['all', 'aline', 'cvp', 'pac', 'iabp', 'chest', 'tubes'].forEach(k => {
+      const b = document.getElementById('hcat-' + k);
+      if (b) b.classList.toggle('active', k === c);
+    });
+    renderHemoSidebar();
+  }
+
+  function renderHemoSidebar() {
+    const box = document.getElementById('clinix-sidebar-scroll');
+    const q = (document.getElementById('hemo-search')?.value || '').trim().toLowerCase();
+    const isAr = (currentLang === 'ar');
+    box.innerHTML = '';
+    const keys = Object.keys(HEMO_SCENARIOS);
+    let shown = 0;
+    const catNames = {
+      aline: { en: 'A-Line', ar: 'خط شرياني A-Line', bg: '#ffe4e6', col: '#9f1239' },
+      cvp:   { en: 'CVC / CVP', ar: 'قسطرة مركزية CVP', bg: '#e0f2fe', col: '#075985' },
+      pac:   { en: 'Swan-Ganz / Shock', ar: 'سوان-غانز / صدمة', bg: '#fef3c7', col: '#92400e' },
+      iabp:  { en: 'IABP Balloon', ar: 'مضخة بالون أبهري', bg: '#d1fae5', col: '#065f46' },
+      chest: { en: 'Chest Tube', ar: 'شيست تيوب / Pleur-evac', bg: '#ede9fe', col: '#5b21b6' },
+      tubes: { en: 'ETT / Trach / NGT', ar: 'أنابيب الرغامى والمعدة', bg: '#ccfbf1', col: '#115e59' }
+    };
+    keys.forEach(k => {
+      const sc = HEMO_SCENARIOS[k];
+      if (hemoCat !== 'all' && sc.cat !== hemoCat) return;
+      const title = isAr ? sc.ar.name : sc.en.name;
+      if (q && !sc.en.name.toLowerCase().includes(q) && !sc.ar.name.toLowerCase().includes(q)) return;
+      shown++;
+      const isSel = (currentHemoKey === k);
+      const b = catNames[sc.cat];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sc-card' + (isSel ? ' active' : '');
+      btn.innerHTML = `
+        <div class="flex items-center justify-between gap-1">
+          <span class="px-2 py-0.5 rounded text-[10px] font-extrabold" style="background:${isSel ? 'rgba(255,255,255,0.22)' : b.bg};color:${isSel ? '#fff' : b.col}">
+            ${isAr ? b.ar : b.en}
+          </span>
+          <span class="num-ltr text-[10px] font-mono font-bold ${isSel ? 'text-teal-100' : 'text-slate-500'}">${sc.abp}</span>
+        </div>
+        <div class="text-xs font-extrabold ${isSel ? 'text-white' : 'text-slate-900'} leading-snug">${title}</div>
+      `;
+      btn.onclick = () => selectHemo(k);
+      box.appendChild(btn);
+    });
+    document.getElementById('ui-sb-count').textContent = `${shown} / ${keys.length}`;
+  }
+
+  function selectHemo(k) {
+    currentHemoKey = k;
+    flushTimer = 0;
+    const sc = HEMO_SCENARIOS[k];
+    const isAr = (currentLang === 'ar');
+    const loc = isAr ? sc.ar : sc.en;
+    document.getElementById('hemo-cat-badge').textContent = sc.cat.toUpperCase();
+    document.getElementById('hemo-main-title').textContent = loc.name;
+    document.getElementById('hbox-1-b').textContent = loc.morph;
+    document.getElementById('hbox-2-b').textContent = loc.anat;
+    document.getElementById('hbox-3-b').textContent = loc.types;
+    document.getElementById('hbox-4-b').textContent = loc.clin;
+    document.getElementById('htel-abp').textContent = sc.abp;
+    document.getElementById('htel-cvp').textContent = sc.cvp;
+    document.getElementById('htel-pap').textContent = sc.pap;
+    document.getElementById('htel-co').textContent = sc.co;
+    document.getElementById('htel-svr').textContent = sc.svr;
+    document.getElementById('htel-svo2').textContent = sc.svo2;
+    renderHemoSidebar();
+  }
+
+  function triggerSquareWaveFlush() {
+    flushTimer = 95;
+  }
+
+  function toggleChestAirLeak() {
+    airLeakActive = !airLeakActive;
+  }
+
+  function gPulse(t, center, width, amp) {
+    return amp * Math.exp(-Math.pow((t - center) / width, 2));
+  }
+
+  function drawHemoAndAnatomyCanvases() {
+    // 1. LEFT CANVAS: ICU BEDSIDE MONITOR + 3-CHAMBER PLEUR-EVAC / CAPNOGRAPHY
+    const c = document.getElementById('hemo-canvas');
+    if (c) {
+      const rect = c.getBoundingClientRect();
+      if (rect.width > 10 && rect.height > 10) {
+        const dpr = window.devicePixelRatio || 1;
+        c.width = rect.width * dpr;
+        c.height = rect.height * dpr;
+        const ctx = c.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const w = rect.width, h = rect.height;
+
+        ctx.fillStyle = '#090d16';
+        ctx.fillRect(0, 0, w, h);
+
+        // Subtle dark ICU monitor grid
+        ctx.strokeStyle = 'rgba(148, 163, 184, 0.10)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let x = 0; x <= w; x += 32) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+        for (let y = 0; y <= h; y += 32) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+        ctx.stroke();
+
+        // Top Track: Synchronized Lead II ECG Timing Reference
+        const ecgY = h * 0.20, ecgScale = h * 0.10;
+        ctx.fillStyle = '#10b981'; ctx.font = '900 11px Inter, sans-serif';
+        ctx.fillText('1. ICU MONITOR — Lead II ECG Timing Reference (P → QRS → T)', 14, 18);
+        ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2.1;
+        ctx.beginPath();
+        for (let x = 0; x <= w; x += 2) {
+          const ms = ((x / w) * 2400 + hTime) % 800; // Uncluttered 2.4s 3-beat window
+          const v = gPulse(ms, 115, 18, 0.22) - gPulse(ms, 222, 6, 0.12) + gPulse(ms, 245, 9, 1.25) - gPulse(ms, 268, 8, 0.25) + gPulse(ms, 495, 38, 0.35);
+          const y = ecgY - v * ecgScale;
+          if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+
+        if (currentHemoKey.startsWith('chest_')) {
+          // INTERACTIVE 3-CHAMBER CHEST DRAINAGE SYSTEM (PLEUR-EVAC) ON BOTTOM 68% OF SCREEN
+          const boxY = h * 0.34, boxH = h * 0.61;
+          ctx.fillStyle = '#38bdf8'; ctx.font = '900 11.5px Inter, sans-serif';
+          ctx.fillText('2. 3-Chamber Chest Drainage System (Pleur-evac: 1. Collection → 2. Water-Seal 2 cm → 3. Suction -20 cmH2O)', 14, boxY - 6);
+
+          const chW = (w - 56) / 3;
+          // Chamber 1: Collection Chamber (Right/First from patient)
+          const c1X = 16;
+          ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.roundRect(c1X, boxY, chW, boxH, 12); ctx.fill(); ctx.stroke();
+          const bloodH = currentHemoKey === 'chest_hemothorax' ? boxH * 0.42 : boxH * 0.08;
+          ctx.fillStyle = currentHemoKey === 'chest_hemothorax' ? 'rgba(225, 29, 72, 0.82)' : 'rgba(251, 191, 36, 0.55)';
+          ctx.fillRect(c1X + 4, boxY + boxH - bloodH, chW - 8, bloodH - 4);
+          ctx.fillStyle = '#fecdd3'; ctx.font = 'bold 11px Inter, sans-serif';
+          ctx.fillText('1. Collection Chamber', c1X + 10, boxY + 20);
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 10px Inter, monospace';
+          ctx.fillText(currentHemoKey === 'chest_hemothorax' ? 'Blood: 80 mL/hr (Report >100-200!)' : 'Serous: <10 mL/hr (Air Focus)', c1X + 10, boxY + 38);
+
+          // Chamber 2: Water-Seal Chamber (2 cm sterile water + Tidaling + Air-Leak Bubbling)
+          const c2X = c1X + chW + 12;
+          ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.roundRect(c2X, boxY, chW, boxH, 12); ctx.fill(); ctx.stroke();
+          const tidalShift = Math.sin(hTime * 0.003) * 14;
+          const wsH = boxH * 0.34 + tidalShift;
+          ctx.fillStyle = 'rgba(14, 165, 233, 0.65)';
+          ctx.fillRect(c2X + 4, boxY + boxH - wsH, chW - 8, wsH - 4);
+          ctx.fillStyle = '#bae6fd'; ctx.font = 'bold 11px Inter, sans-serif';
+          ctx.fillText('2. Water-Seal (2 cm H2O)', c2X + 10, boxY + 20);
+          ctx.fillStyle = '#fde047'; ctx.font = 'bold 10px Inter, monospace';
+          ctx.fillText('Tidaling: Normal Resp Swing', c2X + 10, boxY + 38);
+
+          // Bubbles in Water-Seal if Pneumothorax or Air-Leak active
+          if (currentHemoKey === 'chest_pneumothorax' || airLeakActive) {
+            ctx.fillStyle = '#ffffff';
+            for (let b = 0; b < 6; b++) {
+              const bx = c2X + 24 + b * 22;
+              const by = boxY + boxH - 12 - ((hTime * 0.08 + b * 19) % Math.max(20, wsH - 10));
+              ctx.beginPath(); ctx.arc(bx, by, 4, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.fillStyle = '#fda4af'; ctx.font = 'bold 10px Inter, sans-serif';
+            ctx.fillText(airLeakActive ? '⚠️ Continuous Bubbling = Air Leak!' : 'Bubbling: Evacuating Pleural Air', c2X + 10, boxY + 54);
+          }
+
+          // Chamber 3: Suction Control Chamber (-20 cmH2O)
+          const c3X = c2X + chW + 12;
+          ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#10b981'; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.roundRect(c3X, boxY, chW, boxH, 12); ctx.fill(); ctx.stroke();
+          const sucH = boxH * 0.56;
+          ctx.fillStyle = 'rgba(16, 185, 129, 0.50)';
+          ctx.fillRect(c3X + 4, boxY + boxH - sucH, chW - 8, sucH - 4);
+          for (let b = 0; b < 5; b++) {
+            const bx = c3X + 24 + b * 24;
+            const by = boxY + boxH - 10 - ((hTime * 0.05 + b * 23) % (sucH - 12));
+            ctx.fillStyle = 'rgba(255,255,255,0.75)';
+            ctx.beginPath(); ctx.arc(bx, by, 3.2, 0, Math.PI * 2); ctx.fill();
+          }
+          ctx.fillStyle = '#a7f3d0'; ctx.font = 'bold 11px Inter, sans-serif';
+          ctx.fillText('3. Suction Control (-20 cmH2O)', c3X + 10, boxY + 20);
+          ctx.fillStyle = '#ffffff'; ctx.font = 'bold 10px Inter, monospace';
+          ctx.fillText('Gentle Continuous Bubbling', c3X + 10, boxY + 38);
+        } else {
+          // Bottom Track: Live Hemodynamic Pressure or Capnography EtCO2 Waveform
+          const pBaseY = h * 0.85, pScale = h * 0.44;
+          const isCapno = (currentHemoKey === 'tube_ett_trach');
+          ctx.fillStyle = isCapno ? '#fde047' : (currentHemoKey.startsWith('cvp') ? '#38bdf8' : '#fb7185');
+          ctx.font = '900 11.5px Inter, sans-serif';
+          ctx.fillText(
+            isCapno
+              ? '2. Continuous Waveform Capnography (EtCO2 = 38 mmHg — Gold Standard ETT Verification)'
+              : `2. Invasive Pressure Waveform (${HEMO_SCENARIOS[currentHemoKey].en.name})`,
+            14, h * 0.38
+          );
+
+          ctx.strokeStyle = isCapno ? '#fde047' : (currentHemoKey.startsWith('cvp') ? '#38bdf8' : '#f43f5e');
+          ctx.lineWidth = 2.7;
+          ctx.beginPath();
+          for (let x = 0; x <= w; x += 2) {
+            const absMs = (x / w) * 2400 + hTime; // Uncluttered 2.4s 3-beat window
+            const t = absMs % 800;
+            const bIdx = Math.floor(absMs / 800);
+            let pNorm = 0.2;
+
+            if (isCapno) {
+              // Rectangular Capnogram (Phase I, II, III alveolar plateau, 0)
+              const respU = ((x / w) * 2.2 + (hTime * 0.0004)) % 1;
+              if (respU < 0.12) pNorm = 0.08;
+              else if (respU < 0.20) pNorm = 0.08 + ((respU - 0.12) / 0.08) * 0.62;
+              else if (respU < 0.62) pNorm = 0.70 + ((respU - 0.20) / 0.42) * 0.08;
+              else if (respU < 0.70) pNorm = 0.78 - ((respU - 0.62) / 0.08) * 0.70;
+              else pNorm = 0.08;
+            } else if (flushTimer > 0 && x > w * 0.35 && x < w * 0.52) {
+              pNorm = 0.98; // 300 mmHg Square Wave
+            } else if (flushTimer > 0 && x >= w * 0.52 && x < w * 0.62) {
+              const oscT = (x - w * 0.52) / (w * 0.10);
+              if (currentHemoKey === 'aline_overdamped') pNorm = 0.3 + 0.68 * Math.exp(-oscT * 5);
+              else if (currentHemoKey === 'aline_underdamped') pNorm = 0.3 + 0.65 * Math.exp(-oscT * 1.8) * Math.cos(oscT * Math.PI * 7);
+              else pNorm = 0.3 + 0.55 * Math.exp(-oscT * 4.5) * Math.cos(oscT * Math.PI * 3);
+            } else if (currentHemoKey === 'aline_overdamped') {
+              pNorm = 0.25 + gPulse(t, 360, 145, 0.38);
+            } else if (currentHemoKey === 'aline_underdamped') {
+              pNorm = 0.18 + gPulse(t, 285, 22, 0.92) + gPulse(t, 330, 55, 0.48) + gPulse(t, 460, 45, 0.32);
+            } else if (currentHemoKey === 'aline_pulsus_paradoxus') {
+              const respMod = 0.65 + 0.35 * Math.sin((absMs / 3200) * Math.PI * 2);
+              pNorm = 0.18 + (gPulse(t, 315, 58, 0.65) + gPulse(t, 465, 65, 0.34)) * respMod;
+            } else if (currentHemoKey.startsWith('cvp')) {
+              const aAmp = currentHemoKey === 'cvp_cannon_a' ? 0.85 : 0.34;
+              const vAmp = currentHemoKey === 'cvp_giant_v' ? 0.82 : 0.30;
+              const yDrop = currentHemoKey === 'cvp_tamponade_constrictive' ? 0.03 : 0.14;
+              pNorm = 0.22 + gPulse(t, 155, 34, aAmp) + gPulse(t, 265, 24, 0.16) - gPulse(t, 355, 38, 0.15) + gPulse(t, 525, 48, vAmp) - gPulse(t, 645, 42, yDrop);
+            } else if (currentHemoKey === 'pac_progression') {
+              if (x < w * 0.25) pNorm = 0.15 + gPulse(t, 155, 35, 0.14) + gPulse(t, 520, 45, 0.12);
+              else if (x < w * 0.50) pNorm = 0.05 + gPulse(t, 295, 45, 0.68);
+              else if (x < w * 0.75) pNorm = 0.26 + gPulse(t, 305, 48, 0.46) + gPulse(t, 445, 52, 0.24);
+              else pNorm = 0.22 + gPulse(t, 175, 42, 0.16) + gPulse(t, 540, 48, 0.18);
+            } else if (currentHemoKey === 'iabp_normal') {
+              if (bIdx % 2 === 1) pNorm = 0.18 + gPulse(t, 310, 52, 0.52) + gPulse(t, 455, 58, 0.78) - gPulse(t, 720, 38, 0.12);
+              else pNorm = 0.20 + gPulse(t, 315, 58, 0.62) + gPulse(t, 465, 65, 0.32);
+            } else if (currentHemoKey === 'iabp_malposition') {
+              pNorm = 0.22 + gPulse(t, 315, 55, 0.50) + gPulse(t, 365, 55, 0.72);
+            } else {
+              const sScale = currentHemoKey === 'shock_cardiogenic' ? 0.42 : (currentHemoKey === 'shock_hypovolemic' ? 0.48 : 1.0);
+              pNorm = 0.20 + (gPulse(t, 315, 58, 0.64) + gPulse(t, 465, 65, 0.34)) * sScale;
+            }
+
+            const y = pBaseY - pNorm * pScale;
+            if (x === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+          }
+          ctx.stroke();
+
+          if (currentHemoKey === 'pac_progression') {
+            ['1. RA (2–8)', '2. RV (25/4)', '3. PA (25/10)', '4. PCWP Wedge (9)'].forEach((lbl, i) => {
+              const lx = i * (w * 0.25);
+              if (i > 0) {
+                ctx.strokeStyle = 'rgba(148, 163, 184, 0.35)'; ctx.setLineDash([4, 4]);
+                ctx.beginPath(); ctx.moveTo(lx, h * 0.42); ctx.lineTo(lx, h); ctx.stroke(); ctx.setLineDash([]);
+              }
+              ctx.fillStyle = '#38bdf8'; ctx.font = '800 10.5px Inter, sans-serif';
+              ctx.fillText(lbl, lx + 8, h - 10);
+            });
+          }
+        }
+      }
+    }
+
+    // 2. RIGHT CANVAS: ANATOMICAL ENTRY SITE, PATHWAY & EXACT TIP TARGET MAP
+    const ac = document.getElementById('anatomy-tube-canvas');
+    if (ac) {
+      const rect = ac.getBoundingClientRect();
+      if (rect.width > 10 && rect.height > 10) {
+        const dpr = window.devicePixelRatio || 1;
+        ac.width = rect.width * dpr;
+        ac.height = rect.height * dpr;
+        const ctx = ac.getContext('2d');
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const w = rect.width, h = rect.height;
+
+        ctx.fillStyle = '#0f172a';
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.fillStyle = '#2dd4bf'; ctx.font = '900 11.5px Inter, sans-serif';
+        ctx.fillText('ANATOMICAL MAP: Entry Site (🟢) → Pathway → Exact Tip Target (🎯)', 12, 18);
+
+        // Draw Stylized Patient Silhouette (Head, Neck, Thorax, Lungs, Heart, Great Vessels, Stomach, Groin, Forearm)
+        const cx = w * 0.5;
+        ctx.strokeStyle = '#334155'; ctx.lineWidth = 2;
+        // Head & Neck
+        ctx.beginPath(); ctx.arc(cx, h * 0.10, 22, 0, Math.PI * 2); ctx.stroke();
+        ctx.strokeRect(cx - 12, h * 0.15, 24, h * 0.08);
+        // Torso & Abdomen
+        ctx.beginPath(); ctx.roundRect(cx - 78, h * 0.22, 156, h * 0.56, 26); ctx.stroke();
+        // Right Arm (on left of screen)
+        ctx.beginPath(); ctx.moveTo(cx - 78, h * 0.25); ctx.lineTo(w * 0.16, h * 0.66); ctx.stroke();
+
+        // Trachea & Carina (at T2-T4)
+        ctx.strokeStyle = 'rgba(56, 189, 248, 0.45)'; ctx.lineWidth = 5;
+        ctx.beginPath();
+        ctx.moveTo(cx, h * 0.12); ctx.lineTo(cx, h * 0.29);
+        ctx.lineTo(cx - 22, h * 0.34); ctx.moveTo(cx, h * 0.29); ctx.lineTo(cx + 22, h * 0.34);
+        ctx.stroke();
+
+        // Right & Left Lungs (Pleural Spaces)
+        ctx.fillStyle = 'rgba(14, 165, 233, 0.14)'; ctx.strokeStyle = 'rgba(56, 189, 248, 0.5)'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.ellipse(cx - 38, h * 0.38, 28, 52, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        ctx.beginPath(); ctx.ellipse(cx + 38, h * 0.38, 28, 52, 0, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // Heart, SVC & Descending Aorta
+        ctx.fillStyle = 'rgba(244, 63, 94, 0.26)'; ctx.strokeStyle = '#fb7185'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(cx + 6, h * 0.42, 22, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+        // SVC (Right IJ -> RA)
+        ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(cx - 14, h * 0.19); ctx.lineTo(cx - 10, h * 0.38); ctx.stroke();
+        // Aorta -> Femoral
+        ctx.strokeStyle = '#ef4444'; ctx.lineWidth = 4;
+        ctx.beginPath(); ctx.moveTo(cx + 6, h * 0.33); ctx.lineTo(cx + 6, h * 0.68); ctx.lineTo(cx - 18, h * 0.80); ctx.stroke();
+
+        // Stomach (Left Upper Quadrant)
+        ctx.fillStyle = 'rgba(250, 204, 21, 0.16)'; ctx.strokeStyle = 'rgba(250, 204, 21, 0.55)'; ctx.lineWidth = 1.8;
+        ctx.beginPath(); ctx.ellipse(cx + 24, h * 0.58, 24, 16, -0.2, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+        // Highlight Active Catheter / Tube Pathway!
+        const sc = HEMO_SCENARIOS[currentHemoKey];
+        if (sc && sc.pathPts) {
+          ctx.strokeStyle = '#fde047'; ctx.lineWidth = 3.8;
+          ctx.beginPath();
+          sc.pathPts.forEach((pt, idx) => {
+            const px = pt[0] * w, py = pt[1] * h;
+            if (idx === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+          });
+          ctx.stroke();
+
+          // Entry Point Marker (Green)
+          const ex = sc.entryPt[0] * w, ey = sc.entryPt[1] * h;
+          ctx.fillStyle = '#10b981';
+          ctx.beginPath(); ctx.arc(ex, ey, 7, 0, Math.PI * 2); ctx.fill();
+          ctx.fillStyle = '#a7f3d0'; ctx.font = 'bold 10.5px Inter, sans-serif';
+          ctx.fillText('🟢 Entry Site', ex + 10, ey + 4);
+
+          // Distal Tip Target Marker (Pulsing Red/Yellow Target)
+          const tx = sc.tipPt[0] * w, ty = sc.tipPt[1] * h;
+          const pulseR = 7 + Math.sin(hTime * 0.01) * 2.5;
+          ctx.fillStyle = '#f43f5e';
+          ctx.beginPath(); ctx.arc(tx, ty, pulseR, 0, Math.PI * 2); ctx.fill();
+          ctx.strokeStyle = '#fde047'; ctx.lineWidth = 2; ctx.stroke();
+          ctx.fillStyle = '#fde047'; ctx.font = 'bold 10.5px Inter, sans-serif';
+          ctx.fillText('🎯 Exact Tip Target', tx + 10, ty - 6);
+        }
+
+        // Phlebostatic Axis Reference Line (4th ICS Mid-AP)
+        ctx.strokeStyle = 'rgba(45, 212, 191, 0.45)'; ctx.setLineDash([4, 4]);
+        ctx.beginPath(); ctx.moveTo(12, h * 0.41); ctx.lineTo(w - 12, h * 0.41); ctx.stroke(); ctx.setLineDash([]);
+        ctx.fillStyle = '#2dd4bf'; ctx.font = 'bold 9.5px Inter, monospace';
+        ctx.fillText('Phlebostatic Axis (4th ICS Mid-AP = RA Zero Level)', 14, h - 12);
+      }
+    }
+
+    if (flushTimer > 0) flushTimer--;
+    if (!hemoPaused) hTime += 10 * hemoSpeed;
+    requestAnimationFrame(drawHemoAndAnatomyCanvases);
+  }
+
+  function toggleLanguage() {
+    currentLang = (currentLang === 'en') ? 'ar' : 'en';
+    const isAr = (currentLang === 'ar');
+    const root = document.getElementById('html-root');
+    root.lang = currentLang;
+    root.dir = isAr ? 'rtl' : 'ltr';
+    document.getElementById('ui-lang-btn').textContent = isAr ? 'English (EN)' : 'العربية (AR)';
+    document.getElementById('ui-title').textContent = isAr ? 'CliniX Lab — محاكي الخطوط الغازية، المونيتور، أنابيب الصدر (Chest Tube)، وأنابيب الرغامى والمعدة' : 'CliniX Lab — Invasive Lines, ICU Monitor, Chest Tubes (Pleur-evac) & Airway/Gastric Tubes';
+    document.getElementById('ui-back-hub').textContent = isAr ? 'العودة للرئيسية (Hub)' : 'Back to Hub';
+    document.getElementById('lbl-flush-btn').textContent = isAr ? 'اختبار الغسيل السريع (Square-Wave 300 mmHg)' : 'Fast-Flush Square-Wave (300 mmHg)';
+    document.getElementById('lbl-leak-btn').textContent = isAr ? 'محاكاة تسريب الهواء (Air-Leak Bubbling)' : 'Toggle Air-Leak / Cough Test';
+    document.getElementById('hbox-1-t').innerHTML = `<i class="fa-solid fa-desktop text-sky-600"></i> <span>${isAr ? '1. ماذا يعرض المونيتور أو جهاز التصريف وتفسير كل موجة/حجرة:' : '1. What the ICU Monitor / System Displays & Waveform Interpretation:'}</span>`;
+    document.getElementById('hbox-2-t').innerHTML = `<i class="fa-solid fa-location-crosshairs text-emerald-600"></i> <span>${isAr ? '2. أين يدخل بالجسم، المسار التشريحي، وأين يصل رأس الأنبوب (CXR):' : '2. Where It Enters the Body, Exact Tip Location & CXR Confirmation:'}</span>`;
+    document.getElementById('hbox-3-t').innerHTML = `<i class="fa-solid fa-layer-group text-amber-600"></i> <span>${isAr ? '3. الأنواع والمقاسات واللمعات والغرف الثلاث:' : '3. Types, Catheter/Tube Sizes (Fr / Gauge), Lumens & Chambers:'}</span>`;
+    document.getElementById('hbox-4-t').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600"></i> <span>${isAr ? '4. القواعد التمريضية الحرجة وطوارئ الانفصال أو الانسحاب:' : '4. Critical ICU Nursing Rules, Zeroing & Emergency Troubleshooting:'}</span>`;
+    selectHemo(currentHemoKey);
+  }
+
+  selectHemo('aline_norm');
+  requestAnimationFrame(drawHemoAndAnatomyCanvases);
+</script>
+</body>
+</html>
