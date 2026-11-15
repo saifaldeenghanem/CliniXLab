@@ -1240,7 +1240,7 @@
                 </div>
 
                 <div class="flex items-center gap-2">
-                    <button id="back-to-hub-btn" onclick="window.location.href='../'" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/40 font-bold text-xs sm:text-sm flex items-center gap-2 transition">
+                    <button id="back-to-hub-btn" onclick="return window.goBackToMainHub(event)" class="px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-sky-300 border border-sky-500/40 font-bold text-xs sm:text-sm flex items-center gap-2 transition">
                         <i class="fa-solid fa-house"></i>
                         <span id="ui-back-text">العودة للرئيسية (Hub)</span>
                     </button>
@@ -2632,13 +2632,13 @@
                 }
             },
             aflutter: {
-                cat: 'acls', hr: 150, stripDefault: true,
+                cat: 'acls', hr: 100, stripDefault: true,
                 ar: {
                     name: 'الرفرفة الأذينية (Atrial Flutter - Sawtooth)',
-                    summary: 'حلقة إعادة دخول كبيرة (Macro-reentry) تدور بسرعة ثابتة (300 دورة/دقيقة) حول الصمام ثلاثي الشرف في الأذين الأيمن، فترسم موجات رفرفة منتظمة تشبه أسنان المنشار (Sawtooth F-waves) مع توصيل 2:1 للبطينين.',
+                    summary: 'حلقة إعادة دخول كبيرة (Macro-reentry) تدور بسرعة ثابتة (300 دورة/دقيقة) حول الصمام ثلاثي الشرف في الأذين الأيمن، فترسم موجات رفرفة منتظمة تشبه أسنان المنشار (Sawtooth F-waves) مع توصيل 3:1 للبطينين.',
                     phases: [
                         'الخلل الأساسي في المرحلة 1 (موجات أسنان المنشار F-waves): تدور موجة كهربائية دائرية مستمرة بسرعة 300/دقيقة في الأذين الأيمن، فترسم موجات رفرفة متتالية تشبه أسنان المنشار بدلاً من موجة P الطبيعية.',
-                        'في المرحلة 2 (توصيل AV بنسبة 2:1 أو 3:1): لا تستطيع عقدة AV تمرير 300 نبضة/دقيقة، فتقوم بتمرير نبضة واحدة من كل نبضتين أو ثلاث نبضات أذينية.',
+                        'في المرحلة 2 (توصيل AV بنسبة 3:1 كما في هذا الشريط): لا تستطيع عقدة AV تمرير 300 نبضة/دقيقة، فتقوم بتمرير نبضة واحدة من كل نبضتين أو ثلاث نبضات أذينية.',
                         'في المرحلة 3 (مركب QRS ضيق ومنتظم): النبضة التي تعبر عقدة AV تنزل في مسار هيس وبركنجي الطبيعي فترسم مركب QRS ضيقاً.',
                         'في المرحلة 4: انقباض بطيني سريع مع استمرار موجات أسنان المنشار الأذينية.',
                         'في المرحلة 5: تتداخل موجة T مع موجات الرفرفة الأذينية (F-waves).',
@@ -2647,10 +2647,10 @@
                 },
                 en: {
                     name: 'Atrial Flutter (Sawtooth F-Waves)',
-                    summary: 'A rapid macro-reentrant circuit (~300 bpm) loops around the tricuspid annulus in the Right Atrium, replacing P waves with classic "Sawtooth" Flutter waves (F-waves) and 2:1 AV conduction.',
+                    summary: 'A rapid macro-reentrant circuit (~300 bpm) loops around the tricuspid annulus in the Right Atrium, replacing P waves with classic "Sawtooth" Flutter waves (F-waves) and 3:1 AV conduction.',
                     phases: [
                         'PRIMARY DEFECT IN PHASE 1 (Sawtooth Flutter Waves): A continuous circular electrical loop spins around the right atrium at 300 bpm, drawing continuous sawtooth F-waves instead of discrete P waves.',
-                        'In Phase 2 (2:1 AV Block): The AV node blocks every second or third flutter wave to protect the ventricles.',
+                        'In Phase 2 (3:1 AV conduction, as drawn on this strip): The AV node blocks every second or third flutter wave to protect the ventricles.',
                         'In Phase 3 (Narrow QRS): Conducted impulses depolarize the ventricles rapidly via His-Purkinje (narrow QRS).',
                         'In Phase 4: Ventricular systolic contraction.',
                         'In Phase 5: T wave blends into the ongoing sawtooth baseline.',
@@ -2659,14 +2659,14 @@
                 }
             },
             svt: {
-                cat: 'acls', hr: 190, stripDefault: true,
+                cat: 'acls', hr: 225, stripDefault: true,
                 ar: {
                     name: 'تسرع القلب فوق البطيني (SVT / AVNRT)',
-                    summary: 'حلقة إعادة دخول سريعة جداً (Re-entry Loop) تدور داخل العقدة الأذينية البطينية (AV Node) بسرعة 190 نبضة/دقيقة، فتفعل البطينين والأذينين في نفس اللحظة فتختفي موجة P داخل مركب QRS الضيق السريع.',
+                    summary: 'حلقة إعادة دخول سريعة جداً (Re-entry Loop) تدور داخل العقدة الأذينية البطينية (AV Node) بسرعة نحو 225 نبضة/دقيقة، فتفعل البطينين والأذينين في نفس اللحظة فتختفي موجة P داخل مركب QRS الضيق السريع.',
                     phases: [
                         'في SVT (AVNRT): لا تبدأ النبضة من عقدة SA، بل تدور في حلقة مغلقة سريعة داخل عقدة AV وتخفي موجة P داخل مركب QRS.',
                         'في المرحلة 2: تدور الحلقة بين المسار البطيء والمسار السريع داخل عقدة AV بشكل متواصل.',
-                        'المرحلة 3 (مركب QRS ضيق وسريع جداً): تنطلق النبضات من عقدة AV بسرعة هائلة (190/دقيقة) عبر حزمة هيس وألياف بركنجي، فترسم مركبات QRS ضيقة ومتقاربة جداً.',
+                        'المرحلة 3 (مركب QRS ضيق وسريع جداً): تنطلق النبضات من عقدة AV بسرعة هائلة (نحو 225/دقيقة) عبر حزمة هيس وألياف بركنجي، فترسم مركبات QRS ضيقة ومتقاربة جداً.',
                         'المرحلة 4: ينقبض البطينان بسرعة عالية مع قصر زمن الامتلاء.',
                         'المرحلة 5: موجة T قريبة جداً من مركب QRS التالي (يمكن كسر هذه الحلقة في عقدة AV بمناورات العصب الحائر أو دواء الأدينوزين Adenosine!).',
                         'المرحلة 6: فترة انبساط قصيرة جداً بسبب سرعة النبض.'
@@ -2674,11 +2674,11 @@
                 },
                 en: {
                     name: 'Supraventricular Tachycardia (SVT)',
-                    summary: 'Rapid micro-reentrant circuit spinning inside the AV Node (AVNRT at ~190 bpm) activates ventricles rapidly down His-Purkinje (regular narrow QRS) while burying retrograde P waves inside the QRS.',
+                    summary: 'Rapid micro-reentrant circuit spinning inside the AV Node (AVNRT at ~225 bpm) activates ventricles rapidly down His-Purkinje (regular narrow QRS) while burying retrograde P waves inside the QRS.',
                     phases: [
                         'In SVT: Retrograde atrial activation occurs simultaneously with the QRS, hiding the P wave.',
                         'In Phase 2: Re-entry loop spins continuously between slow and fast pathways inside the AV node (terminated by Adenosine!).',
-                        'PHASE 3 (Rapid Narrow QRS): Impulses exit the AV node at ~190 bpm down the normal His-Purkinje network, producing a very fast, regular narrow QRS complex.',
+                        'PHASE 3 (Rapid Narrow QRS): Impulses exit the AV node at ~225 bpm down the normal His-Purkinje network, producing a very fast, regular narrow QRS complex.',
                         'In Phase 4: Rapid ventricular systolic contraction.',
                         'In Phase 5: Rapid repolarization (T wave).',
                         'In Phase 6: Shortened diastolic filling time.'
@@ -2686,10 +2686,10 @@
                 }
             },
             vt: {
-                cat: 'acls', hr: 175, stripDefault: true,
+                cat: 'acls', hr: 188, stripDefault: true,
                 ar: {
                     name: 'تسرع القلب البطيني (Monomorphic VT)',
-                    summary: 'بؤرة منتبذة أو حلقة إعادة دخول حول ندبة قديمة في عضلة البطين الأيسر تطلق شرارات سريعة (175/دقيقة) تنتشر ببطء خارج نظام بركنجي من خلية لخلية فترسم مركبات QRS عريضة جداً ومتشابهة.',
+                    summary: 'بؤرة منتبذة أو حلقة إعادة دخول حول ندبة قديمة في عضلة البطين الأيسر تطلق شرارات سريعة (نحو 188/دقيقة) تنتشر ببطء خارج نظام بركنجي من خلية لخلية فترسم مركبات QRS عريضة جداً ومتشابهة.',
                     phases: [
                         'في التسرع البطيني (VT): تنطلق الشرارة من عضلة البطين مباشرة وليس من الأذينين (الأذينان منفصلان كهربائياً).',
                         'في المرحلة 2: لا تمر النبضة عبر عقدة AV، بل تبدأ مباشرة في جدار البطين.',
@@ -2701,7 +2701,7 @@
                 },
                 en: {
                     name: 'Ventricular Tachycardia (Monomorphic VT)',
-                    summary: 'A rapid re-entry circuit in the ventricular myocardium fires at ~175 bpm, bypassing the fast Purkinje system and spreading slowly cell-to-cell to produce wide (>0.14s), regular QRS complexes.',
+                    summary: 'A rapid re-entry circuit in the ventricular myocardium fires at ~188 bpm, bypassing the fast Purkinje system and spreading slowly cell-to-cell to produce wide (>0.14s), regular QRS complexes.',
                     phases: [
                         'In VT: Impulse originates inside the ventricular myocardium (AV dissociation).',
                         'In Phase 2: AV node is bypassed completely.',
@@ -3752,11 +3752,11 @@
                 return (fibrillatory + qrs + tWave) * polarity;
             }
             if (scenario === 'vfib') {
-                return (0.48 * Math.sin(t * 0.045) + 0.35 * Math.cos(t * 0.082) + 0.25 * Math.sin(t * 0.12)) * (proj >= 0 ? 1 : -1);
+                return (0.48 * Math.sin(absMs * 0.045) + 0.35 * Math.cos(absMs * 0.082) + 0.25 * Math.sin(absMs * 0.12)) * (proj >= 0 ? 1 : -1);
             }
             if (scenario === 'tdp') {
                 const env = Math.sin((absMs % 1600) / 1600 * Math.PI * 2);
-                return 1.45 * env * Math.sin(t * 0.055) * (grp === 'avr' ? -0.8 : 1);
+                return 1.45 * env * Math.sin(absMs * 0.055) * (grp === 'avr' ? -0.8 : 1);
             }
             if (scenario === 'vt') {
                 const vt1 = gPulse(t, 250, 48, 1.65) - gPulse(t, 340, 42, 0.85) - gPulse(t, 500, 55, 0.55);
@@ -4172,10 +4172,10 @@
             if (sc === 'avb2_1' && (continuousCycleCount % 3 === 2)) return 0;
             if (sc === 'avb3' && (continuousCycleCount % 2 === 1)) return 0;
             if (['afib','svt','vt','tdp','aflutter'].includes(sc)) {
-                const absT=continuousCycleCount*800+t, period=1600, base=Math.floor(absT/period)*period;
+                const absT=continuousCycleCount*800+t, period=sc==='afib'?1600:800, base=Math.floor(absT/period)*period;
                 const offsets=sc==='afib'?[155,590,885,1235]:sc==='svt'?[245,625]:sc==='vt'?[250,650]:sc==='aflutter'?[225,625]:[120,520];
                 let age=Infinity; for(const cb of [base-period,base,base+period]) for(const off of offsets){const a=absT-(cb+off);if(a>=0&&a<age)age=a;}
-                if(age<35||age>390||age===Infinity) return 0;
+                if(age>390||age===Infinity) return 0;
                 t=255+age;
             }
             if (t < 255 || t > 635) return 0;
@@ -6847,7 +6847,7 @@ function updateDynamicECGMetrics(){
             }
         },
         sinus_tachy: {
-            cat: 'normal_elec', hr: 130, stripDefault: true,
+            cat: 'normal_elec', hr: 150, stripDefault: true,
             ar: {
                 name: 'تسرع النظم الجيبي (Sinus Tachycardia 100–150 bpm)',
                 summary: 'زيادة سرعة إطلاق العقدة الجيبية (100–150/دقيقة) كاستجابة فيزيولوجية لتحفيز مستقبلات β1 الودية (حمى، نقص سوائل/نزف، ألم، نقص أكسجة، صمة رئوية، إنتان). يبدأ وينتهي تدريجياً مع موجة P واضحة قبل كل QRS.',
@@ -7063,7 +7063,7 @@ function updateDynamicECGMetrics(){
             }
         },
         mat: {
-            cat: 'acls', hr: 135, stripDefault: true,
+            cat: 'acls', hr: 150, stripDefault: true,
             ar: {
                 name: 'تسرع القلب الأذيني متعدد البؤر (Multifocal Atrial Tachycardia - MAT)',
                 summary: 'انطلاق نبضات سريعة وغير منتظمة من 3 بؤر أذينية منتبذة أو أكثر خارج عقدة SA (كلاسيكي في مرضى الانسداد الرئوي المزمن الشديد COPD ونقص الأكسجة - Rhythm #16 في البوستر): تسرع غير منتظم بمركب QRS ضيق مع وجود ≥ 3 أشكال مختلفة تماماً لموجة P واختلاف مستمر في فترات PR و R-R!',
@@ -7090,7 +7090,7 @@ function updateDynamicECGMetrics(){
             }
         },
         wpw_afib: {
-            cat: 'acls', hr: 220, stripDefault: true,
+            cat: 'acls', hr: 188, stripDefault: true,
             ar: {
                 name: 'الرجفان الأذيني مع وولف-باركنسون-وايت (Pre-Excited AFib - WPW "FBI")',
                 summary: 'أخطر تسرع في متلازمة WPW (Rhythm #17 في البوستر): تعبر نبضات الرجفان الأذيني السريعة جداً عبر مسار إضافي (حزمة كينت Bundle of Kent) متجاوزة عقدة AV مباشرة للبطينين! يظهر الثلاثي الكلاسيكي (FBI: Fast 200–300/min, Broad مع موجة دلتا Delta Wave وتغير عرض QRS، Irregular). تحذير قاتل: يمنع إعطاء أي دواء يبطئ عقدة AV (أدينوزين، حاصرات بيتا، ديلتيازيم، ديجوكسين، أميودارون) لأنه يحولها لرجفان بطيني قاتل!',
@@ -7556,8 +7556,8 @@ function updateDynamicECGMetrics(){
                          en: ['Sawtooth F-waves (~300/min)', '2:1 AV conduction ratio', '0.08s (narrow regular at 150 bpm)', 'Superimposed on F-waves', 'Blends with sawtooth F-waves'] },
         mat:           { ar: ['≥ 3 أشكال مختلفة لموجة P!', 'متغيرة من نبضة لأخرى!', '0.08s (ضيق وغير منتظم >100/د)', '0.0 mV (خط السواء)', 'متغيرة حسب سرعة البؤر'],
                          en: ['≥3 distinct P-wave morphologies!', 'Varies beat-to-beat!', '0.08s (narrow irregular >100 bpm)', '0.0 mV (isoelectric)', 'Varies with cycle length'] },
-        svt:           { ar: ['مخفية داخل QRS (أو رجعية بعده)', 'غير قابلة للقياس', '0.08s (ضيق وسريع جداً 190/د)', 'انخفاض طفيف مرتبط بالسرعة', 'قصيرة بسبب التسرع الشديد'],
-                         en: ['Buried inside QRS (or pseudo-s\')', 'Not measurable', '0.08s (narrow, very fast 190 bpm)', 'Rate-related mild depression', 'Shortened due to rapid rate'] },
+        svt:           { ar: ['مخفية داخل QRS (أو رجعية بعده)', 'غير قابلة للقياس', '0.08s (ضيق وسريع جداً 225/د)', 'انخفاض طفيف مرتبط بالسرعة', 'قصيرة بسبب التسرع الشديد'],
+                         en: ['Buried inside QRS (or pseudo-s\')', 'Not measurable', '0.08s (narrow, very fast 225 bpm)', 'Rate-related mild depression', 'Shortened due to rapid rate'] },
         wpw_afib:      { ar: ['غائبة (رجفان أذيني)', 'موجة دلتا (Delta Wave) بدون PR', 'عريض ومتغير العرض وسريع وغير منتظم (FBI)!', 'تغيرات ثانوية معاكسة', 'غير قابلة للقياس'],
                          en: ['Absent (AFib)', 'Slurred Delta wave (no PR)', 'Fast, Broad (varying width) & Irregular (FBI)!', 'Discordant ST changes', 'Not measurable'] },
         pvc_ront:      { ar: ['طبيعية في الجيبية وغائبة في الـ PVC', '0.16s في الجيبية فقط', 'تناوب QRS ضيق مع PVC عريض ومبكر', 'معاكسة في الـ PVC', 'ضربة PVC تسقط فوق موجة T (R-on-T)!'],
@@ -9060,14 +9060,6 @@ function updateDynamicECGMetrics(){
         origLaunchModule(mod);
         if (mod === 'ecg') {
             updateRouteDisplay('/ECGStimulation');
-            if (!skipPush && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
-                try {
-                    const base = window.location.pathname.replace(/\/ECGStimulation\/?$/, '').replace(/\/index\.html$/, '').replace(/\/$/, '');
-                    window.history.pushState({ clinixRoute: '/ECGStimulation' }, '', (base || '') + '/ECGStimulation');
-                } catch (e) {
-                    try { window.history.pushState({ clinixRoute: '/ECGStimulation' }, '', '#/ECGStimulation'); } catch (_) {}
-                }
-            }
             requestAnimationFrame(() => {
                 if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
                 if (typeof drawAll2D === 'function') drawAll2D();
@@ -9078,33 +9070,11 @@ function updateDynamicECGMetrics(){
 
     const origReturnToHub = window.returnToHub;
     window.returnToHub = function (skipPush) {
+        if (typeof window.goBackToMainHub === 'function') {
+            return window.goBackToMainHub();
+        }
         origReturnToHub();
-        updateRouteDisplay('/');
-        if (!skipPush && (window.location.protocol === 'http:' || window.location.protocol === 'https:')) {
-            try {
-                const base = window.location.pathname.replace(/\/ECGStimulation\/?$/, '').replace(/\/$/, '') || '/';
-                window.history.pushState({ clinixRoute: '/' }, '', base);
-            } catch (e) {
-                try { window.history.pushState({ clinixRoute: '/' }, '', '#/'); } catch (_) {}
-            }
-        }
     };
-
-    window.addEventListener('popstate', function (e) {
-        const p = (window.location.pathname || '') + (window.location.hash || '');
-        if (/ECGStimulation/i.test(p) || (e.state && e.state.clinixRoute === '/ECGStimulation')) {
-            window.launchModule('ecg', true);
-        } else {
-            window.returnToHub(true);
-        }
-    });
-    window.addEventListener('hashchange', function () {
-        if (/ECGStimulation/i.test(window.location.hash || '')) {
-            window.launchModule('ecg', true);
-        } else if (window.location.hash === '#/' || window.location.hash === '') {
-            window.returnToHub(true);
-        }
-    });
 
     // GitHub Architecture Modal & 1-Click Split File Exporter
     window.openGitHubArchModal = function () {
@@ -11079,10 +11049,7 @@ function updateDynamicECGMetrics(){
         document.getElementById('hub-footer').classList.add('hidden');
         document.getElementById('ecg-simulator-view').classList.remove('hidden');
         document.getElementById('back-to-hub-btn').classList.remove('hidden');
-        try { sessionStorage.setItem('clinixActivePage', 'ecg'); } catch (_) {}
-        if (window.location.protocol === 'http:' || window.location.protocol === 'https:') {
-            try { window.history.replaceState({ clinixPage: 'ecg' }, '', '#/ECGStimulation'); } catch (_) {}
-        }
+        try { sessionStorage.removeItem('clinixActivePage'); } catch (_) {}
         window.scrollTo({ top: 0, behavior: 'smooth' });
         requestAnimationFrame(() => {
             if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
@@ -13852,6 +13819,52 @@ window.__isStandaloneECGSimulator = true;
 
 <script id="clinix-v8-perfected-engine">
 (function () {
+
+  // ===========================================================================
+  // 0.A MULTI-PAGE BACK TO MAIN HUB NAVIGATION (NO /ECG RELOAD LOOP)
+  // ===========================================================================
+  try {
+    sessionStorage.removeItem('clinixActivePage');
+  } catch (_) {}
+
+  window.goBackToMainHub = function (e) {
+    if (e && typeof e.preventDefault === 'function') e.preventDefault();
+    if (e && typeof e.stopPropagation === 'function') e.stopPropagation();
+    try {
+      sessionStorage.removeItem('clinixActivePage');
+      sessionStorage.setItem('clinixActivePage', 'hub');
+    } catch (_) {}
+    if (typeof isPlaying !== 'undefined' && isPlaying && typeof togglePlay === 'function') {
+      try { togglePlay(); } catch (_) {}
+    }
+    try {
+      if (window.parent && window.parent !== window) {
+        if (typeof window.parent.__clinixOpenModule === 'function') {
+          window.parent.__clinixOpenModule('hub');
+          return false;
+        }
+      }
+    } catch (_) {}
+
+    const loc = window.location;
+    const pathname = loc.pathname || '';
+    // Strip trailing /index.html and any /ECG or /ECGStimulation folder segments
+    const hubDir = pathname
+      .replace(/\/index\.html$/i, '')
+      .replace(/(\/(?:ECGStimulation|ECG-Stimulation|ECG_Stimulation|ECG))+\/?$/i, '');
+
+    if (loc.protocol === 'file:') {
+      const targetFile = hubDir ? (loc.protocol + '//' + hubDir.replace(/\/$/, '') + '/index.html') : '../index.html';
+      window.location.href = targetFile;
+      return false;
+    }
+
+    const targetUrl = loc.origin + (hubDir ? (hubDir.replace(/\/$/, '') + '/') : '/');
+    window.location.href = targetUrl;
+    return false;
+  };
+  window.returnToHub = window.goBackToMainHub;
+
   // ===========================================================================
   // 0. MASTER 35-SCENARIO MILLISECOND SYNCHRONIZATION ENGINE
   //    Locks the 3D Heart (Chambers, His-Purkinje, Moving Sparks, Clots),
@@ -13930,6 +13943,7 @@ window.__isStandaloneECGSimulator = true;
       if (t >= 230 && t < 325) effVentT = lerpMap(t, 230, 325, 215, 285);
       else if (t >= 325 && t < 460) effVentT = lerpMap(t, 325, 460, 285, 445);
       else if (t >= 460 && t < 575) effVentT = lerpMap(t, 460, 575, 445, 575);
+      else if (t >= 575 && t < 625) effVentT = lerpMap(t, 575, 625, 575, 640);
       return { effVentT, isDroppedBeat: false, atrialContract: aCon, ta750: ta };
     }
 
@@ -13939,11 +13953,12 @@ window.__isStandaloneECGSimulator = true;
       const beats = [155, 590, 885, 1235];
       let effVentT = 720;
       for (const bt of beats) {
-        if (tm >= bt - 28 && tm <= bt + 215) {
+        if (tm >= bt - 28 && tm <= bt + 255) {
           if (tm < bt - 10) effVentT = lerpMap(tm, bt - 28, bt - 10, 175, 215);
           else if (tm < bt + 28) effVentT = lerpMap(tm, bt - 10, bt + 28, 215, 285);
           else if (tm < bt + 125) effVentT = lerpMap(tm, bt + 28, bt + 125, 285, 445);
-          else effVentT = lerpMap(tm, bt + 125, bt + 215, 445, 575);
+          else if (tm < bt + 215) effVentT = lerpMap(tm, bt + 125, bt + 215, 445, 575);
+          else effVentT = lerpMap(tm, bt + 215, bt + 255, 575, 640);
           break;
         }
       }
@@ -13960,6 +13975,7 @@ window.__isStandaloneECGSimulator = true;
       else if (tq >= 188 && tq < 226) effVentT = lerpMap(tq, 188, 226, 215, 285);
       else if (tq >= 226 && tq < 335) effVentT = lerpMap(tq, 226, 335, 285, 445);
       else if (tq >= 335 && tq < 430) effVentT = lerpMap(tq, 335, 430, 445, 575);
+      else if (tq >= 430 && tq < 480) effVentT = lerpMap(tq, 430, 480, 575, 640);
       return { effVentT, isDroppedBeat: false, atrialContract: aCon };
     }
 
@@ -13972,6 +13988,7 @@ window.__isStandaloneECGSimulator = true;
       else if (ts >= 60 && ts < 92) effVentT = lerpMap(ts, 60, 92, 215, 285);
       else if (ts >= 92 && ts < 155) effVentT = lerpMap(ts, 92, 155, 285, 445);
       else if (ts >= 155 && ts < 215) effVentT = lerpMap(ts, 155, 215, 445, 575);
+      else if (ts >= 215 && ts < 262) effVentT = lerpMap(ts, 215, 262, 575, 640); // relaxation tail (no abrupt cut)
       const aCon = (ts >= 88 && ts <= 135) ? 0.12 * Math.sin(((ts - 88) / 47) * Math.PI) : 0;
       return { effVentT, isDroppedBeat: false, atrialContract: aCon };
     }
@@ -14010,6 +14027,7 @@ window.__isStandaloneECGSimulator = true;
       if (ti >= 230 && ti < 345) effVentT = lerpMap(ti, 230, 345, 215, 285);
       else if (ti >= 345 && ti < 465) effVentT = lerpMap(ti, 345, 465, 285, 445);
       else if (ti >= 465 && ti < 595) effVentT = lerpMap(ti, 465, 595, 445, 575);
+      else if (ti >= 595 && ti < 650) effVentT = lerpMap(ti, 595, 650, 575, 640);
       return { effVentT, isDroppedBeat: false, atrialContract: 0 };
     }
 
@@ -14024,14 +14042,18 @@ window.__isStandaloneECGSimulator = true;
       ];
       let effVentT = 720;
       let aCon = 0;
-      for (const b of beats) {
+      for (let bi = 0; bi < beats.length; bi++) {
+        const b = beats[bi];
         const p0 = b.qrsT - b.pr - 15;
         const p1 = b.qrsT - b.pr + 30;
-        if (tm >= p0 && tm <= b.qrsT + 185) {
+        const nb = beats[(bi + 1) % beats.length];
+        const nextP0 = nb.qrsT - nb.pr - 15 + (bi + 1 === beats.length ? 1600 : 0);
+        const tail = (nextP0 - (b.qrsT + 185) >= 60) ? 60 : 0; // relaxation tail only if it fits before the next P wave
+        if (tm >= p0 && tm <= b.qrsT + 185 + tail) {
           if (tm >= p0 && tm <= p1 + 15) {
             aCon = 0.16 * Math.sin(((tm - p0) / (p1 + 15 - p0)) * Math.PI);
           }
-          effVentT = mapBeatWindowTo800(tm - p0, 0, p1 - p0, b.qrsT - 12 - p0, b.qrsT + 26 - p0, b.qrsT + 110 - p0, b.qrsT + 180 - p0, 350);
+          effVentT = mapBeatWindowTo800(tm - p0, 0, p1 - p0, b.qrsT - 12 - p0, b.qrsT + 26 - p0, b.qrsT + 110 - p0, b.qrsT + 180 - p0, Math.max(350, b.qrsT + 180 - p0 + tail));
           break;
         }
       }
@@ -14044,11 +14066,12 @@ window.__isStandaloneECGSimulator = true;
       const beats = [130, 390, 690, 950, 1290];
       let effVentT = 710;
       for (const bt of beats) {
-        if (tm >= bt - 32 && tm <= bt + 165) {
+        if (tm >= bt - 32 && tm <= bt + 205) {
           if (tm < bt - 15) effVentT = lerpMap(tm, bt - 32, bt - 15, 190, 215);
           else if (tm < bt + 35) effVentT = lerpMap(tm, bt - 15, bt + 35, 215, 285);
           else if (tm < bt + 105) effVentT = lerpMap(tm, bt + 35, bt + 105, 285, 445);
-          else effVentT = lerpMap(tm, bt + 105, bt + 165, 445, 575);
+          else if (tm < bt + 165) effVentT = lerpMap(tm, bt + 105, bt + 165, 445, 575);
+          else effVentT = lerpMap(tm, bt + 165, bt + 205, 575, 640);
           break;
         }
       }
@@ -14069,6 +14092,8 @@ window.__isStandaloneECGSimulator = true;
         if (tm < 540) effVentT = lerpMap(tm, 455, 540, 215, 285);
         else if (tm < 625) effVentT = lerpMap(tm, 540, 625, 285, 445);
         else effVentT = lerpMap(tm, 625, 730, 445, 575);
+      } else if (tm >= 730 && tm < 780) {
+        effVentT = lerpMap(tm, 730, 780, 575, 640); // relaxation tail of the PVC
       } else if (tm >= 930 && tm < 1340) {
         effVentT = mapBeatWindowTo800(tm - 855, 80, 135, 208, 252, 385, 475, 800);
         if (tm >= 940 && tm <= 1010) aCon = 0.17 * Math.sin(((tm - 940) / 70) * Math.PI);
@@ -14077,6 +14102,8 @@ window.__isStandaloneECGSimulator = true;
         if (tm < 1425) effVentT = lerpMap(tm, 1340, 1425, 215, 285);
         else if (tm < 1500) effVentT = lerpMap(tm, 1425, 1500, 285, 445);
         else effVentT = lerpMap(tm, 1500, 1575, 445, 575);
+      } else if (tm >= 1575) {
+        effVentT = lerpMap(tm, 1575, 1600, 575, 625); // relaxation tail up to the 1600 ms seam
       }
       return { effVentT, isDroppedBeat: false, atrialContract: aCon };
     }
@@ -14088,6 +14115,11 @@ window.__isStandaloneECGSimulator = true;
       if (tv >= 55 && tv < 175) effVentT = lerpMap(tv, 55, 175, 215, 285);
       else if (tv >= 175 && tv < 235) effVentT = lerpMap(tv, 175, 235, 285, 445);
       else if (tv >= 235 && tv < 295) effVentT = lerpMap(tv, 235, 295, 445, 575);
+      else {
+        // relaxation tail runs across the 320 ms seam so back-to-back beats are not cut
+        const tvx = tv < 55 ? tv + 320 : tv;
+        if (tvx >= 295 && tvx < 345) effVentT = lerpMap(tvx, 295, 345, 575, 640);
+      }
       return { effVentT, isDroppedBeat: false, atrialContract: 0 };
     }
 
@@ -14259,17 +14291,29 @@ window.__isStandaloneECGSimulator = true;
       : ((typeof stripMode !== 'undefined' && stripMode) ? (((continuousCycleCount % (window.__clinixNumCycles || 3)) * 800) + t) : t);
     const syncSt = window.getExactCardiacSyncState(absMs, t, sc);
     if (syncSt.isDroppedBeat) return -90;
-    return trueRawGetAP(syncSt.effVentT, sc, false);
+    // FIX: for these rhythms effVentT is already a beat-normalised time. The legacy base function
+    // would re-map it a second time (offset table + age), which cut the beat and made the potential
+    // jump to ~+10 mV. Evaluate the single-beat template instead.
+    const tplSc = ['afib','svt','vt','aflutter'].includes(sc) ? 'normal' : sc;
+    return trueRawGetAP(syncSt.effVentT, tplSc, false);
   };
 
   const trueRawGetTen = window.__rawBaseGetTen || window.getMechanicalTension;
   window.getMechanicalTension = function (t, sc, forLeadSpecific = false) {
     if (sc === 'pea' || sc === 'asystole' || sc === 'vfib' || sc === 'sinewave') return 0;
-    const rawT = (typeof window.__clinixRawCurrentTime === 'number') ? window.__clinixRawCurrentTime : t;
-    const absMs = window.__clinixActiveScanTime(rawT);
+    // FIX: the panel draws the tension CURVE by calling this for t = 0..800 ms. The old code ignored
+    // `t` and always used the live time, so the whole curve collapsed into a flat line. Only the
+    // sample that really is the live moment may use the live scan time (same logic as the action potential).
+    const isCurrentBeat = (typeof currentTime === 'number') && (Math.abs(t - currentTime) < 1.5);
+    const rawT = (isCurrentBeat && typeof window.__clinixRawCurrentTime === 'number') ? window.__clinixRawCurrentTime : t;
+    const absMs = isCurrentBeat
+      ? window.__clinixActiveScanTime(rawT)
+      : ((typeof stripMode !== 'undefined' && stripMode) ? (((continuousCycleCount % (window.__clinixNumCycles || 3)) * 800) + t) : t);
     const syncSt = window.getExactCardiacSyncState(absMs, rawT, sc);
     if (syncSt.isDroppedBeat) return 0;
-    return trueRawGetTen(syncSt.effVentT, sc, forLeadSpecific);
+    // FIX: same double-mapping problem as the action potential for the fast / irregular rhythms.
+    const tplSc = ['afib','svt','vt','aflutter'].includes(sc) ? 'normal' : sc;
+    return trueRawGetTen(syncSt.effVentT, tplSc, forLeadSpecific);
   };
 
   // Ensure `renderThreeJSHeart` applies exact synchronized atrial & ventricular squeeze (and zero ventricular squeeze on dropped beats!)
@@ -15657,6 +15701,12 @@ window.__isStandaloneECGSimulator = true;
   };
 
   function initCliniXV8Perfected() {
+    const backBtn = document.getElementById('back-to-hub-btn');
+    if (backBtn) {
+      backBtn.classList.remove('hidden');
+      backBtn.setAttribute('onclick', 'return window.goBackToMainHub(event)');
+      backBtn.onclick = window.goBackToMainHub;
+    }
     buildV7TwoColumnLayout();
     setupInModelFloatingControls();
 
