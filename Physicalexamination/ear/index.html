@@ -1,1 +1,996 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root" class="light" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CliniX Lab | Jarvis Ear, Otoscopy & 512 Hz Tuning Fork Step-by-Step Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root, #html-root, body {
+      color-scheme: light !important;
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-family: 'Inter', 'Cairo', sans-serif;
+      margin: 0;
+    }
+    .panel-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      box-shadow: 0 8px 22px -6px rgba(15, 23, 42, 0.06);
+    }
+    #clinix-v7-split-shell {
+      max-width: 1720px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    @media (min-width: 1024px) {
+      #html-root[dir="rtl"] #clinix-v7-split-shell { grid-template-columns: 400px minmax(0, 1fr); }
+      #html-root[dir="ltr"] #clinix-v7-split-shell { grid-template-columns: minmax(0, 1fr) 400px; }
+      #html-root[dir="rtl"] #clinix-sidebar-col { order: 1; }
+      #html-root[dir="rtl"] #clinix-main-col { order: 2; }
+      #html-root[dir="ltr"] #clinix-main-col { order: 1; }
+      #html-root[dir="ltr"] #clinix-sidebar-col { order: 2; }
+      #clinix-sidebar-col {
+        position: sticky;
+        top: 12px;
+        max-height: calc(100vh - 24px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+    }
+    #clinix-sidebar-scroll {
+      overflow-y: auto;
+      max-height: calc(100vh - 250px);
+      padding-inline-end: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .sc-card {
+      width: 100%;
+      text-align: start;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.16s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sc-card:hover { border-color: #0d9488; background: #f8fafc; transform: translateY(-1px); }
+    .sc-card.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+      border-color: #0f766e !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.42) !important;
+    }
+    .sec-tab.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+      color: #ffffff !important;
+      border-color: #0f766e !important;
+    }
+    .step-pill {
+      padding: 5px 10px;
+      border-radius: 999px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #cbd5e1;
+      background: #f8fafc;
+      color: #334155;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .step-pill.active {
+      background: #0d9488;
+      color: #ffffff;
+      border-color: #0f766e;
+      box-shadow: 0 4px 10px rgba(13, 148, 136, 0.3);
+    }
+    .mode-pill {
+      padding: 5px 11px;
+      border-radius: 10px;
+      font-size: 11px;
+      font-weight: 800;
+      border: 1px solid #cbd5e1;
+      background: #ffffff;
+      color: #1e293b;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .mode-pill.active {
+      background: #0284c7;
+      color: #ffffff;
+      border-color: #0369a1;
+    }
+    .num-ltr { direction: ltr !important; unicode-bidi: embed; font-family: 'Inter', monospace !important; }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-3 lg:p-4">
 
+  <header class="max-w-[1720px] mx-auto mb-3 panel-card p-3 sm:p-4 border-b-2 border-teal-500/40">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-teal-600 to-sky-600 flex items-center justify-center text-white text-xl shadow-md">
+          <i class="fa-solid fa-ear-listen"></i>
+        </div>
+        <div>
+          <div class="flex flex-wrap items-center gap-2">
+            <h1 id="ui-title" class="text-lg sm:text-2xl font-black text-slate-900">Jarvis Ear, Otoscopy & 512 Hz Tuning Fork Step-by-Step Simulator</h1>
+            <span class="num-ltr px-2 py-0.5 rounded bg-teal-50 text-teal-800 border border-teal-200 text-[10.5px] font-mono font-extrabold">
+              /CliniXLab/Physicalexamination/ear
+            </span>
+          </div>
+          <p id="ui-subtitle" class="text-xs text-slate-500 font-semibold">4 Interactive Stations: External Ear & Tragus • Otoscope Bracing (Up & Back) • Tympanic Membrane (5 & 7 oclock) • Whisper, Weber & Rinne</p>
+        </div>
+      </div>
+      <div class="flex flex-wrap items-center gap-2">
+        <!-- SINGLE CLEAR BACK BUTTON THAT STRICTLY RETURNS TO PHYSICAL EXAMINATION HUB -->
+        <a href="../index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('pe_hub');return false;}"
+          class="px-3.5 py-2 rounded-xl bg-teal-50 hover:bg-teal-100 text-teal-900 border-2 border-teal-400 text-xs font-black flex items-center gap-1.5 shadow-sm">
+          <i class="fa-solid fa-arrow-left"></i>
+          <span id="ui-back-pe">Back to Physical Examination Hub</span>
+        </a>
+        <button type="button" onclick="toggleLanguage()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-sky-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+          <i class="fa-solid fa-globe"></i>
+          <span id="ui-lang-btn">العربية (AR)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div id="clinix-v7-split-shell">
+    <!-- SIDEBAR: STEP-BY-STEP CHECKLIST STATIONS -->
+    <aside id="clinix-sidebar-col" class="panel-card p-3">
+      <div class="mb-2.5 pb-2 border-b border-slate-200">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span id="ui-sb-title" class="text-xs sm:text-sm font-black text-teal-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-list-check text-teal-600"></i>
+            <span id="lbl-sb-head">Step-by-Step Checklist Stations</span>
+          </span>
+          <span id="ui-sb-count" class="num-ltr px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 text-[11px] font-extrabold"></span>
+        </div>
+        <input type="search" id="pe-search" oninput="renderSidebar()" placeholder="Search checklist step or finding..."
+          class="w-full px-3 py-1.5 rounded-xl bg-slate-50 border border-slate-300 text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-teal-600" />
+        
+      </div>
+      <div id="clinix-sidebar-scroll"></div>
+    </aside>
+
+    <!-- MAIN SIMULATION WORKSPACE -->
+    <main id="clinix-main-col" class="flex flex-col gap-3.5 min-w-0">
+
+      <!-- 1. STEP-BY-STEP PROCEDURE SIMULATOR BAR -->
+      <section class="panel-card p-3.5 bg-gradient-to-r from-teal-50/70 via-white to-sky-50/70">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+          <div class="flex items-center gap-2">
+            <span id="step-counter-badge" class="num-ltr px-2.5 py-1 rounded-lg bg-teal-700 text-white text-xs font-black">Step 1 / 6</span>
+            <span id="lbl-step-guide" class="text-xs sm:text-sm font-black text-slate-800">Interactive Step-by-Step Procedure Walkthrough (University Checklist)</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="stepNavigate(-1)" class="px-3 py-1.5 rounded-xl bg-white hover:bg-slate-100 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-backward-step"></i>
+              <span id="lbl-prev-step">Prev Step</span>
+            </button>
+            <button type="button" id="btn-autorun" onclick="toggleAutoRun()" class="px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <i class="fa-solid fa-play"></i>
+              <span id="lbl-autorun">Auto-Run Steps</span>
+            </button>
+            <button type="button" onclick="stepNavigate(1)" class="px-3 py-1.5 rounded-xl bg-teal-600 hover:bg-teal-700 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm">
+              <span id="lbl-next-step">Next Step</span>
+              <i class="fa-solid fa-forward-step"></i>
+            </button>
+          </div>
+        </div>
+        <div id="step-pills-row" class="flex flex-wrap gap-1.5"></div>
+      </section>
+
+      <!-- 2. INTERACTIVE SIMULATOR VIEWPORT -->
+      <section class="panel-card p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
+          <div>
+            <span id="sim-badge" class="px-2.5 py-0.5 rounded-md bg-teal-100 text-teal-800 border border-teal-300 text-[11px] font-extrabold"></span>
+            <h2 id="sim-main-heading" class="text-base sm:text-xl font-black text-slate-900 mt-1"></h2>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="btn-bell-diaphragm" onclick="toggleChestpieceMode()" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1.5">
+              <i class="fa-solid fa-stethoscope text-teal-600"></i>
+              <span id="lbl-chestpiece">Chestpiece: Diaphragm (High Pitch)</span>
+            </button>
+            <button type="button" id="btn-cont-audio" onclick="toggleContinuousAudio()" class="px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-extrabold flex items-center gap-1.5">
+              <i class="fa-solid fa-repeat text-amber-600"></i>
+              <span id="lbl-cont-audio">Continuous Sound: OFF</span>
+            </button>
+            <button type="button" id="btn-audio-synth" onclick="playExamAudio()" class="px-3.5 py-2 rounded-xl bg-teal-600 hover:bg-teal-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+              <i class="fa-solid fa-volume-high"></i>
+              <span id="lbl-audio-btn">Play Real Clinical Sound</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Interactive Clinical Sub-Mode Selector (Normal vs Pathologies for Current Step) -->
+        <div class="mb-2.5 flex flex-wrap items-center gap-1.5">
+          <span id="lbl-sim-mode" class="text-xs font-black text-slate-700 me-1">Simulate Patient Condition:</span>
+          <div id="sim-mode-buttons" class="flex flex-wrap gap-1.5"></div>
+        </div>
+
+        <!-- Interactive Canvas Viewport -->
+        <div class="relative w-full h-80 sm:h-96 rounded-xl bg-slate-900 border-2 border-slate-300 overflow-hidden mb-3">
+          <canvas id="pe-sim-canvas" class="w-full h-full block cursor-crosshair"></canvas>
+        </div>
+
+        <p id="sim-canvas-hint" class="text-xs font-bold text-teal-800 bg-teal-50 px-3 py-2 rounded-xl border border-teal-200">
+          💡 Interactive Procedure Simulator: Move your cursor or tap inside the screen above to position the clinical instrument or hand, switch patient findings above, or click "Next Step" to walk through the complete OSCE procedure!
+        </p>
+      </section>
+
+      <!-- 3. STRUCTURED 4-BOX OSCE & CLINICAL BREAKDOWN -->
+      <section class="panel-card p-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5">
+          <div class="p-3.5 rounded-xl bg-sky-50/80 border border-sky-200">
+            <h3 id="box1-title" class="text-xs sm:text-sm font-black text-sky-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-user-doctor text-sky-600"></i>
+              <span>Step-by-Step Procedure & Patient Script (Checklist)</span>
+            </h3>
+            <p id="box1-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200">
+            <h3 id="box2-title" class="text-xs sm:text-sm font-black text-emerald-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-circle-check text-emerald-600"></i>
+              <span>Normal Finding & Physiological Mechanism</span>
+            </h3>
+            <p id="box2-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-rose-50/80 border border-rose-200">
+            <h3 id="box3-title" class="text-xs sm:text-sm font-black text-rose-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+              <span>Abnormal Findings & Clinical Differential</span>
+            </h3>
+            <p id="box3-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+
+          <div class="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200">
+            <h3 id="box4-title" class="text-xs sm:text-sm font-black text-amber-900 mb-1.5 flex items-center gap-1.5">
+              <i class="fa-solid fa-lightbulb text-amber-600"></i>
+              <span>OSCE Checklist Evaluation & Documentation ("Record")</span>
+            </h3>
+            <p id="box4-body" class="text-xs sm:text-sm text-slate-800 font-semibold leading-relaxed"></p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. INTERACTIVE UNIVERSITY OSCE GRADING CHECKLIST (PRE-ASSESSMENT + PROCEDURE + RECORD) -->
+      <section class="panel-card p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2 border-b border-slate-200">
+          <div>
+            <h3 id="osce-sheet-title" class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-clipboard-check text-teal-600"></i>
+              <span>Interactive University OSCE Evaluation Sheet (Pre-Assessment, Procedure & Record)</span>
+            </h3>
+            <p id="osce-sheet-sub" class="text-xs text-slate-500 font-semibold">Check off each step as you practice — calculates your OSCE score (0 = Not Done, 1 = Incompletely Done, 2 = Completely Done)</p>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="osce-score-badge" class="num-ltr px-3 py-1 rounded-xl bg-emerald-100 text-emerald-900 border border-emerald-300 text-xs font-black">Score: 0%</span>
+            <button type="button" onclick="checkAllOSCE(true)" class="px-2.5 py-1 rounded-lg bg-teal-600 text-white text-[11px] font-extrabold">Check All</button>
+            <button type="button" onclick="checkAllOSCE(false)" class="px-2.5 py-1 rounded-lg bg-slate-200 text-slate-700 text-[11px] font-extrabold">Reset</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 text-xs">
+          <!-- Column A: 8 Mandatory Pre-Assessment Steps -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 id="lbl-pre-title" class="font-black text-teal-900 mb-2">A. Mandatory Pre-Assessment Steps (8 Steps)</h4>
+            <div id="osce-pre-list" class="space-y-1.5"></div>
+          </div>
+          <!-- Column B: Organ Procedure & Documentation Record Steps -->
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <h4 id="lbl-rec-title" class="font-black text-sky-900 mb-2">B. Procedure Stations & Required Documentation ("Record")</h4>
+            <div id="osce-rec-list" class="space-y-1.5"></div>
+          </div>
+        </div>
+      </section>
+
+      <footer class="panel-card py-3 px-6 text-center text-sm font-black text-slate-700">
+        By: MSN, RN Saif AlDeen Ghanem
+      </footer>
+    </main>
+  </div>
+
+<script>
+  let currentLang = 'en';
+  let currentKey = '';
+  let sectionFilter = 'all';
+  let currentModeIdx = 0;
+  let mouseX = 0.5, mouseY = 0.5;
+  let isPressed = false;
+  let pressTimer = 0;
+  let tick = 0;
+  let audioCtx = null;
+  let autoRunInterval = null;
+
+  const PRE_STEPS = [
+    { en: '1. Verify Doctor Order / Clinical Assessment Indication', ar: '1. التحقق من الأمر الطبي / دواعي الفحص السريري' },
+    { en: '2. Prepare Required Equipment (Penlight, Otoscope, Stethoscope, Tuning Fork 512 Hz)', ar: '2. تحضير الأدوات اللازمة (قلم ضوئي، منظار، سماعة، شوكة رنانة 512 Hz)' },
+    { en: '3. Perform Hand Hygiene / Wash Hands before patient contact', ar: '3. غسل اليدين وتعقيمهما قبل لمس المريض' },
+    { en: '4. Introduce Yourself & Role to the Patient', ar: '4. التعريف بالنفس والصفة المهنية للمريض' },
+    { en: '5. Confirm Patient Identity using 2 Identifiers (Full Name & Medical Record / DOB)', ar: '5. التأكد من هوية المريض عبر معرّفين (الاسم الرباعي والرقم الطبي)' },
+    { en: '6. Explain the Procedure Clearly & Obtain Verbal Consent', ar: '6. شرح خطوات الفحص للمريض بلغة واضحة وأخذ الموافقة' },
+    { en: '7. Provide Privacy (Close Curtains / Door & Drape Appropriately)', ar: '7. توفير الخصوصية التامة للمريض (إغلاق الستارة/الباب)' },
+    { en: '8. Position the Patient Comfortably (Sitting Upright or Supine at 30°–45°)', ar: '8. وضع المريض بوضعية مريحة ومناسبة للفحص (جالساً أو مستلقياً بزاوية 30-45°)' }
+  ];
+
+  const RECORD_ITEMS = [
+  { en: 'Station 1: Inspect & Palpate External Ear (Auricle, Tragus & Mastoid Process for size, shape, symmetry, lesions, tenderness)', ar: 'محطة 1: تأمل وجس الأذن الخارجية (الصيوان، الزنمة Tragus، والناتئ الخشائي Mastoid لتحري الإيلام والآفات)' },
+  { en: 'Station 2: Inspect External Auditory Canal with Otoscope (Pull pinna UP & BACK in adults; inspect cerumen, redness, swelling)', ar: 'محطة 2: فحص القناة السمعية بالمنظار Otoscope (سحب الصيوان للأعلى والخلف للبالغين وفحص الصملاخ والاحمرار)' },
+  { en: 'Station 3: Inspect Tympanic Membrane (Pearly gray color, Cone of Light at 5 o\'clock Right / 7 o\'clock Left, intactness)', ar: 'محطة 3: فحص غشاء الطبل (اللون الرمادي اللؤلؤي، مخروط الضوء عند الساعة 5 باليمنى و7 باليسرى، وعدم الانثقاب)' },
+  { en: 'Station 4: Hearing Acuity & 512 Hz Tuning Fork (Gross Voice/Whisper Test, Weber Midline Test & Rinne AC > BC Test)', ar: 'محطة 4: فحص السمع والشوكة الرنانة 512 Hz (اختبار الهمس، اختبار ويبر بمنتصف الرأس، واختبار رينيه AC > BC)' },
+  { en: 'Record 1: Ear symmetry, size, shape, swelling, redness, lesions & palpable tenderness documented', ar: 'التوثيق 1 (Record): تسجيل حجم وتناظر الأذنين وأي احمرار أو تورم أو إيلام بالجس' },
+  { en: 'Record 2: Tympanic membrane color (pearly gray), landmarks, cone of light & intactness documented', ar: 'التوثيق 2 (Record): تسجيل لون غشاء الطبل الرمادي اللؤلؤي ومخروط الضوء وسلامته' },
+  { en: 'Record 3: Hearing acuity, Weber lateralization & Rinne AC:BC ratio documented accurately', ar: 'التوثيق 3 (Record): تسجيل حدة السمع ونتيجتي اختباري Weber و Rinne بدقة' }
+];
+  const ITEMS = {
+  external_pinna_tragus: {
+    modes: [
+      { en: 'Normal Non-Tender Pinna & Tragus', ar: 'صيوان وزنمة طبيعيان بدون إيلام' },
+      { en: 'Otitis Externa (Positive Tragus Pain)', ar: 'التهاب الأذن الخارجية (ألم الزنمة)' },
+      { en: 'Mastoiditis (Post-Auricular Swelling)', ar: 'التهاب الخشاء خلف الأذن (Mastoiditis)' }
+    ],
+    en: {
+      short: '1. External Ear & Tragus',
+      tag: 'Step 1 • External Ear Inspection & Palpation',
+      name: '1. External Ear Inspection & Palpation (Auricle, Tragus & Mastoid Process)',
+      tech: '1) Inspect both auricles (pinnae) for size (4–10 cm), symmetry, vertical alignment (top of pinna aligns with lateral canthus of eye within 10°), skin color, tophi, or Darwin tubercle. 2) Palpate the firm cartilage of the Auricle, press gently on the Tragus, and palpate the bony Mastoid Process behind the ear.',
+      norm: 'Ears equal in size and level with outer eye canthus; smooth skin without lesions or discharge; firm elastic cartilage; ZERO pain on Tragus push, Pinna pull, or Mastoid palpation.',
+      abn: '1) Pain on pushing Tragus or pulling Pinna ("Tug Test") = Acute Otitis Externa (Swimmer\'s Ear)! 2) Redness, swelling & tenderness over the Mastoid Process = Acute Mastoiditis (complication of AOM). 3) Low-set ears (>10° tilt) = Congenital/renal syndromes.',
+      pearl: 'Record in Checklist: Always palpate the Tragus and Pinna BEFORE inserting the otoscope speculum so you don\'t cause severe pain in Otitis Externa!'
+    },
+    ar: {
+      short: '1. الأذن الخارجية والزنمة',
+      tag: 'الخطوة 1 • تأمل وجس الأذن الخارجية',
+      name: '1. تأمل وجس الأذن الخارجية (الصيوان Auricle، الزنمة Tragus، والناتئ الخشائي Mastoid)',
+      tech: '1) تأمل حجم الصيوانين وتناظرهما ومستوى المحاذاة مع الزاوية الوحشية للعين، ولون الجلد أو أي آفات أو مفرزات. 2) اجسّ الصيوان، واضغط بلطف على الزنمة (Tragus)، واجسّ الناتئ الخشائي (Mastoid Process) خلف الأذن لتحري الإيلام.',
+      norm: 'أذنان متناظرتان بمستوى زاوية العين، جلد سليم خالٍ من الآفات، وعدم وجود أي ألم عند ضغط الزنمة أو سحب الصيوان أو جس الخشاء.',
+      abn: '1) ألم شديد عند ضغط الزنمة أو سحب الصيوان = التهاب الأذن الخارجية الحاد (Otitis Externa). 2) احمرار وتورم وإيلام خلف الأذن فوق الخشاء = التهاب الخشاء الحاد (Mastoiditis).',
+      pearl: 'التوثيق بالتشيك ليست (Record): يجب جس الزنمة والصيوان قبل إدخال قمع المنظار لتجنب إيلام المريض المصاب بالتهاب الأذن الخارجية!'
+    }
+  },
+  otoscope_canal: {
+    modes: [
+      { en: 'Adult: Pull Pinna UP & BACK', ar: 'البالغ: سحب الصيوان للأعلى والخلف' },
+      { en: 'Child <3 yrs: Pull DOWN & BACK', ar: 'الطفل <3 سنوات: للأسفل والخلف' },
+      { en: 'Cerumen Impaction / Foreign Body', ar: 'انحشار الصملاخ / جسم أجنبي' }
+    ],
+    en: {
+      short: '2. Otoscope & Ear Canal',
+      tag: 'Step 2 • External Auditory Canal',
+      name: '2. Otoscope Technique & External Auditory Canal Inspection (Adult Up-and-Back vs Child Down-and-Back)',
+      tech: '1) Choose the largest speculum that fits comfortably. 2) Hold otoscope upside-down ("pencil grip") and brace the dorsal aspect of your hand firmly against the patient\'s cheek/temple to prevent trauma if the patient moves. 3) Straighten the S-shaped ear canal: pull pinna UP and BACK in adults/children >3 yrs (pull DOWN and BACK in infants/children <3 yrs).',
+      norm: 'Smooth pink external canal wall without redness, swelling, foreign bodies, or foul discharge; minimal soft yellow-brown cerumen that does not obscure the tympanic membrane.',
+      abn: 'Swollen narrowed erythematous canal with debris (Otitis Externa); complete Cerumen Impaction blocking view; purulent or bloody/CSF otorrhea (Skull base fracture -> Halo sign; NEVER irrigate!).',
+      pearl: 'Record in Checklist: Bracing your hand against the patient\'s head while holding the otoscope is a critical safety item in the OSCE!'
+    },
+    ar: {
+      short: '2. المنظار والقناة السمعية',
+      tag: 'الخطوة 2 • فحص القناة السمعية بالمنظار Otoscope',
+      name: '2. مهارة استخدام منظار الأذن وفحص القناة السمعية (سحب الصيوان للأعلى والخلف للبالغ)',
+      tech: '1) اختر أكبر قمع يناسب قناة الأذن بشكل مريح. 2) أمسك المنظار كالقلم مع تثبيت ظهر يدك على خد/صدغ المريض لحماية الطبلة إذا تحرك المريض فجأة. 3) لتقويم القناة السمعية: اسحب الصيوان للأعلى والخلف في البالغين والأطفال فوق 3 سنوات (وللأسفل والخلف في الرضع دون 3 سنوات).',
+      norm: 'قناة سمعية وردية ملساء خالية من التورم أو الاحمرار أو الأجسام الأجنبية، مع كمية طبيعية بسيطة من الصملاخ.',
+      abn: 'تضيق وتورم القناة (التهاب الأذن الخارجية)، انحشار الصملاخ الكامل، أو سيلان قيحي/دموي.',
+      pearl: 'التوثيق بالتشيك ليست (Record): تثبيت يد الفاحص على رأس المريض وسحب الصيوان بالاتجاه الصحيح قبل إدخال القمع.'
+    }
+  },
+  tympanic_membrane: {
+    modes: [
+      { en: 'Normal Pearly Gray TM (5 & 7 o\'clock)', ar: 'طبلة رمادية لؤلؤية طبيعية (5 و7)' },
+      { en: 'Acute Otitis Media (Red Bulging TM)', ar: 'التهاب أذن وسطى حاد (احمرار وتبارز)' },
+      { en: 'Serous Effusion / TM Perforation', ar: 'انصباب مصلي بفقاعات / انثقاب الطبلة' }
+    ],
+    en: {
+      short: '3. Tympanic Membrane (TM)',
+      tag: 'Step 3 • Tympanic Membrane Landmarks',
+      name: '3. Tympanic Membrane Inspection (Pearly Gray, Cone of Light at 5 o\'clock Right / 7 o\'clock Left & Malleus)',
+      tech: 'Slowly angle the otoscope speculum slightly anteriorly and downward to visualize the entire circumference of the Tympanic Membrane (eardrum) and identify the handle of the Malleus, Umbo, Pars Flaccida, Pars Tensa, and triangular Cone of Light.',
+      norm: 'Translucent, shiny Pearly Gray membrane; flat/slightly conical contour; intact without perforations; triangular Cone of Light reflection at 5 o\'clock in the RIGHT ear and 7 o\'clock in the LEFT ear.',
+      abn: '1) Acute Otitis Media (AOM): Bright red, bulging TM with absent/distorted Cone of Light. 2) Serous Otitis Media (OME): Amber-yellow retracted TM with visible air-fluid bubbles behind the drum. 3) Central/Marginal TM Perforation: Dark oval hole in pars tensa from ruptured AOM or trauma.',
+      pearl: 'Record in Checklist: Memorize the Cone of Light clock positions — 5 o\'clock in the Right ear and 7 o\'clock in the Left ear!'
+    },
+    ar: {
+      short: '3. غشاء الطبل ومخروط الضوء',
+      tag: 'الخطوة 3 • معالم غشاء الطبل السليمة والمرضية',
+      name: '3. فحص غشاء الطبل (اللون الرمادي اللؤلؤي، ومخروط الضوء عند الساعة 5 باليمنى و7 باليسرى)',
+      tech: 'تأمل كامل محيط غشاء الطبل وحدد لونه، قبضة المطرقة (Handle of Malleus)، السرة (Umbo)، ومثلث انعكاس الضوء (Cone of Light)، وتأكد من سلامة الغشاء وعدم وجود انثقاب.',
+      norm: 'غشاء طبل رمادي لؤلؤي (Pearly Gray) شبه شفاف وسليم تماماً، مع ظهور مخروط الضوء عند الساعة 5 في الأذن اليمنى وعند الساعة 7 في الأذن اليسرى.',
+      abn: '1) التهاب الأذن الوسطى الحاد (AOM): احمرار شديد وتبارز الطبلة مع اختفاء مخروط الضوء. 2) الانصباب المصلي: لون كهرماني مع فقاعات هواء خلف الطبلة. 3) انثقاب غشاء الطبل.',
+      pearl: 'التوثيق بالتشيك ليست (Record): حفظ موقع مخروط الضوء بدقة (الساعة 5 بالأذن اليمنى والساعة 7 بالأذن اليسرى) وتوثيق سلامة الغشاء.'
+    }
+  },
+  hearing_weber_rinne: {
+    modes: [
+      { en: 'Normal: Midline Weber & AC > BC (2:1)', ar: 'طبيعي: ويبر بالمنتصف و AC > BC' },
+      { en: 'Right Conductive Loss (BC > AC Right)', ar: 'نقص سمع توصيلي أيمن (ويبر لليمنى)' },
+      { en: 'Right Sensorineural Loss (Weber Left)', ar: 'نقص سمع حسي عصبي أيمن (ويبر لليسرى)' }
+    ],
+    en: {
+      short: '4. Whisper, Weber & Rinne (512 Hz)',
+      tag: 'Step 4 • CN VIII Hearing & 512 Hz Tuning Fork',
+      name: '4. Hearing Acuity (Whispered Voice) & 512 Hz Tuning Fork (Weber & Rinne Tests — CN VIII)',
+      tech: '1) Whisper Test: Stand 1–2 feet (30–60 cm) behind patient; occlude non-test ear tragus with circular rub and whisper 3 two-syllable numbers/letters (e.g., "5-B-6"). 2) Weber Test: Strike 512 Hz fork and place base firmly on midline vertex/forehead; ask where sound is heard. 3) Rinne Test: Place vibrating 512 Hz fork base on Mastoid process (Bone Conduction BC) until sound stops, then immediately hold tines 1–2 cm in front of ear canal (Air Conduction AC).',
+      norm: '1) Repeats ≥50% of whispered words correctly. 2) Weber: Sound heard EQUALLY in both ears (no lateralization). 3) Positive Rinne (Normal): Air Conduction is heard twice as long as Bone Conduction (AC > BC ≈ 2:1).',
+      abn: '1) Conductive Hearing Loss (Cerumen, AOM, Otosclerosis): Weber lateralizes to the BAD/AFFECTED ear; Negative Rinne on affected side (BC > AC). 2) Sensorineural Hearing Loss (Presbycusis, Meniere, Ototoxic drugs): Weber lateralizes to the GOOD/HEALTHY ear; Rinne stays AC > BC (both reduced).',
+      pearl: 'Record in Checklist: Always hold the 512 Hz tuning fork by its STEM (base), never touching the vibrating tines!'
+    },
+    ar: {
+      short: '4. الهمس واختبارا ويبر ورينيه',
+      tag: 'الخطوة 4 • فحص السمع والشوكة الرنانة 512 Hz (CN VIII)',
+      name: '4. فحص حدة السمع (اختبار الهمس) والشوكة الرنانة 512 Hz (اختبارا Weber و Rinne)',
+      tech: '1) اختبار الهمس: قف خلف المريض على بعد 30-60 سم، سد الأذن الأخرى بتحريك الزنمة واهمس بـ 3 مقاطع. 2) اختبار Weber: اضرب الشوكة الرنانة (512 Hz) وضع قاعدتها في منتصف قمة الرأس أو الجبهة واسأل المريض أين يسمع الصوت. 3) اختبار Rinne: ضع قاعدة الشوكة على الناتئ الخشائي (توصيل عظمي BC) حتى يتوقف الصوت، ثم انقل فرعيها فوراً أمام صماخ الأذن (توصيل هوائي AC).',
+      norm: '1) تمييز الهمس بوضوح. 2) اختبار Weber: يُسمع الصوت بالتساوي في الأذنين بمنتصف الرأس. 3) اختبار Rinne الإيجابي (الطبيعي): التوصيل الهوائي أطول بمرتين من العظمي (AC > BC).',
+      abn: '1) نقص السمع التوصيلي (صملاخ، التهاب أذن وسطى): ينحرف Weber نحو الأذن المصابة، وينقلب Rinne ليصبح BC > AC. 2) نقص السمع الحسي العصبي: ينحرف Weber نحو الأذن السليمة، ويبقى AC > BC.',
+      pearl: 'التوثيق بالتشيك ليست (Record): أمسك الشوكة الرنانة من ساقها دائماً وليس من فرعيها المهتزين، ووثق نتائج الهمس و Weber و Rinne.'
+    }
+  }
+};
+  const ITEM_KEYS = Object.keys(ITEMS);
+  currentKey = ITEM_KEYS[0];
+
+  const canvas = document.getElementById('pe-sim-canvas');
+  canvas.addEventListener('pointermove', e => {
+    const r = canvas.getBoundingClientRect();
+    mouseX = Math.max(0, Math.min(1, (e.clientX - r.left) / (r.width || 1)));
+    mouseY = Math.max(0, Math.min(1, (e.clientY - r.top) / (r.height || 1)));
+  });
+  canvas.addEventListener('pointerdown', e => {
+    const r = canvas.getBoundingClientRect();
+    mouseX = Math.max(0, Math.min(1, (e.clientX - r.left) / (r.width || 1)));
+    mouseY = Math.max(0, Math.min(1, (e.clientY - r.top) / (r.height || 1)));
+    isPressed = true;
+    pressTimer = 90;
+    // Detect which anatomical spot was clicked (Base vs Apex in Heart) and play sound!
+    selectedSpotIdx = (mouseY < 0.44) ? 0 : 4;
+    playExamAudio();
+  });
+  canvas.addEventListener('pointerup', () => { isPressed = false; });
+
+  function setSectionFilter(sec) {
+    sectionFilter = sec;
+    ['all', 'cardiac', 'pvs'].forEach(s => {
+      const b = document.getElementById('sec-btn-' + s);
+      if (b) b.classList.toggle('active', s === sec);
+    });
+    const filtered = ITEM_KEYS.filter(k => sec === 'all' || ITEMS[k].sec === sec);
+    if (filtered.length && !filtered.includes(currentKey)) {
+      selectItem(filtered[0]);
+    } else {
+      renderSidebar();
+      renderStepPills();
+    }
+  }
+
+  function renderStepPills() {
+    const row = document.getElementById('step-pills-row');
+    if (!row) return;
+    const isAr = (currentLang === 'ar');
+    const activeList = ITEM_KEYS.filter(k => sectionFilter === 'all' || !ITEMS[k].sec || ITEMS[k].sec === sectionFilter);
+    const curIdx = Math.max(0, activeList.indexOf(currentKey));
+    document.getElementById('step-counter-badge').textContent = `Step ${curIdx + 1} / ${activeList.length}`;
+    row.innerHTML = '';
+    activeList.forEach((k, idx) => {
+      const it = ITEMS[k];
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'step-pill' + (k === currentKey ? ' active' : '');
+      const shortLbl = isAr ? (it.ar.short || `خطوة ${idx + 1}`) : (it.en.short || `Step ${idx + 1}`);
+      btn.textContent = `${idx + 1}. ${shortLbl}`;
+      btn.onclick = () => selectItem(k);
+      row.appendChild(btn);
+    });
+  }
+
+  function stepNavigate(dir) {
+    const activeList = ITEM_KEYS.filter(k => sectionFilter === 'all' || !ITEMS[k].sec || ITEMS[k].sec === sectionFilter);
+    const idx = activeList.indexOf(currentKey);
+    const nextIdx = (idx + dir + activeList.length) % activeList.length;
+    selectItem(activeList[nextIdx]);
+  }
+
+  function toggleAutoRun() {
+    const btn = document.getElementById('btn-autorun');
+    const isAr = (currentLang === 'ar');
+    if (autoRunInterval) {
+      clearInterval(autoRunInterval);
+      autoRunInterval = null;
+      btn.className = 'px-3 py-1.5 rounded-xl bg-amber-500 hover:bg-amber-600 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm';
+      btn.innerHTML = `<i class="fa-solid fa-play"></i> <span id="lbl-autorun">${isAr ? 'تشغيل تلقائي للخطوات' : 'Auto-Run Steps'}</span>`;
+    } else {
+      autoRunInterval = setInterval(() => stepNavigate(1), 4200);
+      btn.className = 'px-3 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-extrabold flex items-center gap-1 shadow-sm';
+      btn.innerHTML = `<i class="fa-solid fa-pause"></i> <span id="lbl-autorun">${isAr ? 'إيقاف التشغيل التلقائي' : 'Pause Auto-Run'}</span>`;
+    }
+  }
+
+  function renderModeButtons() {
+    const box = document.getElementById('sim-mode-buttons');
+    if (!box) return;
+    const it = ITEMS[currentKey];
+    const isAr = (currentLang === 'ar');
+    const modes = (it && it.modes) ? it.modes : [
+      { en: 'Normal Physiological Finding', ar: 'النتيجة الطبيعية السليمة' },
+      { en: 'Pathological / Abnormal Case 1', ar: 'الحالة المرضية الأولى' },
+      { en: 'Pathological / Abnormal Case 2', ar: 'الحالة المرضية الثانية' }
+    ];
+    box.innerHTML = '';
+    modes.forEach((m, idx) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mode-pill' + (idx === currentModeIdx ? ' active' : '');
+      b.textContent = isAr ? m.ar : m.en;
+      b.onclick = () => {
+        currentModeIdx = idx;
+        pressTimer = 90;
+        renderModeButtons();
+      };
+      box.appendChild(b);
+    });
+  }
+
+  function renderSidebar() {
+    const box = document.getElementById('clinix-sidebar-scroll');
+    const q = (document.getElementById('pe-search')?.value || '').trim().toLowerCase();
+    const isAr = (currentLang === 'ar');
+    box.innerHTML = '';
+    let shown = 0;
+    ITEM_KEYS.forEach((k, idx) => {
+      const it = ITEMS[k];
+      if (sectionFilter !== 'all' && it.sec && it.sec !== sectionFilter) return;
+      const title = isAr ? it.ar.name : it.en.name;
+      if (q && !it.en.name.toLowerCase().includes(q) && !it.ar.name.toLowerCase().includes(q) && !it.en.tag.toLowerCase().includes(q)) return;
+      shown++;
+      const isSel = (currentKey === k);
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'sc-card' + (isSel ? ' active' : '');
+      btn.innerHTML = `
+        <div class="flex items-center justify-between gap-1">
+          <span class="px-2 py-0.5 rounded text-[10px] font-extrabold ${isSel ? 'bg-white/25 text-white' : 'bg-teal-50 text-teal-800 border border-teal-200'}">
+            ${isAr ? it.ar.tag : it.en.tag}
+          </span>
+          <span class="num-ltr text-[10.5px] font-mono font-extrabold ${isSel ? 'text-teal-100' : 'text-slate-500'}">Step ${idx + 1}/${ITEM_KEYS.length}</span>
+        </div>
+        <div class="text-xs font-extrabold ${isSel ? 'text-white' : 'text-slate-900'} leading-snug">${title}</div>
+      `;
+      btn.onclick = () => selectItem(k);
+      box.appendChild(btn);
+    });
+    document.getElementById('ui-sb-count').textContent = `${shown} / ${ITEM_KEYS.length}`;
+  }
+
+  function selectItem(k) {
+    currentKey = k;
+    currentModeIdx = 0;
+    const it = ITEMS[k];
+    const isAr = (currentLang === 'ar');
+    const d = isAr ? it.ar : it.en;
+    document.getElementById('sim-badge').textContent = d.tag;
+    document.getElementById('sim-main-heading').textContent = d.name;
+    document.getElementById('box1-body').textContent = d.tech;
+    document.getElementById('box2-body').textContent = d.norm;
+    document.getElementById('box3-body').textContent = d.abn;
+    document.getElementById('box4-body').textContent = d.pearl;
+    renderSidebar();
+    renderStepPills();
+    renderModeButtons();
+  }
+
+  function renderOSCEChecklist() {
+    const preBox = document.getElementById('osce-pre-list');
+    const recBox = document.getElementById('osce-rec-list');
+    if (!preBox || !recBox) return;
+    const isAr = (currentLang === 'ar');
+    preBox.innerHTML = '';
+    recBox.innerHTML = '';
+    PRE_STEPS.forEach((st, i) => {
+      const lbl = document.createElement('label');
+      lbl.className = 'flex items-start gap-2 p-1.5 rounded-lg hover:bg-white cursor-pointer';
+      lbl.innerHTML = `<input type="checkbox" class="osce-chk mt-0.5 accent-teal-600" onchange="updateOSCEScore()"> <span class="font-semibold text-slate-800">${isAr ? st.ar : st.en}</span>`;
+      preBox.appendChild(lbl);
+    });
+    RECORD_ITEMS.forEach((st, i) => {
+      const lbl = document.createElement('label');
+      lbl.className = 'flex items-start gap-2 p-1.5 rounded-lg hover:bg-white cursor-pointer';
+      lbl.innerHTML = `<input type="checkbox" class="osce-chk mt-0.5 accent-sky-600" onchange="updateOSCEScore()"> <span class="font-semibold text-slate-800">${isAr ? st.ar : st.en}</span>`;
+      recBox.appendChild(lbl);
+    });
+    updateOSCEScore();
+  }
+
+  function updateOSCEScore() {
+    const chks = document.querySelectorAll('.osce-chk');
+    let done = 0;
+    chks.forEach(c => { if (c.checked) done++; });
+    const pct = chks.length ? Math.round((done / chks.length) * 100) : 0;
+    const badge = document.getElementById('osce-score-badge');
+    if (badge) badge.textContent = `OSCE Score: ${done * 2} / ${chks.length * 2} (${pct}%)`;
+  }
+
+  function checkAllOSCE(state) {
+    document.querySelectorAll('.osce-chk').forEach(c => { c.checked = state; });
+    updateOSCEScore();
+  }
+
+  let useBellMode = false;
+  let contAudioTimer = null;
+  let selectedSpotIdx = 0;
+
+  function toggleChestpieceMode() {
+    useBellMode = !useBellMode;
+    const isAr = (currentLang === 'ar');
+    const lbl = document.getElementById('lbl-chestpiece');
+    if (lbl) {
+      lbl.textContent = useBellMode
+        ? (isAr ? 'القمع: Bell (للأصوات المنخفضة S3/S4/MS)' : 'Chestpiece: Bell (Low Pitch S3/S4/MS)')
+        : (isAr ? 'الغشاء: Diaphragm (للأصوات العالية S1/S2)' : 'Chestpiece: Diaphragm (High Pitch)');
+    }
+    playExamAudio();
+  }
+
+  function toggleContinuousAudio() {
+    const isAr = (currentLang === 'ar');
+    const lbl = document.getElementById('lbl-cont-audio');
+    const btn = document.getElementById('btn-cont-audio');
+    if (contAudioTimer) {
+      clearInterval(contAudioTimer);
+      contAudioTimer = null;
+      if (lbl) lbl.textContent = isAr ? 'صوت السماعة المستمر: متوقف' : 'Continuous Sound: OFF';
+      if (btn) btn.className = 'px-3 py-2 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-extrabold flex items-center gap-1.5';
+    } else {
+      playExamAudio();
+      contAudioTimer = setInterval(playExamAudio, 2500);
+      if (lbl) lbl.textContent = isAr ? 'صوت السماعة المستمر: يعمل 🔊' : 'Continuous Sound: ON 🔊';
+      if (btn) btn.className = 'px-3 py-2 rounded-xl bg-emerald-600 text-white border border-emerald-700 text-xs font-extrabold flex items-center gap-1.5 shadow';
+    }
+  }
+
+  function makeNoiseBuffer(ctx, durationSec) {
+    const sr = ctx.sampleRate;
+    const len = Math.floor(sr * durationSec);
+    const buf = ctx.createBuffer(1, len, sr);
+    const data = buf.getChannelData(0);
+    for (let i = 0; i < len; i++) data[i] = (Math.random() * 2 - 1);
+    return buf;
+  }
+
+  function playFilteredNoiseBurst(ctx, tStart, dur, freqHz, qVal, peakGain) {
+    const src = ctx.createBufferSource();
+    src.buffer = makeNoiseBuffer(ctx, dur + 0.05);
+    const flt = ctx.createBiquadFilter();
+    flt.type = 'bandpass';
+    flt.frequency.setValueAtTime(freqHz, tStart);
+    flt.Q.setValueAtTime(qVal, tStart);
+    const g = ctx.createGain();
+    g.gain.setValueAtTime(0.001, tStart);
+    g.gain.linearRampToValueAtTime(peakGain, tStart + dur * 0.42);
+    g.gain.exponentialRampToValueAtTime(0.001, tStart + dur);
+    src.connect(flt); flt.connect(g); g.connect(ctx.destination);
+    src.start(tStart); src.stop(tStart + dur + 0.02);
+  }
+
+  function playThud(ctx, t0, fStart, fEnd, dur, vol) {
+    const o = ctx.createOscillator();
+    const flt = ctx.createBiquadFilter();
+    const g = ctx.createGain();
+    o.type = 'sine';
+    o.frequency.setValueAtTime(fStart, t0);
+    o.frequency.exponentialRampToValueAtTime(fEnd, t0 + dur);
+    flt.type = 'lowpass';
+    flt.frequency.setValueAtTime(useBellMode ? 140 : 240, t0);
+    g.gain.setValueAtTime(0.001, t0);
+    g.gain.linearRampToValueAtTime(vol, t0 + 0.015);
+    g.gain.exponentialRampToValueAtTime(0.0008, t0 + dur);
+    o.connect(flt); flt.connect(g); g.connect(ctx.destination);
+    o.start(t0); o.stop(t0 + dur + 0.01);
+  }
+
+  function playExamAudio() {
+    try {
+      if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      if (audioCtx.state === 'suspended') audioCtx.resume();
+      const now = audioCtx.currentTime;
+
+      if ('ear' === 'ear') {
+        // Realistic 512 Hz Tuning Fork with Stereo Lateralization (Weber & Rinne)
+        const osc = audioCtx.createOscillator();
+        const osc2 = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.type = 'sine'; osc.frequency.setValueAtTime(512, now);
+        osc2.type = 'sine'; osc2.frequency.setValueAtTime(1024, now);
+        const g2 = audioCtx.createGain(); g2.gain.setValueAtTime(0.04, now);
+        gain.gain.setValueAtTime(0.28, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 2.1);
+        if (audioCtx.createStereoPanner) {
+          const pan = audioCtx.createStereoPanner();
+          // Mode 1: Right Conductive Loss -> lateralizes to Right (-0.8); Mode 2: Right Sensorineural -> lateralizes to Left (+0.8)
+          pan.pan.setValueAtTime(currentModeIdx === 1 ? -0.82 : (currentModeIdx === 2 ? 0.82 : 0), now);
+          osc.connect(gain); osc2.connect(g2); g2.connect(gain);
+          gain.connect(pan); pan.connect(audioCtx.destination);
+        } else {
+          osc.connect(gain); gain.connect(audioCtx.destination);
+        }
+        osc.start(now); osc2.start(now);
+        osc.stop(now + 2.15); osc2.stop(now + 2.15);
+      } else if ('ear' === 'heart') {
+        if (ITEMS[currentKey] && ITEMS[currentKey].sec === 'pvs') {
+          // Arterial Handheld Doppler Ultrasound Sound (Triphasic Normal vs Monophasic PAD)
+          for (let b = 0; b < 3; b++) {
+            const t0 = now + b * 0.80;
+            if (currentModeIdx === 0) {
+              // Crisp Triphasic Doppler: Systolic forward whoosh + Early diastolic reverse + Late diastolic forward
+              playFilteredNoiseBurst(audioCtx, t0, 0.16, 650, 3.0, 0.28);
+              playFilteredNoiseBurst(audioCtx, t0 + 0.18, 0.08, 420, 4.0, 0.16);
+              playFilteredNoiseBurst(audioCtx, t0 + 0.28, 0.07, 520, 4.0, 0.12);
+            } else {
+              // Damped Monophasic PAD Doppler
+              playFilteredNoiseBurst(audioCtx, t0, 0.28, 320, 2.5, 0.15);
+            }
+          }
+          return;
+        }
+        // Realistic Multi-Layer Heart Sounds (S1, S2, Split S2, S3, S4, AS/MR/AR/MS Murmurs & Carotid Bruit)
+        const isBaseSpot = (selectedSpotIdx === 0 || selectedSpotIdx === 1); // Aortic/Pulmonic: S2 > S1
+        const s1Vol = isBaseSpot ? 0.24 : 0.42;
+        const s2Vol = isBaseSpot ? 0.42 : 0.26;
+        for (let b = 0; b < 3; b++) {
+          const t0 = now + b * 0.80;
+          // S4 Atrial Gallop (just before S1)
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 2) {
+            playThud(audioCtx, t0 + 0.02, 46, 32, 0.08, useBellMode ? 0.34 : 0.18);
+          }
+          // S1 ("Lub" — Mitral M1 + Tricuspid T1 closure)
+          playThud(audioCtx, t0 + 0.10, 72, 42, 0.10, s1Vol);
+          // Systolic Murmurs / Carotid Bruit (between S1 and S2)
+          if ((currentKey === 'neck_carotid' && currentModeIdx === 1) || (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 0)) {
+            // Harsh Aortic Stenosis / Carotid Bruit Crescendo-Decrescendo Diamond Murmur
+            playFilteredNoiseBurst(audioCtx, t0 + 0.18, 0.22, 340, 2.2, 0.28);
+          } else if (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 1) {
+            // Blowing Holosystolic Mitral Regurgitation Murmur
+            playFilteredNoiseBurst(audioCtx, t0 + 0.14, 0.28, 580, 1.8, 0.26);
+          }
+          // S2 ("Dub" — Aortic A2 + Pulmonic P2 closure)
+          playThud(audioCtx, t0 + 0.42, 98, 58, 0.085, s2Vol);
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 0) {
+            // Physiologic Split S2 (P2 55ms after A2)
+            playThud(audioCtx, t0 + 0.475, 92, 54, 0.08, s2Vol * 0.85);
+          }
+          // S3 Ventricular Gallop ("Ken-tuck-y" — 120ms after S2)
+          if (currentKey === 'split_s2_gallops' && currentModeIdx === 1) {
+            playThud(audioCtx, t0 + 0.55, 50, 34, 0.09, useBellMode ? 0.36 : 0.20);
+          }
+          // Diastolic Murmur (AR / MS)
+          if (currentKey === 'systolic_diastolic_murmurs' && currentModeIdx === 2) {
+            playFilteredNoiseBurst(audioCtx, t0 + 0.50, 0.25, useBellMode ? 130 : 680, 2.5, 0.24);
+          }
+        }
+      } else if ('ear' === 'lungs') {
+        if (currentKey === 'percussion_ladder') {
+          // Realistic Thoracic Percussion Notes (Resonance vs Hyperresonance vs Dullness)
+          for (let tap = 0; tap < 2; tap++) {
+            const t0 = now + tap * 0.28;
+            if (currentModeIdx === 0) playThud(audioCtx, t0, 115, 78, 0.18, 0.38); // Hollow Resonance
+            else if (currentModeIdx === 1) playThud(audioCtx, t0, 165, 130, 0.26, 0.44); // Booming Hyperresonance (Pneumothorax)
+            else playThud(audioCtx, t0, 240, 180, 0.06, 0.28); // Short Flat Dullness (Consolidation/Effusion)
+          }
+          return;
+        }
+        // Realistic Breath Cycle (Inspiration 0..1.1s + Expiration 1.2..2.2s)
+        const isBronchial = (currentKey === 'normal_breath_sounds' && currentModeIdx === 2);
+        const isBV = (currentKey === 'normal_breath_sounds' && currentModeIdx === 1);
+        // Inspiration filtered noise
+        playFilteredNoiseBurst(audioCtx, now + 0.05, 1.05, isBronchial ? 720 : (isBV ? 440 : 260), 1.6, 0.24);
+        // Expiration filtered noise
+        playFilteredNoiseBurst(audioCtx, now + 1.20, isBronchial ? 1.15 : (isBV ? 0.95 : 0.55), isBronchial ? 780 : (isBV ? 420 : 220), 1.6, isBronchial ? 0.28 : 0.14);
+
+        if (currentKey === 'adventitious_vocal') {
+          if (currentModeIdx === 0) {
+            // Fine Late-Inspiratory Crackles (12 rapid Velcro micro-popping impulses at 0.55..1.05s)
+            for (let c = 0; c < 12; c++) {
+              const tc = now + 0.52 + c * 0.042 + (Math.random() * 0.015);
+              playFilteredNoiseBurst(audioCtx, tc, 0.014, 1350, 4.5, 0.32);
+            }
+          } else if (currentModeIdx === 1) {
+            // High-Pitched Musical Polyphonic Expiratory Wheezes (1.18..2.15s)
+            [410, 565, 710].forEach((freq, idx) => {
+              const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+              o.type = 'sawtooth'; o.frequency.setValueAtTime(freq, now + 1.18);
+              o.frequency.linearRampToValueAtTime(freq * 0.94, now + 2.10);
+              g.gain.setValueAtTime(0.001, now + 1.18);
+              g.gain.linearRampToValueAtTime(0.055, now + 1.35);
+              g.gain.exponentialRampToValueAtTime(0.001, now + 2.15);
+              o.connect(g); g.connect(audioCtx.destination);
+              o.start(now + 1.18); o.stop(now + 2.18);
+            });
+          } else {
+            // High-Pitched Inspiratory Stridor (0.08..1.05s)
+            const o = audioCtx.createOscillator(), g = audioCtx.createGain();
+            o.type = 'triangle'; o.frequency.setValueAtTime(640, now + 0.08);
+            o.frequency.linearRampToValueAtTime(760, now + 0.65);
+            g.gain.setValueAtTime(0.001, now + 0.08);
+            g.gain.linearRampToValueAtTime(0.22, now + 0.45);
+            g.gain.exponentialRampToValueAtTime(0.001, now + 1.05);
+            o.connect(g); g.connect(audioCtx.destination);
+            o.start(now + 0.08); o.stop(now + 1.08);
+          }
+        }
+      } else {
+        // Eye stimulus confirmation tone
+        playThud(audioCtx, now, 520, 660, 0.18, 0.18);
+      }
+    } catch (e) {}
+  }
+
+  function toggleLanguage() {
+    currentLang = (currentLang === 'en') ? 'ar' : 'en';
+    const isAr = (currentLang === 'ar');
+    const root = document.getElementById('html-root');
+    root.lang = currentLang;
+    root.dir = isAr ? 'rtl' : 'ltr';
+    document.getElementById('ui-lang-btn').textContent = isAr ? 'English (EN)' : 'العربية (AR)';
+    document.getElementById('ui-title').textContent = isAr ? 'محاكي فحص الأذن والمنظار والشوكة الرنانة 512 Hz خطوة بخطوة (حسب التشيك ليست)' : 'Jarvis Ear, Otoscopy & 512 Hz Tuning Fork Step-by-Step Simulator';
+    document.getElementById('ui-subtitle').textContent = isAr ? '4 محطات تفاعلية خطوة بخطوة: الصيوان والزنمة، منظار الأذن، معالم غشاء الطبل ومخروط الضوء، واختبارات الهمس وويبر ورينيه' : '4 Interactive Stations: External Ear & Tragus • Otoscope Bracing (Up & Back) • Tympanic Membrane (5 & 7 oclock) • Whisper, Weber & Rinne';
+    document.getElementById('ui-back-pe').textContent = isAr ? 'الرجوع إلى صفحة الفحص السريري (Physical Exam)' : 'Back to Physical Examination Hub';
+    document.getElementById('lbl-sb-head').textContent = isAr ? 'محطات الفحص السريري خطوة بخطوة' : 'Step-by-Step Checklist Stations';
+    document.getElementById('lbl-step-guide').textContent = isAr ? 'محاكي تطبيق خطوات الفحص السريري خطوة بخطوة حسب التشيك ليست' : 'Interactive Step-by-Step Procedure Walkthrough (University Checklist)';
+    document.getElementById('lbl-prev-step').textContent = isAr ? 'الخطوة السابقة' : 'Prev Step';
+    document.getElementById('lbl-next-step').textContent = isAr ? 'الخطوة التالية' : 'Next Step';
+    document.getElementById('lbl-sim-mode').textContent = isAr ? 'اختر حالة المريض للمحاكاة:' : 'Simulate Patient Condition:';
+    document.getElementById('lbl-audio-btn').textContent = isAr ? 'تشغيل الصوت السريري / المنبه' : 'Play Clinical Sound / Stimulus';
+    if (document.getElementById('lbl-sec-all')) {
+      document.getElementById('lbl-sec-all').textContent = isAr ? 'جميع محطات القلب والأطراف (12 محطة)' : 'All Cardiac & Peripheral Stations (12)';
+      document.getElementById('lbl-sec-cardiac').textContent = isAr ? '❤️ فحص القلب والعنق (6)' : '❤️ Heart & Neck (6)';
+      document.getElementById('lbl-sec-pvs').textContent = isAr ? '🦵 فحص الأطراف والأوعية (6)' : '🦵 Extremities / PVS (6)';
+    }
+    document.getElementById('box1-title').innerHTML = `<i class="fa-solid fa-user-doctor text-sky-600"></i> <span>${isAr ? 'طريقة إجراء الفحص خطوة بخطوة وما تقوله للمريض:' : 'Step-by-Step Procedure & Patient Script (Checklist):'}</span>`;
+    document.getElementById('box2-title').innerHTML = `<i class="fa-solid fa-circle-check text-emerald-600"></i> <span>${isAr ? 'النتيجة الطبيعية والتفسير الفيزيولوجي:' : 'Normal Finding & Physiological Mechanism:'}</span>`;
+    document.getElementById('box3-title').innerHTML = `<i class="fa-solid fa-triangle-exclamation text-rose-600"></i> <span>${isAr ? 'النتائج غير الطبيعية والتشخيص التفريقي:' : 'Abnormal Findings & Clinical Differential:'}</span>`;
+    document.getElementById('box4-title').innerHTML = `<i class="fa-solid fa-lightbulb text-amber-600"></i> <span>${isAr ? 'التوثيق المطلوب بالتشيك ليست (Record) وتنبيهات الـ OSCE:' : 'OSCE Checklist Evaluation & Documentation ("Record"):'}</span>`;
+    renderOSCEChecklist();
+    selectItem(currentKey);
+  }
+
+  function drawSim() {
+    tick++;
+    if (pressTimer > 0) pressTimer--;
+    const rect = canvas.getBoundingClientRect();
+    if (rect.width > 10 && rect.height > 10) {
+      const dpr = window.devicePixelRatio || 1;
+      canvas.width = rect.width * dpr;
+      canvas.height = rect.height * dpr;
+      const ctx = canvas.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.direction = 'ltr';
+      
+  ctx.fillStyle = '#0f172a';
+  ctx.fillRect(0, 0, w, h);
+
+  if (currentKey === 'hearing_weber_rinne') {
+    const cx = w * 0.5, cy = h * 0.54;
+    // Patient Head Top-Down / Frontal View
+    ctx.fillStyle = '#1e293b'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(cx, cy, 68, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+    // Left & Right Ears
+    ctx.fillStyle = (currentModeIdx === 1) ? '#f43f5e' : '#38bdf8';
+    ctx.beginPath(); ctx.ellipse(cx - 74, cy, 12, 24, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#38bdf8';
+    ctx.beginPath(); ctx.ellipse(cx + 74, cy, 12, 24, 0, 0, Math.PI * 2); ctx.fill();
+
+    // 512 Hz Tuning Fork on Vertex
+    ctx.strokeStyle = '#facc15'; ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy - 68); ctx.lineTo(cx, cy - 98);
+    ctx.moveTo(cx - 14, cy - 134); ctx.lineTo(cx - 14, cy - 98); ctx.lineTo(cx + 14, cy - 98); ctx.lineTo(cx + 14, cy - 134);
+    ctx.stroke();
+
+    // Acoustic Lateralization Waves
+    for (let r = 18; r < 110; r += 24) {
+      const rad = (r + (tick % 24));
+      ctx.strokeStyle = `rgba(56, 189, 248, ${1 - rad / 120})`;
+      ctx.lineWidth = 2.5;
+      // Right Ear (left side of screen)
+      if (currentModeIdx !== 2) {
+        ctx.beginPath(); ctx.arc(cx - 74, cy, rad * (currentModeIdx === 1 ? 1.25 : 0.8), Math.PI * 0.6, Math.PI * 1.4); ctx.stroke();
+      }
+      // Left Ear (right side of screen)
+      if (currentModeIdx !== 1) {
+        ctx.beginPath(); ctx.arc(cx + 74, cy, rad * (currentModeIdx === 2 ? 1.25 : 0.8), -Math.PI * 0.4, Math.PI * 0.4); ctx.stroke();
+      }
+    }
+
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 12px Inter, sans-serif'; ctx.textAlign = 'center';
+    const weberTxt = currentModeIdx === 0
+      ? 'Normal 512 Hz Tuning Fork: Weber Midline (Equal) & Rinne Positive (AC > BC 2:1)'
+      : (currentModeIdx === 1
+        ? 'Right Conductive Hearing Loss: Weber Lateralizes to RIGHT (Bad Ear) & Rinne Negative (BC > AC)'
+        : 'Right Sensorineural Hearing Loss: Weber Lateralizes to LEFT (Good Ear) & Rinne AC > BC');
+    ctx.fillText(weberTxt, cx, 26);
+    ctx.textAlign = 'left';
+  } else {
+    // Left Side: Pinna Bracing & Pull Direction; Right Side: Otoscope Tympanic Membrane View
+    const lx = w * 0.25, ly = h * 0.52;
+    ctx.fillStyle = '#fde68a'; ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.ellipse(lx, ly, 44, 68, 0.15, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#0f172a'; ctx.beginPath(); ctx.arc(lx + 8, ly + 8, 12, 0, Math.PI * 2); ctx.fill();
+
+    // Arrow showing Pull Direction (Up & Back vs Down & Back)
+    ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3.5;
+    const upDir = (currentKey === 'otoscope_canal' && currentModeIdx === 1) ? 45 : -45;
+    ctx.beginPath(); ctx.moveTo(lx - 18, ly - 15); ctx.lineTo(lx - 52, ly + upDir); ctx.stroke();
+    ctx.fillStyle = '#38bdf8'; ctx.font = 'bold 11px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText((currentKey === 'otoscope_canal' && currentModeIdx === 1) ? 'Child <3y: Pull DOWN & BACK' : 'Adult: Pull UP & BACK', lx, ly - 82);
+
+    // Right Side: Otoscope Tympanic Membrane View
+    const rx = w * 0.68, ry = h * 0.52, r = Math.min(w * 0.25, h * 0.38);
+    const tmGrad = ctx.createRadialGradient(rx, ry, 10, rx, ry, r);
+    if (currentModeIdx === 1) {
+      tmGrad.addColorStop(0, '#ef4444'); tmGrad.addColorStop(0.75, '#991b1b'); tmGrad.addColorStop(1, '#450a0a');
+    } else if (currentModeIdx === 2) {
+      tmGrad.addColorStop(0, '#fbbf24'); tmGrad.addColorStop(0.75, '#b45309'); tmGrad.addColorStop(1, '#451a03');
+    } else {
+      tmGrad.addColorStop(0, '#cbd5e1'); tmGrad.addColorStop(0.75, '#64748b'); tmGrad.addColorStop(1, '#1e293b');
+    }
+    ctx.fillStyle = tmGrad;
+    ctx.beginPath(); ctx.arc(rx, ry, r, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 3; ctx.stroke();
+
+    // Handle of Malleus & Umbo
+    ctx.strokeStyle = '#f8fafc'; ctx.lineWidth = 4.5;
+    ctx.beginPath(); ctx.moveTo(rx - r * 0.28, ry - r * 0.62); ctx.lineTo(rx, ry); ctx.stroke();
+    ctx.fillStyle = '#f8fafc'; ctx.beginPath(); ctx.arc(rx, ry, 5.5, 0, Math.PI * 2); ctx.fill();
+
+    // Cone of Light at 5 o'clock (Right TM) in normal mode
+    if (currentModeIdx === 0) {
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.72)';
+      ctx.beginPath();
+      ctx.moveTo(rx, ry);
+      ctx.lineTo(rx + r * 0.62, ry + r * 0.44);
+      ctx.lineTo(rx + r * 0.34, ry + r * 0.74);
+      ctx.closePath();
+      ctx.fill();
+    } else if (currentModeIdx === 2) {
+      // Serous bubbles & perforation
+      ctx.strokeStyle = '#fef08a'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(rx - 22, ry + 18, 12, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#090d16';
+      ctx.beginPath(); ctx.ellipse(rx + 24, ry - 14, 16, 11, 0.3, 0, Math.PI * 2); ctx.fill();
+    }
+
+    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 11.5px Inter, sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(
+      currentModeIdx === 0
+        ? 'Right Tympanic Membrane: Pearly Gray + Cone of Light at 5 o\'clock (Left = 7 o\'clock)'
+        : (currentModeIdx === 1 ? 'Acute Otitis Media (AOM): Red Bulging TM + Absent Cone of Light' : 'Serous Effusion with Air Bubbles / Central TM Perforation'),
+      rx, 26
+    );
+    ctx.textAlign = 'left';
+  }
+
+    }
+    requestAnimationFrame(drawSim);
+  }
+
+  renderOSCEChecklist();
+  selectItem(ITEM_KEYS[0]);
+  requestAnimationFrame(drawSim);
+</script>
+</body>
+</html>
