@@ -1,1 +1,1700 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root" class="light" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CliniX Lab | ICU Patient Monitor & Emergency/Critical Care Pharmacology Simulator</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&family=JetBrains+Mono:wght@600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root, #html-root, body {
+      color-scheme: light !important;
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-family: 'Inter', 'Cairo', sans-serif;
+      margin: 0;
+    }
+    .panel-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      box-shadow: 0 8px 22px -6px rgba(15, 23, 42, 0.06);
+    }
+    #clinix-v8-split-shell {
+      max-width: 1720px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 16px;
+      align-items: start;
+    }
+    @media (min-width: 1024px) {
+      #html-root[dir="rtl"] #clinix-v8-split-shell { grid-template-columns: 390px minmax(0, 1fr); }
+      #html-root[dir="ltr"] #clinix-v8-split-shell { grid-template-columns: minmax(0, 1fr) 390px; }
+      #html-root[dir="rtl"] #clinix-sidebar-col { order: 1; }
+      #html-root[dir="rtl"] #clinix-main-col { order: 2; }
+      #html-root[dir="ltr"] #clinix-main-col { order: 1; }
+      #html-root[dir="ltr"] #clinix-sidebar-col { order: 2; }
+      #clinix-sidebar-col {
+        position: sticky;
+        top: 12px;
+        max-height: calc(100vh - 24px);
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+    }
+    #clinix-sidebar-scroll {
+      overflow-y: auto;
+      max-height: calc(100vh - 220px);
+      padding-inline-end: 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+    }
+    #clinix-sidebar-scroll::-webkit-scrollbar { width: 6px; }
+    #clinix-sidebar-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+    #clinix-sidebar-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
 
+    .sc-card {
+      width: 100%;
+      text-align: start;
+      border-radius: 14px;
+      padding: 10px 12px;
+      background: #ffffff;
+      border: 1.5px solid #e2e8f0;
+      transition: all 0.16s ease;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .sc-card:hover {
+      border-color: #d97706;
+      background: #f8fafc;
+      transform: translateY(-1px);
+    }
+    .sc-card.active {
+      background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+      border-color: #0f766e !important;
+      color: #ffffff !important;
+      box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.42) !important;
+    }
+    .cat-btn.active {
+      background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+      color: #ffffff !important;
+      border-color: #0284c7 !important;
+    }
+
+    /* ICU Bedside Patient Monitor Bezel */
+    .icu-monitor {
+      background: linear-gradient(180deg, #090d16 0%, #050811 100%);
+      border: 4px solid #334155;
+      border-radius: 22px;
+      box-shadow: 0 18px 40px -10px rgba(15, 23, 42, 0.38);
+      color: #f8fafc;
+      overflow: hidden;
+    }
+    .mon-vital-card {
+      background: rgba(15, 23, 42, 0.9);
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      padding: 8px 10px;
+    }
+    .num-ltr {
+      direction: ltr !important;
+      unicode-bidi: embed;
+      font-family: 'JetBrains Mono', 'Inter', monospace !important;
+      font-variant-numeric: tabular-nums;
+    }
+    #mon-vitals-col.vitals-wide { grid-column: 1 / -1; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+    #mon-vitals-col.vitals-wide > .col-span-2 { grid-column: span 4 / span 4; }
+    @media (max-width: 639px) {
+      #mon-vitals-col.vitals-wide { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      #mon-vitals-col.vitals-wide > .col-span-2 { grid-column: span 2 / span 2; }
+    }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-3 lg:p-4">
+
+  <!-- TOP PLATFORM HEADER -->
+  <header class="max-w-[1720px] mx-auto mb-3 panel-card p-3 sm:p-4 border-b-2 border-amber-500/40">
+    <div class="flex flex-wrap justify-between items-center gap-3">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-500 to-rose-600 flex items-center justify-center text-white text-xl shadow-md">
+          <i class="fa-solid fa-syringe"></i>
+        </div>
+        <div>
+          <h1 id="ui-title" class="text-lg sm:text-2xl font-black text-slate-900">
+            CliniX Lab — ICU Patient Monitor & Emergency / Critical Care Pharmacology (24 Drugs)
+          </h1>
+          <p id="ui-subtitle" class="text-xs text-slate-500 font-semibold">
+            Thrombolytics (Alteplase, Tenecteplase/Metalyse, Streptokinase) • Anticoagulants & Antiplatelets (Heparin, Clexane, Clopidogrel) • ACLS & ICU Infusions + Calculator
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <a href="../index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('hub');return false;}"
+          class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1.5 transition">
+          <i class="fa-solid fa-house text-amber-600"></i>
+          <span id="ui-back-hub">Back to Hub</span>
+        </a>
+        <button type="button" onclick="toggleLanguage()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-amber-600 to-rose-600 hover:from-amber-500 hover:to-rose-500 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+          <i class="fa-solid fa-globe"></i>
+          <span id="ui-lang-btn">العربية (AR)</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- TWO-COLUMN SPLIT WORKSPACE -->
+  <div id="clinix-v8-split-shell">
+
+    <!-- SIDEBAR COLUMN: 24 ICU & EMERGENCY DRUGS -->
+    <aside id="clinix-sidebar-col" class="panel-card p-3">
+      <div class="mb-2.5 pb-2 border-b border-slate-200">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span id="ui-sb-title" class="text-xs sm:text-sm font-black text-teal-800 flex items-center gap-1.5">
+            <i class="fa-solid fa-Capsules text-teal-600"></i>
+            <span>ICU & Emergency Drugs (24)</span>
+          </span>
+          <span class="num-ltr px-2 py-0.5 rounded-full bg-teal-50 text-teal-700 border border-teal-200 text-[11px] font-extrabold">
+            24
+          </span>
+        </div>
+        <div class="grid grid-cols-2 gap-1.5">
+          <button type="button" onclick="setDrugCat('all')" id="dcat-all" class="cat-btn active col-span-2 px-2.5 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[11px] font-extrabold">
+            All ICU & Emergency Drugs (24)
+          </button>
+          <button type="button" onclick="setDrugCat('lysis')" id="dcat-lysis" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[10.5px] font-extrabold">
+            1. Thrombolytics (3)
+          </button>
+          <button type="button" onclick="setDrugCat('anticoag')" id="dcat-anticoag" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[10.5px] font-extrabold">
+            2. Heparin & Plavix (4)
+          </button>
+          <button type="button" onclick="setDrugCat('acls')" id="dcat-acls" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[10.5px] font-extrabold">
+            3. ACLS Rhythms (9)
+          </button>
+          <button type="button" onclick="setDrugCat('icu')" id="dcat-icu" class="cat-btn px-2 py-1.5 rounded-lg border border-slate-300 bg-slate-50 text-slate-700 text-[10.5px] font-extrabold">
+            4. Pressors & ICU (8)
+          </button>
+        </div>
+      </div>
+      <div id="clinix-sidebar-scroll"></div>
+    </aside>
+
+    <!-- MAIN WORKSPACE COLUMN: BEDSIDE PATIENT MONITOR + DOSE CALCULATOR + PHARMACOLOGY MASTERGUIDE -->
+    <main id="clinix-main-col" class="flex flex-col gap-3.5 min-w-0">
+
+      <!-- 1. INTERACTIVE ICU BEDSIDE PATIENT MONITOR -->
+      <section class="icu-monitor p-3 sm:p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-800">
+          <div class="flex flex-wrap items-center gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-rose-500/20 border border-rose-400/50 text-rose-300 text-xs font-black" id="mon-case-badge">
+              PATIENT CASE: Acute Ischemic Stroke (NIHSS 14, Onset 2.0h)
+            </span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-800 border border-slate-700 text-sky-300 text-xs font-extrabold num-ltr" id="mon-drug-pill">
+              Selected Drug: Alteplase (rt-PA / Actilyse)
+            </span>
+          </div>
+          <div class="flex items-center gap-2">
+            <span id="mon-phase-badge" class="px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-black">
+              ● PRE-DRUG BASELINE STATE
+            </span>
+          </div>
+        </div>
+
+        <!-- MONITOR ACTION BAR: ADMINISTER DRUG + PATIENT WEIGHT SLIDER -->
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-3 bg-slate-900/95 p-2.5 rounded-xl border border-slate-800">
+          <div class="flex flex-wrap items-center gap-2">
+            <button type="button" id="btn-give-drug" onclick="administerSelectedDrug()"
+              class="px-4 py-2 rounded-xl bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-400 hover:to-teal-500 text-slate-950 font-black text-xs sm:text-sm flex items-center gap-2 shadow-lg transition cursor-pointer">
+              <i class="fa-solid fa-syringe"></i>
+              <span id="lbl-give-drug">💉 Administer Drug / Start IV Infusion & Watch Monitor Response</span>
+            </button>
+            <button type="button" onclick="resetPatientToBaseline()"
+              class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-extrabold flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-rotate-left"></i>
+              <span id="lbl-reset-pt">Reset Patient Baseline</span>
+            </button>
+            <button type="button" id="btn-toggle-wave" onclick="toggleWaveforms()"
+              class="px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-600 text-xs font-extrabold flex items-center gap-1.5 cursor-pointer">
+              <i class="fa-solid fa-eye-slash" id="ico-toggle-wave"></i>
+              <span id="lbl-toggle-wave">Hide Waveforms</span>
+            </button>
+          </div>
+          <div class="flex items-center gap-2 bg-slate-950 px-3 py-1.5 rounded-xl border border-slate-700">
+            <span class="text-xs font-extrabold text-slate-300" id="lbl-pt-weight">Patient Weight:</span>
+            <input type="range" id="sld-pt-weight" min="40" max="130" step="1" value="75" oninput="onWeightChange(this.value)" class="w-24 sm:w-32">
+            <span class="num-ltr text-sm font-black text-amber-400" id="val-pt-weight">75 kg</span>
+          </div>
+        </div>
+
+        <!-- LIVE RESPONSE TIMELINE BANNER -->
+        <div id="mon-response-banner" class="mb-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700 text-xs font-bold text-slate-200">
+          <span id="mon-response-txt">Click "Administer Drug / Start IV Infusion" above to observe real-time ECG, Blood Pressure, Hemodynamic, and Laboratory changes on the patient monitor.</span>
+        </div>
+
+        <!-- MONITOR SCREEN GRID: 3 WAVEFORMS (LEFT 8 COLS) + VITAL SIGNS & LABS (RIGHT 4 COLS) -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-3">
+          <div id="mon-wave-panel" class="lg:col-span-8 bg-slate-950 rounded-xl border border-slate-800 p-2">
+            <div class="flex items-center justify-between px-2 py-1 text-[11px] font-extrabold text-slate-400 border-b border-slate-900">
+              <span>BEDSIDE TELEMETRY WAVEFORMS (1: ECG Lead II • 2: Invasive Arterial BP • 3: SpO2 Plethysmograph)</span>
+              <span class="num-ltr text-emerald-400">25 mm/s</span>
+            </div>
+            <div class="w-full h-[310px] relative">
+              <canvas id="icu-monitor-canvas" class="w-full h-full block"></canvas>
+            </div>
+          </div>
+
+          <div id="mon-vitals-col" class="lg:col-span-4 grid grid-cols-2 gap-2">
+            <div class="mon-vital-card border-l-4 border-l-emerald-400">
+              <div class="flex justify-between text-[10px] font-bold text-emerald-300">
+                <span>HR (ECG)</span><span class="num-ltr">bpm</span>
+              </div>
+              <div class="num-ltr text-3xl font-black text-emerald-400 leading-none my-1" id="mon-hr">92</div>
+              <div class="text-[10.5px] text-slate-300 font-bold truncate" id="mon-rhythm">Sinus Rhythm</div>
+            </div>
+
+            <div class="mon-vital-card border-l-4 border-l-rose-500">
+              <div class="flex justify-between text-[10px] font-bold text-rose-300">
+                <span>ART BP (MAP)</span><span class="num-ltr">mmHg</span>
+              </div>
+              <div class="num-ltr text-2xl font-black text-rose-400 leading-none my-1" id="mon-bp">168/96</div>
+              <div class="num-ltr text-[10.5px] text-rose-200 font-bold" id="mon-map">MAP: 120 mmHg</div>
+            </div>
+
+            <div class="mon-vital-card border-l-4 border-l-cyan-400">
+              <div class="flex justify-between text-[10px] font-bold text-cyan-300">
+                <span>SpO2 & RR</span><span class="num-ltr">% / min</span>
+              </div>
+              <div class="num-ltr text-2xl font-black text-cyan-300 leading-none my-1" id="mon-spo2">96%</div>
+              <div class="num-ltr text-[10.5px] text-slate-300 font-bold" id="mon-rr">RR: 18 /min</div>
+            </div>
+
+            <div class="mon-vital-card border-l-4 border-l-amber-400">
+              <div class="flex justify-between text-[10px] font-bold text-amber-300">
+                <span>CO / SVR</span><span class="num-ltr">Hemodynamics</span>
+              </div>
+              <div class="num-ltr text-sm font-black text-amber-300 leading-tight my-1" id="mon-co">CO: 5.1 L/m</div>
+              <div class="num-ltr text-[10.5px] text-slate-300 font-bold" id="mon-svr">SVR: 1450</div>
+            </div>
+
+            <div class="mon-vital-card col-span-2 border-l-4 border-l-purple-400">
+              <div class="flex justify-between text-[10px] font-bold text-purple-300 mb-0.5">
+                <span id="lbl-mon-labs">CRITICAL LABS & CLINICAL TARGETS</span>
+                <span class="num-ltr">ICU Point-of-Care</span>
+              </div>
+              <div class="num-ltr text-xs font-extrabold text-purple-200 leading-snug" id="mon-labs">
+                aPTT: 30s | INR: 1.0 | K+: 4.2 mEq/L | Glucose: 115 mg/dL
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. INTERACTIVE STEP-BY-STEP DOSE & IV INFUSION PUMP CALCULATOR -->
+      <section class="panel-card p-4 border-l-4 border-l-amber-500">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-200">
+          <div>
+            <h2 id="ui-calc-title" class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
+              <i class="fa-solid fa-calculator text-amber-600"></i>
+              <span>Interactive Weight-Based Dose, Dilution & IV Infusion Pump Calculator</span>
+            </h2>
+            <p id="ui-calc-sub" class="text-[11px] text-slate-500 font-semibold">
+              Automatically calculates exact Loading Bolus, Maintenance Infusion, Standard ICU Bag Dilution, and Syringe/Infusion Pump Rate (mL/hr) for Patient Weight
+            </p>
+          </div>
+          <span class="num-ltr px-3 py-1 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-black" id="calc-weight-pill">
+            Weight = 75 kg
+          </span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+          <div class="p-3 rounded-xl bg-slate-50 border border-slate-200">
+            <div class="text-[11px] font-extrabold text-slate-500 mb-1" id="lbl-calc-prep">1. Standard ICU Preparation & Concentration:</div>
+            <div class="num-ltr text-xs sm:text-sm font-black text-slate-900" id="calc-prep-val"></div>
+          </div>
+          <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200">
+            <div class="text-[11px] font-extrabold text-amber-900 mb-1" id="lbl-calc-dose">2. Exact Calculated Dose for This Patient:</div>
+            <div class="num-ltr text-xs sm:text-sm font-black text-amber-950" id="calc-dose-val"></div>
+          </div>
+          <div class="p-3 rounded-xl bg-emerald-50/80 border border-emerald-300">
+            <div class="text-[11px] font-extrabold text-emerald-900 mb-1" id="lbl-calc-pump">3. Infusion Pump Rate (mL/hr) & Formula:</div>
+            <div class="num-ltr text-xs sm:text-sm font-black text-emerald-950" id="calc-pump-val"></div>
+          </div>
+        </div>
+
+        <!-- Step-by-Step Mathematical Formula Box -->
+        <div class="p-3 rounded-xl bg-slate-900 text-slate-100 border border-slate-800 text-xs font-bold leading-relaxed num-ltr" id="calc-math-steps"></div>
+      </section>
+
+      <!-- 3. COMPREHENSIVE PHARMACOLOGY & CLINICAL PROTOCOL CARDS -->
+      <section class="panel-card p-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 pb-2.5 mb-3 border-b border-slate-200">
+          <div>
+            <span class="px-2.5 py-0.5 rounded-md bg-teal-100 text-teal-800 border border-teal-300 text-[11px] font-black" id="drug-class-badge">
+              Fibrinolytic / Thrombolytic Agent (tPA)
+            </span>
+            <h2 id="drug-full-title" class="text-base sm:text-lg font-black text-slate-900 mt-1">
+              Alteplase (rt-PA / Actilyse) — Stroke, STEMI & Massive PE Thrombolytic
+            </h2>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-3">
+          <div class="p-3.5 rounded-xl bg-sky-50/70 border border-sky-200">
+            <div class="text-xs font-black text-sky-900 mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-dna text-sky-600"></i>
+              <span id="lbl-mech">Cellular Mechanism & Receptor Action:</span>
+            </div>
+            <p id="drug-mech-txt" class="text-xs text-slate-700 font-semibold leading-relaxed"></p>
+          </div>
+          <div class="p-3.5 rounded-xl bg-emerald-50/70 border border-emerald-200">
+            <div class="text-xs font-black text-emerald-900 mb-1 flex items-center gap-1.5">
+              <i class="fa-solid fa-prescription-bottle-medical text-emerald-600"></i>
+              <span id="lbl-ind">Clinical Indications & Dosing Regimens (Stroke vs STEMI vs ICU):</span>
+            </div>
+            <p id="drug-ind-txt" class="text-xs text-slate-700 font-semibold leading-relaxed"></p>
+          </div>
+        </div>
+
+        <div class="p-3.5 rounded-xl bg-rose-50/80 border-2 border-rose-300">
+          <div class="text-xs font-black text-rose-900 mb-1 flex items-center gap-1.5">
+            <i class="fa-solid fa-triangle-exclamation text-rose-600"></i>
+            <span id="lbl-warn">Critical ICU Nursing Precautions, Contraindications & Antidotes:</span>
+          </div>
+          <p id="drug-warn-txt" class="text-xs text-rose-950 font-bold leading-relaxed"></p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- BOTTOM SIGNATURE FOOTER -->
+  <footer class="max-w-[1720px] mx-auto mt-4 mb-2 panel-card rounded-2xl py-3.5 px-6 text-center border-t-2 border-sky-500/40">
+    <span class="text-sm sm:text-base font-black tracking-wide text-slate-900">
+      By: MSN, RN Saif AlDeen Ghanem
+    </span>
+  </footer>
+
+  <script>
+    let currentLang = 'en';
+    let currentCat = 'all';
+    let currentDrugKey = 'alteplase';
+    let ptWeight = 75;
+    let drugGiven = false;
+    let animTick = 0;
+
+    const DRUG_DB = {
+      // =======================================================================
+      // CATEGORY 1: THROMBOLYTICS / FIBRINOLYTICS (مذيبات الجلطات القلبية والدماغية)
+      // =======================================================================
+      alteplase: {
+        cat: 'lysis',
+        shortBadge: 'rt-PA (Stroke / STEMI / PE)',
+        caseEn: 'Acute Ischemic Stroke (NIHSS 14, Onset 2.0h) / Acute Anterior STEMI',
+        caseAr: 'جلطة دماغية إقفارية حادة (NIHSS 14 خلال ساعتين) / أو جلطة قلبية STEMI',
+        pre:  { hr: 88, sbp: 172, dbp: 98, spo2: 96, rr: 18, co: 5.0, svr: 1420, wave: 'stemi', rhythmEn: 'Sinus + Anterior STE / Acute Stroke', rhythmAr: 'جيبي + ارتفاع ST / جلطة دماغية حادة', labs: 'BP <185/110 required! | INR: 1.0 | Plt: 240k | Glucose: 118 mg/dL' },
+        post: { hr: 78, sbp: 154, dbp: 86, spo2: 98, rr: 16, co: 5.4, svr: 1210, wave: 'normal', rhythmEn: 'Reperfusion Achieved (ST Resolved / NIHSS ↓)', rhythmAr: 'إعادة التروية بنجاح (تراجع ST وتحسن NIHSS)', labs: 'Keep BP <180/105 for 24h! | Neuro Q15m | No Heparin/ASA for 24h in Stroke!' },
+        calcFn: (w, isAr) => {
+          const totalStroke = Math.min(90, +(w * 0.9).toFixed(1));
+          const bolus10 = +(totalStroke * 0.10).toFixed(1);
+          const inf90 = +(totalStroke * 0.90).toFixed(1);
+          const stemi30 = Math.min(50, +(w * 0.75).toFixed(1));
+          const stemi60 = Math.min(35, +(w * 0.50).toFixed(1));
+          return {
+            prep: `100 mg vial reconstituted in 100 mL Sterile Water = 1 mg/mL`,
+            dose: `Stroke (0.9 mg/kg, Max 90mg): Total = ${totalStroke} mg (Bolus ${bolus10} mg + Infuse ${inf90} mg/60m) | STEMI: 15mg bolus -> ${stemi30}mg/30m -> ${stemi60}mg/60m`,
+            pump: `Stroke Bolus: ${bolus10} mL IVP over 1 min, then Pump = ${inf90} mL/hr for 1 hr`,
+            math: `• [ISCHEMIC STROKE FORMULA]: Total Dose = 0.9 mg/kg × ${w} kg = ${(w*0.9).toFixed(1)} mg (Capped at Max 90 mg = ${totalStroke} mg) | 10% IV Bolus over 1 min = ${bolus10} mg (${bolus10} mL) | Remaining 90% over 60 min = ${inf90} mg (${inf90} mL/hr).\n• [ACCELERATED STEMI 90-MIN FORMULA]: 15 mg IV bolus, then 0.75 mg/kg (${stemi30} mg = ${stemi30*2} mL/hr) over 30 min, then 0.50 mg/kg (${stemi60} mg = ${stemi60} mL/hr) over 60 min (Max Total 100 mg).\n• [MASSIVE PE FORMULA]: 100 mg (100 mL) IV over 2 hours (Pump = 50 mL/hr).`
+          };
+        },
+        en: {
+          title: '1. Alteplase (rt-PA / Actilyse) — Fibrinolytic for Ischemic Stroke, STEMI & Massive PE',
+          cls: 'Recombinant Tissue Plasminogen Activator (Fibrin-Specific Thrombolytic)',
+          mech: 'Binds directly to fibrin within an occlusive thrombus and converts entrapped Plasminogen into active Plasmin, which degrades the fibrin meshwork and dissolves the clot (restoring cerebral, coronary, or pulmonary perfusion). Half-life ~5 min.',
+          ind: '1) Acute Ischemic Stroke (<3 to 4.5 hours of symptom onset after Non-Contrast Head CT rules out hemorrhage): 0.9 mg/kg (Max 90 mg) — give 10% as a 1-min IV bolus and infuse 90% over 60 min. 2) Acute STEMI (<12h when PCI unavailable within 120 min): 15 mg IV bolus, then 0.75 mg/kg (max 50 mg) over 30 min, then 0.5 mg/kg (max 35 mg) over 60 min. 3) Massive Pulmonary Embolism: 100 mg IV over 2 hours.',
+          warn: 'CRITICAL STROKE RULES: 1) Check Fingerstick Glucose first (rule out hypoglycemia mimicking stroke!), 2) BP MUST be lowered <185/110 mmHg before starting rt-PA and kept <180/105 mmHg for 24h after (use IV Labetalol/Nicardipine), 3) NO Aspirin, Clopidogrel, or Heparin for 24 hours after Stroke tPA until repeat 24h Head CT excludes intracranial hemorrhage (ICH)! 4) If sudden headache, vomiting, or neuro worsening occurs → STOP infusion immediately, order STAT Head CT, and prepare Cryoprecipitate (10 units) + Tranexamic Acid (TXA 1g IV)!'
+        },
+        ar: {
+          title: '1. ألتيبليز (Alteplase / rt-PA / Actilyse) — مذيب الجلطات الدماغية والقلبية والرئوية',
+          cls: 'مفعل البلازمينوجين النسيجي المؤتلف (مذيب خثرات نوعي للفيبرين)',
+          mech: 'يرتبط بالفيبرين داخل الخثرة السادة للشريان ويحول البلازمينوجين إلى بلازمين فعال يفكك شبكة الفيبرين ويذيب الجلطة لإعادة التروية الدماغية أو التاجية.',
+          ind: '1) الجلطة الدماغية الإقفارية الحادة (خلال 3 إلى 4.5 ساعة من بداية الأعراض وبعد نفي النزف بصورة CT للدماغ): الجرعة الكلية 0.9 ملغ/كغ (الحد الأقصى 90 ملغ) — يُعطى 10% منها دفعة وريدية خلال دقيقة واحدة، و90% تسريباً بالمضخة على مدى 60 دقيقة. 2) جلطة القلب STEMI: 15 ملغ بولس، ثم 0.75 ملغ/كغ خلال 30 دقيقة، ثم 0.5 ملغ/كغ خلال 60 دقيقة. 3) الصمة الرئوية الجسيمة (Massive PE): 100 ملغ خلال ساعتين.',
+          warn: 'قواعد ذهبية حرجة: 1) افحص سكر الدم أولاً، 2) يجب أن يكون الضغط <185/110 قبل البدء ويبقى <180/105 لمدة 24 ساعة، 3) في الجلطة الدماغية يُمنع إعطاء الأسبرين أو البلافيكس أو الهيبارين لمدة 24 ساعة حتى تُعاد صورة CT للدماغ، 4) عند حدوث صداع شديد مفاجئ أو تدهور وعي: أوقف التسريب فوراً واطلب CT طارئ وحضر Cryoprecipitate و Tranexamic Acid!'
+        }
+      },
+
+      tenecteplase: {
+        cat: 'lysis',
+        shortBadge: 'TNK-tPA / Metalyse (5-sec Bolus)',
+        caseEn: 'Acute Anterior STEMI (Chest Pain 90 min, V1–V4 STE, No Cath Lab on-site)',
+        caseAr: 'جلطة قلبية أمامية حادة STEMI (ألم صدري منذ 90 دقيقة، ارتفاع ST في V1–V4)',
+        pre:  { hr: 98, sbp: 136, dbp: 84, spo2: 95, rr: 20, co: 4.3, svr: 1380, wave: 'stemi', rhythmEn: 'Anteroseptal STEMI (Marked STE)', rhythmAr: 'جلطة أمامية حادة (ارتفاع ST حاد)', labs: 'Troponin I: Elevated | Weight-tiered TNK dose | Give with ASA + Clopidogrel + Heparin/Enoxaparin' },
+        post: { hr: 76, sbp: 126, dbp: 78, spo2: 98, rr: 16, co: 5.2, svr: 1180, wave: 'normal', rhythmEn: 'TIMI-3 Coronary Flow Restored (>50% STE Resolution)', rhythmAr: 'فتح الشريان التاجي وتراجع ارتفاع ST بأكثر من 50%', labs: 'Watch for transient Reperfusion AIVR (Do NOT give Lidocaine!) | Transfer for angiography' },
+        calcFn: (w, isAr) => {
+          let mg = 50, iu = 10000;
+          if (w < 60) { mg = 30; iu = 6000; }
+          else if (w < 70) { mg = 35; iu = 7000; }
+          else if (w < 80) { mg = 40; iu = 8000; }
+          else if (w < 90) { mg = 45; iu = 9000; }
+          const ml = mg / 5;
+          const strokeDose = Math.min(25, +(w * 0.25).toFixed(1));
+          return {
+            prep: `50 mg (10,000 IU) vial in 10 mL Sterile Water = 5 mg/mL (1,000 IU/mL)`,
+            dose: `STEMI Single IV Bolus for ${w} kg = ${mg} mg (${iu} IU = ${ml} mL) [If age ≥75y: halve to ${mg/2} mg!]`,
+            pump: `Single IV Push over 5 seconds (${ml} mL) — No 60-min infusion pump required!`,
+            math: `• [STEMI WEIGHT-TIERED TABLE]: <60 kg = 30 mg (6 mL) | 60–69 kg = 35 mg (7 mL) | 70–79 kg = 40 mg (8 mL) | 80–89 kg = 45 mg (9 mL) | ≥90 kg = 50 mg (10 mL). For patient weight ${w} kg ➔ ${mg} mg (${ml} mL IV push over 5 sec).\n• [ELDERLY ≥75 YEARS RULE]: Reduce STEMI bolus by 50% (${mg/2} mg) to minimize intracranial hemorrhage risk.\n• [ACUTE ISCHEMIC STROKE DOSE]: 0.25 mg/kg × ${w} kg = ${strokeDose} mg (Max 25 mg) single IV bolus.`
+          };
+        },
+        en: {
+          title: '2. Tenecteplase (TNK-tPA / Metalyse) — Single-Bolus Thrombolytic',
+          cls: '3rd-Generation Bioengineered Fibrin-Specific Tissue Plasminogen Activator',
+          mech: 'Genetically modified tPA with 14-fold higher fibrin specificity, 80-fold greater resistance to PAI-1, and longer half-life (~20–24 min), allowing administration as a single 5-second IV bolus.',
+          ind: '1) Acute STEMI (<12h onset): Weight-tiered single IV bolus over 5 seconds (<60kg: 30mg; 60–69kg: 35mg; 70–79kg: 40mg; 80–89kg: 45mg; ≥90kg: 50mg). Administer alongside Aspirin (162–325mg), Clopidogrel (300mg load if ≤75y; 75mg if >75y), and Enoxaparin or UFH! 2) Acute Ischemic Stroke (<4.5h): 0.25 mg/kg single IV bolus (Max 25 mg).',
+          warn: '1) In patients ≥75 years old with STEMI, halve the dose (50% dose) to prevent ICH! 2) Flush line with 0.9% NS before and after (precipitates in Dextrose D5W!), 3) Monitor ECG during reperfusion: transient Accelerated Idioventricular Rhythm (AIVR) is a sign of successful artery opening—NEVER give Lidocaine or Amiodarone for reperfusion AIVR!'
+        },
+        ar: {
+          title: '2. تينيكتيبليز / ميتاليز (Tenecteplase / Metalyse / TNK-tPA) — مذيب الجلطات بالدفعة الواحدة',
+          cls: 'الجيل الثالث من مفعل البلازمينوجين النسيجي عالي النوعية للفيبرين',
+          mech: 'يمتاز بنوعية أعلى بـ 14 ضعفاً للفيبرين وعمر نصفي أطول (20-24 دقيقة)، مما يسمح بإعطائه كدفعة وريدية واحدة خلال 5 ثوانٍ فقط دون الحاجة لمضخة تسريب.',
+          ind: '1) جلطة القلب الحادة STEMI: دفعة وريدية واحدة حسب فئة الوزن (<60 كغ: 30 ملغ | 60-69 كغ: 35 ملغ | 70-79 كغ: 40 ملغ | 80-89 كغ: 45 ملغ | ≥90 كغ: 50 ملغ)؛ وتُخفض الجرعة للنصف (50%) للمرضى بعمر ≥75 سنة! 2) الجلطة الدماغية الإقفارية: 0.25 ملغ/كغ بولس (بحد أقصى 25 ملغ).',
+          warn: '1) لا يُمدد ولا يُخلط مع الدكستروز D5W (يُستخدم فقط مع المحلول الملحي NS)، 2) يُعطى في جلطة القلب مع الأسبرين والكلوبيدوغريل والهيبارين/الكليكسان، 3) ظهور نظم AIVR بعد الإعطاء يدل على نجاح فتح الشريان التاجي ويُمنع إعطاؤه ليدوكائين!'
+        }
+      },
+
+      streptokinase: {
+        cat: 'lysis',
+        shortBadge: 'Streptokinase (1.5 Million IU)',
+        caseEn: 'Acute Inferior STEMI (II, III, aVF STE) — Receiving Streptokinase 1.5M IU Infusion',
+        caseAr: 'جلطة قلبية سفلية حادة STEMI — تسريب ستربتوكاينيز 1.5 مليون وحدة',
+        pre:  { hr: 84, sbp: 128, dbp: 78, spo2: 96, rr: 18, co: 4.5, svr: 1320, wave: 'stemi', rhythmEn: 'Inferior STEMI (STE in II, III, aVF)', rhythmAr: 'جلطة سفلية حادة (ارتفاع ST في II, III, aVF)', labs: 'Check prior SK exposure (<12m = Contraindicated!) | Fibrinogen: 320 mg/dL' },
+        post: { hr: 72, sbp: 108, dbp: 68, spo2: 98, rr: 16, co: 5.1, svr: 1120, wave: 'normal', rhythmEn: 'Reperfused Sinus Rhythm (Watch for SK Hypotension!)', rhythmAr: 'إعادة التروية الجيبية (راقب هبوط الضغط الناتج عن الستربتوكاينيز!)', labs: 'Fibrinogen: 140 mg/dL (Systemic lytic state) | Monitor BP every 5–10 min during infusion!' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `1,500,000 IU (1.5 Million IU) vial gently rolled (do NOT shake!) in 100 mL 0.9% NS or D5W`,
+            dose: `STEMI Fixed Dose = 1,500,000 IU IV over 30–60 min | PE/DVT = 250,000 IU load (30m), then 100,000 IU/hr`,
+            pump: `STEMI 60-min Infusion = 100 mL/hr (or 30-min Infusion = 200 mL/hr)`,
+            math: `• [STEMI INFUSION]: 1,500,000 IU in 100 mL NS infused over 60 min ➔ Pump Rate = 100 mL/hr (or over 30 min = 200 mL/hr).\n• [PULMONARY EMBOLISM / DVT]: Loading dose = 250,000 IU over 30 min, followed by continuous maintenance = 100,000 IU/hr for 24–72h.`
+          };
+        },
+        en: {
+          title: '3. Streptokinase (SK) — Non-Fibrin-Specific Fibrinolytic',
+          cls: 'First-Generation Bacterial Streptococcal Fibrinolytic Protein',
+          mech: 'Forms a 1:1 activator complex with circulating and clot-bound Plasminogen, converting both into Plasmin (producing a systemic lytic state and fibrinogen depletion).',
+          ind: '1) Acute STEMI (<12h): 1.5 Million IU (1,500,000 IU) diluted in 100 mL NS/D5W infused IV over 30 to 60 minutes. 2) Acute Massive PE / DVT / Arterial Thrombosis: 250,000 IU IV loading over 30 min, then 100,000 IU/hr for 24–72h. (Note: Streptokinase is NOT used in Ischemic Stroke due to high ICH mortality).',
+          warn: '1) HYPOTENSION IS VERY COMMON during infusion (due to bradykinin release & vasodilation): if BP drops, pause/slow infusion, place patient in Trendelenburg (legs elevated), and give IV Normal Saline bolus! 2) ANTIGENICITY: Derived from Streptococci—causes fever/allergic reactions and induces neutralizing antibodies; NEVER re-administer Streptokinase between 5 days and 12 months of prior exposure or recent strep infection!'
+        },
+        ar: {
+          title: '3. ستربتوكاينيز (Streptokinase — SK) — مذيب الجلطات الوريدي (1.5 مليون وحدة)',
+          cls: 'حالّ للفيبرين من الجيل الأول (غير انتقائي للفيبرين)',
+          mech: 'يتحد مع البلازمينوجين الحر والمرتبط بالخثرة ليحوله إلى بلازمين فعال يحلل الفيبرين والفيبرينوجين في الدوران العام.',
+          ind: '1) جلطة القلب الحادة STEMI: 1.5 مليون وحدة دولية (1,500,000 IU) تمدد في 100 مل محلول ملحي أو دكستروز وتسرب وريدياً خلال 30 إلى 60 دقيقة (بمعدل 100-200 مل/ساعة). 2) الصمة الرئوية والخثار الوريدي العميق: 250,000 وحدة تحميل خلال 30 دقيقة ثم 100,000 وحدة/ساعة. (ملاحظة: لا يُستخدم في الجلطات الدماغية لارتفاع خطر النزف).',
+          warn: '1) هبوط الضغط شائع جداً أثناء تسريب الستربتوكاينيز (بسبب تحرر البراديكينين): عند هبوط الضغط أبطئ التسريب مؤقتاً، ارفع قدمي المريض (Trendelenburg)، وأعطِ محلولاً ملحياً وريدياً. 2) يُمنع تكرار إعطائه خلال 5 أيام إلى 12 شهراً من جرعة سابقة لتكون أجسام مضادة تسبب صدمة تحسسية وتبطل مفعوله!'
+        }
+      },
+
+      // =======================================================================
+      // CATEGORY 2: ANTICOAGULANTS & ANTIPLATELETS (الهيبارين، الكليكسان، البلافيكس)
+      // =======================================================================
+      heparin_ufh: {
+        cat: 'anticoag',
+        shortBadge: 'UFH (60–80 U/kg + Infusion)',
+        caseEn: 'Acute Coronary Syndrome (NSTEMI/STEMI) & Acute Pulmonary Embolism',
+        caseAr: 'المتلازمة الإكليلية الحادة (ACS) والصمة الرئوية الحادة (PE / DVT)',
+        pre:  { hr: 94, sbp: 132, dbp: 82, spo2: 94, rr: 20, co: 4.8, svr: 1280, wave: 'normal', rhythmEn: 'Sinus Rhythm (Hypercoagulable State)', rhythmAr: 'نظم جيبي (حالة فرط تخثر نشطة)', labs: 'Baseline aPTT: 29 sec (Subtherapeutic) | Platelets: 265,000 | INR: 1.0' },
+        post: { hr: 82, sbp: 128, dbp: 78, spo2: 97, rr: 16, co: 5.1, svr: 1200, wave: 'normal', rhythmEn: 'Sinus Rhythm (Therapeutic Anticoagulation)', rhythmAr: 'نظم جيبي (تمييع علاجي فعّال يمنع امتداد الخثرة)', labs: '6-hr Repeat aPTT: 68 sec (Therapeutic Target 60–80s = 1.5–2.5x!) | Plt: 260,000' },
+        calcFn: (w, isAr) => {
+          const acsBolus = Math.min(4000, Math.round(w * 60));
+          const acsInf = Math.min(1000, Math.round(w * 12));
+          const acsMlHr = +(acsInf / 100).toFixed(1);
+          const vteBolus = Math.min(10000, Math.round(w * 80));
+          const vteInf = Math.round(w * 18);
+          const vteMlHr = +(vteInf / 100).toFixed(1);
+          return {
+            prep: `25,000 Units in 250 mL 0.9% NS (or D5W) = 100 Units/mL`,
+            dose: `ACS (60 U/kg + 12 U/kg/h): Bolus ${acsBolus} U, Infuse ${acsInf} U/hr | VTE/PE (80 U/kg + 18 U/kg/h): Bolus ${vteBolus} U, Infuse ${vteInf} U/hr`,
+            pump: `ACS Pump = ${acsMlHr} mL/hr (${acsInf} U/hr) | PE/DVT Pump = ${vteMlHr} mL/hr (${vteInf} U/hr)`,
+            math: `• [STANDARD ICU CONCENTRATION]: 25,000 Units / 250 mL = 100 Units/mL.\n• [ACS / STEMI / NSTEMI PROTOCOL]: Loading Bolus = 60 U/kg × ${w} kg = ${w*60} U (Capped at Max 4,000 U = ${acsBolus} U) | Maintenance = 12 U/kg/hr × ${w} kg = ${w*12} U/hr (Capped at Max 1,000 U/hr = ${acsInf} U/hr) ÷ 100 U/mL = ${acsMlHr} mL/hr.\n• [DVT / PULMONARY EMBOLISM PROTOCOL]: Loading Bolus = 80 U/kg × ${w} kg = ${w*80} U (capped at 10,000 U in many protocols → ${vteBolus} U; follow local nomogram) | Maintenance = 18 U/kg/hr × ${w} kg = ${vteInf} U/hr ÷ 100 U/mL = ${vteMlHr} mL/hr.`
+          };
+        },
+        en: {
+          title: '4. Unfractionated Heparin (UFH) — Weight-Based ICU Nomogram',
+          cls: 'Parenteral Indirect Thrombin & Factor Xa Inhibitor (Antithrombin III Potentiator)',
+          mech: 'Binds to Antithrombin III (AT-III) and accelerates its inactivation of Thrombin (Factor IIa) and Factor Xa by 1000-fold, immediately halting thrombus propagation. Short IV half-life (60–90 min), safe in renal failure!',
+          ind: '1) ACS (STEMI / NSTEMI / Unstable Angina): 60 units/kg IV bolus (Max 4,000 units), then 12 units/kg/hr infusion (Max 1,000 units/hr). 2) Acute DVT / Pulmonary Embolism (VTE): 80 units/kg IV bolus, then 18 units/kg/hr infusion. 3) DVT Prophylaxis: 5,000 units SC every 8–12 hours.',
+          warn: '1) Check aPTT every 6 hours until stable in therapeutic range (60–80 sec or 1.5–2.5× control; Anti-Xa 0.3–0.7 IU/mL), 2) Monitor Platelet count daily for Heparin-Induced Thrombocytopenia (HIT — >50% platelet drop on days 5–10 -> stop ALL heparin and switch to Argatroban/Fondaparinux!), 3) Specific Antidote: Protamine Sulfate (1 mg IV neutralizes ~100 units of Heparin given in the last 2–3 hours — use less if more time has passed since heparin t½ is 60–90 min; give slowly over 10 min, Max single dose 50 mg; rapid push causes hypotension/anaphylactoid reaction).'
+        },
+        ar: {
+          title: '4. الهيبارين غير المجزأ (Unfractionated Heparin — UFH) — بروتوكول التسريب الوريدي حسب الوزن',
+          cls: 'مضاد تخثر وريدي غير مباشر (ينشط أنتي-ثرومبين III لتثبيط العاملين IIa و Xa)',
+          mech: 'يرتبط بـ Antithrombin III ويضاعف سرعته 1000 مرة في تثبيط الثرومبين (IIa) والعامل العاشر (Xa) لمنع امتداد الخثرة. يتميز بعمر نصفي قصير وآمن تماماً في القصور الكلوي.',
+          ind: '1) بروتوكول جلطة القلب (ACS / STEMI): بولس 60 وحدة/كغ (بحد أقصى 4000 وحدة) ثم تسريب مستمر 12 وحدة/كغ/ساعة (بحد أقصى 1000 وحدة/ساعة). 2) بروتوكول الصمة الرئوية والخثار الوريدي (PE / DVT): بولس 80 وحدة/كغ ثم تسريب 18 وحدة/كغ/ساعة. 3) الوقاية من الخثار: 5000 وحدة تحت الجلد كل 8–12 ساعة.',
+          warn: '1) يُراقب فحص aPTT كل 6 ساعات (الهدف العلاجي 60–80 ثانية أي 1.5 إلى 2.5 ضعف الطبيعي)، 2) راقب الصفيحات الدموية لتحري قلة الصفيحات المحرضة بالهيبارين (HIT)، 3) الترياق النوعي (Antidote): كبريتات البروتامين (Protamine Sulfate بجرعة 1 ملغ لكل 100 وحدة هيبارين أُعطيت خلال آخر 2–3 ساعات، ببطء خلال 10 دقائق وبحد أقصى 50 ملغ).'
+        }
+      },
+
+      enoxaparin: {
+        cat: 'anticoag',
+        shortBadge: 'Enoxaparin / Clexane (1 mg/kg SC)',
+        caseEn: 'NSTEMI / Acute DVT & Pulmonary Embolism — Therapeutic LMW Heparin',
+        caseAr: 'الذبحة غير المستقرة / NSTEMI والخثار الوريدي العميق — كليكسان علاجي',
+        pre:  { hr: 86, sbp: 134, dbp: 80, spo2: 96, rr: 18, co: 4.9, svr: 1260, wave: 'normal', rhythmEn: 'Sinus Rhythm (NSTEMI / Acute DVT)', rhythmAr: 'نظم جيبي (خثار وريدي / NSTEMI)', labs: 'CrCl: 78 mL/min (>30 mL/min = q12h dosing) | Anti-Xa: 0.0 IU/mL' },
+        post: { hr: 78, sbp: 128, dbp: 76, spo2: 98, rr: 16, co: 5.1, svr: 1210, wave: 'normal', rhythmEn: 'Sinus Rhythm (Anti-Xa 0.6–1.0 IU/mL)', rhythmAr: 'نظم جيبي (تثبيط انتقائي للعامل Xa)', labs: 'Peak Anti-Xa (4h post-dose): 0.85 IU/mL (Therapeutic!) | Check renal function CrCl!' },
+        calcFn: (w, isAr) => {
+          const txQ12 = Math.round(w * 1.0);
+          const txQ24 = Math.round(w * 1.5);
+          const renalDose = Math.round(w * 1.0);
+          return {
+            prep: `Pre-filled syringes: 40 mg/0.4 mL, 60 mg/0.6 mL, 80 mg/0.8 mL (100 mg/mL)`,
+            dose: `Therapeutic (CrCl ≥30): ${txQ12} mg SC every 12h (or ${txQ24} mg SC q24h) | Prophylaxis: 40 mg SC q24h`,
+            pump: `Subcutaneous (SC) injection in abdominal wall (2 inches from umbilicus; do NOT expel air bubble!)`,
+            math: `• [THERAPEUTIC DOSE (ACS / DVT / PE)]: 1 mg/kg × ${w} kg = ${txQ12} mg SC every 12 hours.\n• [SEVERE RENAL IMPAIRMENT (CrCl < 30 mL/min)]: Reduce to 1 mg/kg (${renalDose} mg) SC ONCE daily (q24h) or switch to IV Unfractionated Heparin!\n• [STEMI WITH FIBRINOLYTICS (<75 yrs)]: 30 mg IV bolus + ${txQ12} mg SC q12h (Max 100 mg for each of the first 2 SC doses). If ≥75 yrs: NO IV bolus, give ${Math.round(w*0.75)} mg SC q12h (Max 75 mg for each of the first 2 doses).`
+          };
+        },
+        en: {
+          title: '5. Enoxaparin (Clexane / Lovenox) — Low-Molecular-Weight Heparin',
+          cls: 'Low-Molecular-Weight Heparin (LMWH — Selective Factor Xa > IIa Inhibitor)',
+          mech: 'Potentiates Antithrombin III with high selectivity for Factor Xa (Xa:IIa ratio ~4:1), providing predictable bioavailability without routine aPTT monitoring.',
+          ind: '1) Therapeutic Anticoagulation (NSTEMI, Unstable Angina, DVT, PE): 1 mg/kg SC every 12 hours. 2) STEMI with Fibrinolysis (<75 yrs): 30 mg IV bolus + 1 mg/kg SC q12h (Max 100 mg for the first 2 doses); if ≥75 yrs: omit bolus, give 0.75 mg/kg SC q12h (Max 75 mg for the first 2 doses). 3) VTE Prophylaxis in ICU/Medical patients: 40 mg SC once daily (30 mg once daily if CrCl < 30 mL/min).',
+          warn: '1) RENALLY CLEARED: Always calculate Creatinine Clearance (CrCl)! If CrCl < 30 mL/min, reduce treatment dose to 1 mg/kg SC ONCE daily (q24h) or use Unfractionated Heparin! 2) Do NOT expel the pre-filled syringe air bubble before SC injection (prevents bruising), 3) Hold 12–24h prior to spinal/epidural anesthesia (risk of spinal hematoma).'
+        },
+        ar: {
+          title: '5. إينوكسابارين / كليكسان (Enoxaparin / Clexane) — الهيبارين منخفض الوزن الجزيئي',
+          cls: 'هيبارين منخفض الوزن الجزيئي (يثبط العامل العاشر Xa انتقائياً)',
+          mech: 'ينشط أنتي-ثرومبين III بانتقائية عالية لتثبيط العامل Xa، ويعطي فعالية ثابتة تحت الجلد دون الحاجة لمراقبة الـ aPTT الروتينية.',
+          ind: '1) الجرعة العلاجية (الجلطات القلبية NSTEMI، الخثار الوريدي DVT، الصمة الرئوية PE): 1 ملغ/كغ تحت الجلد كل 12 ساعة. 2) الجرعة الوقائية (DVT Prophylaxis): 40 ملغ تحت الجلد مرة واحدة يومياً. 3) في STEMI (<75 سنة): 30 ملغ بولس وريدي ثم 1 ملغ/كغ تحت الجلد كل 12 ساعة.',
+          warn: '1) يُطرح عن طريق الكلى: إذا كانت تصفية الكرياتينين CrCl < 30 مل/دقيقة يجب خفض الجرعة العلاجية إلى 1 ملغ/كغ مرة واحدة يومياً (كل 24 ساعة) أو استبداله بالهيبارين الوريدي! 2) يُحقن في جدار البطن على بعد 5 سم من السرة مع عدم تفريغ فقاعة الهواء ولا يُفرك مكان الحقن.'
+        }
+      },
+
+      clopidogrel: {
+        cat: 'anticoag',
+        shortBadge: 'Clopidogrel / Plavix + Aspirin (DAPT)',
+        caseEn: 'Acute Coronary Syndrome (STEMI/NSTEMI Stent PCI) & Minor Ischemic Stroke/TIA',
+        caseAr: 'المتلازمة الإكليلية الحادة (شبكة الشريان التاجي PCI) والجلطة الدماغية العابرة',
+        pre:  { hr: 84, sbp: 138, dbp: 84, spo2: 96, rr: 17, co: 4.8, svr: 1300, wave: 'stemi', rhythmEn: 'Sinus Rhythm (Platelet Aggregation Active)', rhythmAr: 'نظم جيبي (تكدس صفيحات نشط على اللويحة)', labs: 'Platelets: 280,000 | CYP2C19 Prodrug activation | Pair with Aspirin 162–325mg chewed!' },
+        post: { hr: 74, sbp: 126, dbp: 76, spo2: 98, rr: 16, co: 5.1, svr: 1210, wave: 'normal', rhythmEn: 'Sinus Rhythm (P2Y12 Platelet Inhibition — Stent Protected)', rhythmAr: 'نظم جيبي (تثبيط مستقبلات P2Y12 وحماية الشبكة التاجية)', labs: 'Irreversible P2Y12 blockade for platelet lifespan (7–10 days) | Hold 5 days before CABG!' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `Oral Tablets: Clopidogrel 75 mg & 300 mg tablets + Non-enteric Aspirin 81 mg / 300 mg`,
+            dose: `Primary PCI Load = 600 mg PO | Fibrinolytic Load (≤75y) = 300 mg PO (>75y = 75 mg) | Maintenance = 75 mg PO daily`,
+            pump: `Oral / NG Tube Administration (Crush & suspend in water if given via NGT in intubated STEMI patient!)`,
+            math: `• [PRIMARY PCI LOADING DOSE]: Clopidogrel 600 mg PO (8 × 75mg tabs) + Aspirin 162–325 mg chewed immediately.\n• [STEMI WITH FIBRINOLYTICS]: Age ≤ 75 yrs = 300 mg PO load | Age > 75 yrs = 75 mg PO (NO loading dose!).\n• [MINOR STROKE (NIHSS ≤3) / HIGH-RISK TIA, NOT given tPA]: Clopidogrel 300 mg PO load (CHANCE; POINT used 600 mg), then 75 mg/day + Aspirin 81 mg/day for 21 days, then a single antiplatelet.\n• [P2Y12 CHOICE IN ACS-PCI]: Ticagrelor (180 mg load) or Prasugrel (60 mg load; not for age ≥75, weight <60 kg, or prior stroke/TIA) are preferred over Clopidogrel when there is no contraindication; Clopidogrel remains the choice with fibrinolysis, high bleeding risk or oral anticoagulant use.`
+          };
+        },
+        en: {
+          title: '6. Clopidogrel (Plavix) & Aspirin (Dual Antiplatelet Therapy — DAPT)',
+          cls: 'Irreversible Platelet P2Y12 ADP-Receptor Antagonist (Thienopyridine) + COX-1 Inhibitor',
+          mech: 'Clopidogrel is a prodrug activated by hepatic CYP2C19 that irreversibly blocks the P2Y12 ADP receptor on platelets, preventing GP IIb/IIIa activation and platelet aggregation for the life of the platelet (7–10 days). Combined with Aspirin (irreversible COX-1 / Thromboxane A2 blockade) as DAPT.',
+          ind: '1) Primary PCI (Coronary Stenting): 600 mg PO loading dose, then 75 mg PO once daily (+ Aspirin 162–325 mg chewed load, then 81 mg daily). 2) STEMI with Fibrinolytic therapy: 300 mg PO load if age ≤75 years (if >75 years: give 75 mg without loading dose!). 3) Acute Minor Ischemic Stroke (NIHSS ≤3) or High-Risk TIA (NOT receiving tPA): 300 mg load then 75 mg/day + Aspirin for 21 days. Note: Ticagrelor / Prasugrel are preferred P2Y12 inhibitors in ACS-PCI when not contraindicated.',
+          warn: '1) Hold Clopidogrel at least 5 days before elective CABG (open-heart surgery) to prevent severe perioperative bleeding! 2) Avoid Omeprazole/Esomeprazole (inhibit CYP2C19 and reduce Clopidogrel activation—use Pantoprazole instead for GI protection!), 3) In Acute Ischemic Stroke treated with Alteplase (tPA), wait 24 hours and confirm negative repeat Head CT before giving Clopidogrel/Aspirin!'
+        },
+        ar: {
+          title: '6. كلوبيدوغريل / بلافيكس (Clopidogrel / Plavix) مع الأسبرين (المعالجة المزدوجة DAPT)',
+          cls: 'مثبط غير عكوس لمستقبلات P2Y12 الصفيحية + مثبط COX-1 (مضاد تكدس صفيحات مزدوج)',
+          mech: 'يتفعل الكلوبيدوغريل في الكبد عبر أنزيم CYP2C19 ليغلق مستقبلات ADP (P2Y12) على سطح الصفيحات بشكل غير عكوس طوال عمر الصفيحة (7–10 أيام)، ويعمل تآزرياً مع الأسبرين لمنع تخثر الشبكة التاجية (Stent Thrombosis).',
+          ind: '1) القسطرة التاجية الأولية (Primary PCI): جرعة تحميل 600 ملغ فموياً ثم 75 ملغ يومياً (+ أسبرين 162–325 ملغ مضغاً ثم 81 ملغ يومياً). 2) مع مذيبات الجلطات في STEMI: جرعة تحميل 300 ملغ لمن عمره ≤75 سنة (و75 ملغ بدون تحميل لمن عمره >75 سنة!). 3) الجلطة الدماغية الخفيفة أو العابرة (TIA) التي لم تأخذ مذيب جلطة: تحميل 300 ملغ ثم 75 ملغ يومياً.',
+          warn: '1) يجب إيقاف الكلوبيدوغريل قبل 5 أيام على الأقل من عملية القلب المفتوح (CABG) لمنع النزف الجراحي الغزير! 2) تجنب إعطاء Omeprazole معه لأنه يثبط أنزيم CYP2C19 ويضعف مفعول البلافيكس (استخدم Pantoprazole بدلاً منه لحماية المعدة).'
+        }
+      },
+
+      tirofiban: {
+        cat: 'anticoag',
+        shortBadge: 'Tirofiban / Aggrastat (GP IIb/IIIa)',
+        caseEn: 'High-Risk PCI / Bailout Thrombus in Cath Lab & Refractory NSTEMI',
+        caseAr: 'قسطرة قلبية عالية الخطورة مع خثرة تاجية كثيفة (Tirofiban / Aggrastat)',
+        pre:  { hr: 90, sbp: 130, dbp: 78, spo2: 96, rr: 18, co: 4.7, svr: 1290, wave: 'stemi', rhythmEn: 'Sinus Rhythm (High-Burden Intracoronary Thrombus)', rhythmAr: 'نظم جيبي (خثرة تاجية عالية الكثافة)', labs: 'CrCl: 72 mL/min | Platelets: 245,000 | Final Common Pathway GP IIb/IIIa' },
+        post: { hr: 76, sbp: 124, dbp: 76, spo2: 98, rr: 16, co: 5.1, svr: 1200, wave: 'normal', rhythmEn: 'Sinus Rhythm (>90% Platelet Aggregation Blocked)', rhythmAr: 'نظم جيبي (تثبيط >90% من تكدس الصفيحات)', labs: 'Check Platelets at 2–6h post-bolus! | Halve infusion rate if CrCl ≤ 60 mL/min!' },
+        calcFn: (w, isAr) => {
+          const bolusMcg = Math.round(w * 25);
+          const bolusMl = +(bolusMcg / 50).toFixed(1);
+          const infMcgMin = +(w * 0.15).toFixed(2);
+          const infMlHr = +((infMcgMin * 60) / 50).toFixed(1);
+          return {
+            prep: `12.5 mg in 250 mL NS/D5W = 50 mcg/mL`,
+            dose: `Bolus (25 mcg/kg) = ${bolusMcg} mcg IV over 3 min | Infusion (0.15 mcg/kg/min) = ${infMcgMin} mcg/min`,
+            pump: `Bolus = ${bolusMl} mL over 3 min, then Continuous Pump = ${infMlHr} mL/hr (Halve to ${(infMlHr/2).toFixed(1)} mL/hr if CrCl ≤ 60!)`,
+            math: `• [CONCENTRATION]: 12.5 mg (12,500 mcg) / 250 mL = 50 mcg/mL.\n• [HIGH-DOSE PCI BOLUS]: 25 mcg/kg × ${w} kg = ${bolusMcg} mcg ÷ 50 mcg/mL = ${bolusMl} mL IV over 3 min.\n• [MAINTENANCE INFUSION]: (0.15 mcg/kg/min × ${w} kg × 60 min/hr) ÷ 50 mcg/mL = ${infMlHr} mL/hr for 12–18 hours.`
+          };
+        },
+        en: {
+          title: '7. Tirofiban (Aggrastat) — IV Glycoprotein IIb/IIIa Inhibitor',
+          cls: 'Reversible Non-Peptide GP IIb/IIIa Receptor Antagonist (Final Common Pathway Blocker)',
+          mech: 'Blocks the platelet Glycoprotein IIb/IIIa receptor—the final common pathway of platelet aggregation—preventing fibrinogen from cross-linking platelets. Platelet function recovers within 4–8 hours of stopping the infusion.',
+          ind: 'High-risk NSTEMI / STEMI undergoing PCI with large intracoronary thrombus burden or no-reflow phenomenon: 25 mcg/kg IV bolus over 3 minutes, followed by 0.15 mcg/kg/min continuous IV infusion for 12–18 hours.',
+          warn: '1) RENAL DOSE ADJUSTMENT: Reduce infusion rate by 50% (to 0.075 mcg/kg/min) if CrCl ≤ 60 mL/min! 2) Check platelet count 2–6 hours after starting infusion to detect acute profound GP IIb/IIIa-induced thrombocytopenia (<50,000/mm³), 3) Monitor femoral/radial arterial sheath site closely for bleeding.'
+        },
+        ar: {
+          title: '7. تيروفيبان / أغراستات (Tirofiban / Aggrastat) — مثبط مستقبلات GP IIb/IIIa الوريدي',
+          cls: 'مثبط عكوس للمسار النهائي المشترك لتكدس الصفيحات (GP IIb/IIIa Inhibitor)',
+          mech: 'يغلق مستقبلات GP IIb/IIIa على سطح الصفيحات فيمنع ارتباط الفيبرينوجين بها بشكل كامل (>90%). يعود عمل الصفيحات لطبيعته خلال 4–8 ساعات بعد إيقاف التسريب.',
+          ind: 'يُعطى في القسطرة التاجية عالية الخطورة (PCI) وعند وجود خثرة تاجية كثيفة: بولس 25 ميكروغرام/كغ خلال 3 دقائق، يتبعه تسريب مستمر بمعدل 0.15 ميكروغرام/كغ/دقيقة لمدة 12–18 ساعة.',
+          warn: '1) تُخفض سرعة التسريب إلى النصف (50%) إذا كانت تصفية الكرياتينين CrCl ≤ 60 مل/دقيقة! 2) يجب فحص عدد الصفيحات الدموية بعد 2–6 ساعات من بدء الدواء لتحري الهبوط الحاد في الصفيحات.'
+        }
+      },
+
+      // =======================================================================
+      // CATEGORY 3: ACLS ARRHYTHMIA & CARDIAC ARREST DRUGS
+      // =======================================================================
+      epinephrine: {
+        cat: 'acls',
+        shortBadge: 'Epinephrine (1mg Arrest / Infusion)',
+        caseEn: 'Cardiac Arrest (PEA / Asystole / Refractory VF) & Anaphylactic / Bradycardic Shock',
+        caseAr: 'توقف القلب (Asystole / PEA / VF) أو صدمة التأق وبطء القلب المعند',
+        pre:  { hr: 0, sbp: 0, dbp: 0, spo2: 0, rr: 10, co: 0.0, svr: 400, wave: 'asystole', rhythmEn: 'Cardiac Arrest (Asystole / Flatline)', rhythmAr: 'توقف قلب كامل (Asystole — خط مستقيم)', labs: 'EtCO2: 12 mmHg (High-quality CPR in progress) | Give Epinephrine 1 mg IV/IO ASAP!' },
+        post: { hr: 104, sbp: 118, dbp: 72, spo2: 96, rr: 14, co: 4.8, svr: 1480, wave: 'normal', rhythmEn: 'ROSC Achieved! (Sinus Rhythm Restored)', rhythmAr: 'عودة الدورة الدموية التلقائية (ROSC — نظم جيبي)', labs: 'Sudden EtCO2 jump to 42 mmHg (ROSC sign!) | Obtain 12-Lead ECG & target SpO2 92–98%' },
+        calcFn: (w, isAr) => {
+          const infMcgMin = +(w * 0.10).toFixed(1);
+          const infMlHr = +((infMcgMin * 60) / 16).toFixed(1);
+          return {
+            prep: `Arrest Bolus: 1 mg in 10 mL (1:10,000 = 0.1 mg/mL) | Infusion Bag: 4 mg in 250 mL NS/D5W = 16 mcg/mL`,
+            dose: `Cardiac Arrest = 1 mg (10 mL) IV/IO q3–5m | Anaphylaxis = 0.3–0.5 mg IM (1:1,000) | Shock/Brady Infusion = 2–10 mcg/min (0.05–0.2 mcg/kg/min)`,
+            pump: `Shock/Brady Infusion at 0.1 mcg/kg/min (${infMcgMin} mcg/min) = ${infMlHr} mL/hr (on 16 mcg/mL bag)`,
+            math: `• [CARDIAC ARREST BOLUS]: 1 mg (10 mL of 1:10,000) IV/IO push every 3–5 minutes followed by 20 mL NS flush.\n• [CONTINUOUS VASOPRESSOR/BRADYCARDIA INFUSION]: Bag = 4 mg / 250 mL = 16 mcg/mL. At 0.1 mcg/kg/min for ${w} kg (${infMcgMin} mcg/min): Pump Rate = (${infMcgMin} × 60) ÷ 16 = ${infMlHr} mL/hr.`
+          };
+        },
+        en: {
+          title: '8. Epinephrine (Adrenaline) — Cardiac Arrest, Anaphylaxis & Inopressor',
+          cls: 'Non-Selective Alpha-1, Beta-1, and Beta-2 Adrenergic Agonist (Catecholamine)',
+          mech: 'Alpha-1 vasoconstriction increases aortic diastolic pressure and coronary/cerebral perfusion pressure during CPR; Beta-1 increases heart rate (chronotropy) and contractility (inotropy); Beta-2 relaxes bronchial smooth muscle.',
+          ind: '1) Cardiac Arrest (VF/pVT after 2nd shock; Asystole/PEA ASAP): 1 mg (10 mL of 1:10,000) IV/IO every 3–5 min. 2) Symptomatic Bradycardia / Post-ROSC Hypotension: 2–10 mcg/min (or 0.05–0.2 mcg/kg/min) continuous IV infusion. 3) Anaphylactic Shock: 0.3–0.5 mg IM (1:1,000) in anterolateral thigh.',
+          warn: '1) Never confuse 1:10,000 IV Cardiac Arrest concentration (0.1 mg/mL) with 1:1,000 IM Anaphylaxis concentration (1 mg/mL)! 2) Infuse continuous drip via Central Line when possible (extravasation causes necrosis -> treat with Phentolamine).'
+        },
+        ar: {
+          title: '8. إبينفرين / أدرينالين (Epinephrine) — حجر الزاوية في الإنعاش القلبي والصدمة',
+          cls: 'مقلد ودي غير انتقائي لمستقبلات ألفا-1 وبيتا-1 وبيتا-2 (كاتيكولامين)',
+          mech: 'يرفع ضغط الانبساط الأبهري وضغط التروية التاجية والدماغية أثناء الـ CPR عبر تحفيز ألفا-1، ويزيد قوة وسرعة القلب عبر بيتا-1، ويوسع القصبات عبر بيتا-2.',
+          ind: '1) توقف القلب (بعد الصدمة الثانية في VF/pVT، وفوراً في Asystole/PEA): 1 ملغ (10 مل بتركيز 1:10,000) وريدياً كل 3–5 دقائق. 2) تسريب بطء القلب أو الصدمة: 2–10 ميكروغرام/دقيقة (0.05–0.2 مكغ/كغ/د). 3) صدمة التحسس (Anaphylaxis): 0.3–0.5 ملغ عضلياً في الفخذ (1:1,000).',
+          warn: 'انتبه لعدم الخلط بين تركيز الوريد في الإنعاش (1:10,000) وتركيز العضل في التحسس (1:1,000)! ويُعطى التسريب المستمر عبر خط مركزي لتجنب نخر الأنسجة.'
+        }
+      },
+
+      amiodarone: {
+        cat: 'acls',
+        shortBadge: 'Amiodarone / Cordarone (300mg / 150mg)',
+        caseEn: 'Stable Monomorphic VT (182 bpm) / Shock-Refractory VF / Rapid AFib in HF',
+        caseAr: 'تسرع بطيني مستقر (VT 182/د) أو رجفان بطيني معند للصدمات',
+        pre:  { hr: 182, sbp: 104, dbp: 66, spo2: 93, rr: 22, co: 3.4, svr: 1490, wave: 'vt', rhythmEn: 'Monomorphic Ventricular Tachycardia (182 bpm)', rhythmAr: 'تسرع بطيني أحادي الشكل (VT — 182 نبضة/د)', labs: 'K+: 4.3 mEq/L | Mg2+: 2.1 mg/dL | Wide QRS 0.16s | Check QTc after conversion!' },
+        post: { hr: 76, sbp: 122, dbp: 76, spo2: 98, rr: 16, co: 5.0, svr: 1220, wave: 'normal', rhythmEn: 'Converted to Normal Sinus Rhythm (76 bpm)', rhythmAr: 'تحول إلى النظم الجيبي الطبيعي (76 نبضة/د)', labs: 'Start Maintenance: 1 mg/min for 6h (33.3 mL/hr), then 0.5 mg/min for 18h (16.7 mL/hr)' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `Loading: 150 mg in 100 mL D5W (1.5 mg/mL) | Maintenance Bag: 450 mg in 250 mL D5W = 1.8 mg/mL`,
+            dose: `Arrest (VF/pVT) = 300 mg IVP, then 150 mg | Perfusing VT = 150 mg over 10m -> 1 mg/min (6h) -> 0.5 mg/min (18h)`,
+            pump: `10-min Load = 600 mL/hr (100 mL over 10m) | First 6h (1 mg/min) = 33.3 mL/hr | Next 18h (0.5 mg/min) = 16.7 mL/hr`,
+            math: `• [CARDIAC ARREST (After 3rd Shock)]: 1st Dose = 300 mg IV/IO push | 2nd Dose = 150 mg IV/IO push.\n• [STABLE VT / WIDE TACHYCARDIA 24-HR PROTOCOL (Total 1,050 mg)]:\n  1) Rapid Load: 150 mg in 100 mL D5W over 10 min (Pump = 600 mL/hr).\n  2) Slow Load (6 hrs at 1 mg/min = 60 mg/hr): 60 mg/hr ÷ 1.8 mg/mL = 33.3 mL/hr (delivers 360 mg).\n  3) Maintenance (18 hrs at 0.5 mg/min = 30 mg/hr): 30 mg/hr ÷ 1.8 mg/mL = 16.7 mL/hr (delivers 540 mg).`
+          };
+        },
+        en: {
+          title: '9. Amiodarone (Cordarone) — Class III Broad-Spectrum Antiarrhythmic',
+          cls: 'Vaughan Williams Class III K+ Channel Blocker (+ Na+, Ca2+, and Beta-Blocking Properties)',
+          mech: 'Prolongs Phase 3 Action Potential duration and Effective Refractory Period (ERP) across atrial, nodal, and ventricular myocardium, while slowing AV nodal conduction.',
+          ind: '1) Shock-Refractory VF / Pulseless VT (after 3rd shock): 300 mg IV/IO bolus, followed by a second dose of 150 mg IV/IO. 2) Stable Monomorphic VT or Wide-Complex Tachycardia with pulse (and AFib rate/rhythm control in Heart Failure): 150 mg IV in 100 mL D5W over 10 min, then 1 mg/min for 6 hours, then 0.5 mg/min for 18 hours (Max 2.2 g/24h).',
+          warn: '1) Rapid IV administration causes hypotension and bradycardia (due to Polysorbate-80 solvent — infuse load over full 10 min in patients with a pulse!), 2) Dilute in D5W in glass/polyolefin bottles, 3) CONTRAINDICATED in Torsades de Pointes (prolongs QTc) and Pre-Excited AFib (WPW)!'
+        },
+        ar: {
+          title: '9. أميودارون / كوردارون (Amiodarone / Cordarone) — مضاد اللانظميات واسع الطيف',
+          cls: 'مضاد لانظميات من الصنف الثالث (Class III — يغلق قنوات K+ و Na+ و Ca2+ ومستقبلات بيتا)',
+          mech: 'يطيل زمن جهد الفعل وفترة العصيان الفعالة في الأذينين والبطينين، ويبطئ التوصيل عبر العقدة الأذينية البطينية.',
+          ind: '1) توقف القلب القابل للصدمة (VF / pVT بعد الصدمة الثالثة): 300 ملغ دفعة وريدية، والجرعة الثانية 150 ملغ. 2) التسرع البطيني المستقر مع نبض (VT with Pulse): 150 ملغ في 100 مل دكستروز خلال 10 دقائق، ثم 1 ملغ/دقيقة لمدة 6 ساعات (360 ملغ)، ثم 0.5 ملغ/دقيقة لمدة 18 ساعة (540 ملغ).',
+          warn: '1) التسريب السريع يسبب هبوط ضغط شديد وبطء قلب، 2) يُمنع في Torsades de Pointes (لأنه يطيل QT) وفي الرجفان الأذيني المترافق مع متلازمة WPW!'
+        }
+      },
+
+      adenosine: {
+        cat: 'acls',
+        shortBadge: 'Adenosine (6mg -> 12mg Rapid IVP)',
+        caseEn: 'Regular Narrow-Complex SVT / AVNRT (HR 212 bpm, Stable BP 116/74)',
+        caseAr: 'تسرع فوق بطيني منتظم ضيق المركب (SVT / AVNRT بسرعة 212 نبضة/د)',
+        pre:  { hr: 212, sbp: 116, dbp: 74, spo2: 96, rr: 22, co: 3.9, svr: 1360, wave: 'svt', rhythmEn: 'Supraventricular Tachycardia (SVT 212 bpm)', rhythmAr: 'تسرع فوق بطيني منتظم (SVT — 212 نبضة/د)', labs: 'Use large antecubital IV + 3-way stopcock two-syringe flush! | Half-life < 10 sec!' },
+        post: { hr: 78, sbp: 124, dbp: 78, spo2: 99, rr: 16, co: 5.2, svr: 1190, wave: 'normal', rhythmEn: 'Transient AV Block -> Restored Sinus Rhythm (78 bpm)', rhythmAr: 'وقفة جيبية عابرة ثم عودة النظم الجيبي الطبيعي (78/د)', labs: 'AV nodal re-entry circuit terminated! | Record continuous 12-Lead rhythm strip during push' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `Vials: 6 mg / 2 mL (3 mg/mL) + 20 mL 0.9% Normal Saline Flush in a 3-way stopcock`,
+            dose: `1st Dose = 6 mg (2 mL) rapid IVP | 2nd Dose (after 1–2 min if needed) = 12 mg (4 mL) rapid IVP`,
+            pump: `Instant 1–2 second IV push into proximal/antecubital vein + immediate 20 mL NS flush & arm elevation!`,
+            math: `• [STANDARD ADULT SVT]: 1st Dose = 6 mg (2 mL) rapid IV push + 20 mL NS flush | 2nd Dose = 12 mg (4 mL) rapid IV push.\n• [CENTRAL LINE / HEART TRANSPLANT / DIPYRIDAMOLE / CARBAMAZEPINE]: Reduce initial dose by 50% to 3 mg (1 mL)!\n• [THEOPHYLLINE / CAFFEINE]: Receptor antagonists — may require higher doses.`
+          };
+        },
+        en: {
+          title: '10. Adenosine (Adenocor) — Ultra-Short-Acting AV Nodal Blocker',
+          cls: 'Endogenous Purine Nucleoside (A1 Receptor Agonist -> Activates IK-ACh & Blocks ICa-L)',
+          mech: 'Hyperpolarizes the AV node and transiently blocks AV nodal conduction for a few seconds, breaking re-entrant SVT circuits (AVNRT / orthodromic AVRT). Ultra-short half-life (<10 seconds) due to RBC uptake.',
+          ind: 'First-line drug for stable Regular Narrow-Complex SVT (after vagal maneuvers fail): 6 mg rapid IV push over 1–2 seconds via a large proximal (antecubital) vein using a two-syringe 3-way stopcock, immediately followed by a rapid 20 mL Normal Saline flush and arm elevation. If SVT persists after 1–2 min, give 12 mg rapid IV push.',
+          warn: '1) Warn the awake patient about transient chest tightness, facial flushing, dyspnea, and a brief 3–6 second "heart stopping" pause on the monitor! 2) CONTRAINDICATED in Asthma/Active Bronchospasm, 2nd/3rd-Degree AV Block, Irregular Wide-Complex Tachycardia (WPW + AFib -> precipitates VFib!), and Sinus Tachycardia.'
+        },
+        ar: {
+          title: '10. أدينوزين (Adenosine / Adenocor) — إيقاف التسرع فوق البطيني (SVT)',
+          cls: 'نيوكليوزيد داخلي المنشأ (يثبط العقدة الأذينية البطينية AV Node مؤقتاً — عمره النصفي <10 ثوانٍ)',
+          mech: 'يفعّل قنوات البوتاسيوم ويغلق قنوات الكالسيوم في عقدة AV محدثاً حصاراً أذينياً بطينياً عابراً لثوانٍ يكسر حلقة إعادة الدخول في الـ SVT.',
+          ind: 'الدواء الأول للـ SVT المنتظم المستقر (بعد مناورات المبهم): الجرعة الأولى 6 ملغ (2 مل) دفعاً وريدياً سريعاً جداً خلال ثانية في وريد مرفقي كبير عبر وصلة ثلاثية يتبعها فوراً دفع 20 مل محلول ملحي ورفع ذراع المريض. إذا لم يستجب خلال 1–2 دقيقة تُعطى الجرعة الثانية 12 ملغ (4 مل).',
+          warn: '1) نبّه المريض مسبقاً لشعور ضيق الصدر وتوهج الوجه العابر لثوانٍ وظهور وقفة قصيرة على المونيتور، 2) تُخفض الجرعة الأولى إلى 3 ملغ إذا أُعطي عبر خط مركزي (CVC)، 3) يُمنع منعاً باتاً في الربو وفي الرجفان الأذيني المترافق مع WPW!'
+        }
+      },
+
+      atropine: {
+        cat: 'acls',
+        shortBadge: 'Atropine (1 mg IV q3–5m, Max 3mg)',
+        caseEn: 'Symptomatic Sinus Bradycardia (HR 36 bpm, BP 82/50) / Mobitz Type I AV Block',
+        caseAr: 'بطء قلب عرضي غير مستقر (36 نبضة/د، ضغط 82/50) أو حصار موبتز الأول',
+        pre:  { hr: 36, sbp: 82, dbp: 50, spo2: 92, rr: 16, co: 2.8, svr: 1410, wave: 'brady', rhythmEn: 'Severe Sinus Bradycardia (36 bpm)', rhythmAr: 'بطء جيبي شديد مع هبوط ضغط (36 نبضة/د)', labs: 'Nodal vagal tone high | Give Atropine 1 mg IV (Never give <0.5 mg!)' },
+        post: { hr: 78, sbp: 118, dbp: 74, spo2: 98, rr: 16, co: 5.0, svr: 1220, wave: 'normal', rhythmEn: 'Restored Sinus Rhythm (78 bpm)', rhythmAr: 'عودة سرعة النظم الجيبي والضغط للطبيعي (78/د)', labs: 'Max cumulative ACLS Bradycardia dose = 3 mg | In Organophosphate poisoning: 2–5 mg doubled q5m!' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `Ampoules / Pre-filled syringes: 1 mg / 1 mL or 1 mg / 10 mL`,
+            dose: `ACLS Bradycardia = 1 mg IV bolus every 3–5 min (Maximum Total = 3 mg) | Organophosphate = 2–5 mg IV doubled q5m`,
+            pump: `Direct IV Push over 1 minute (Do NOT give in slow infusion or doses < 0.5 mg -> causes paradoxical bradycardia!)`,
+            math: `• [AHA ACLS BRADYCARDIA PROTOCOL]: 1 mg IV push every 3–5 minutes as needed up to Maximum Total Dose = 3 mg (0.04 mg/kg).\n• [ORGANOPHOSPHATE / CARBAMATE CHOLINERGIC TOXICITY]: 2 to 5 mg IV bolus, doubled every 5 minutes until bronchial secretions dry ("atropinization").`
+          };
+        },
+        en: {
+          title: '11. Atropine Sulfate — First-Line Anticholinergic for Symptomatic Bradycardia',
+          cls: 'Competitive Muscarinic (M2) Acetylcholine Receptor Antagonist (Parasympatholytic)',
+          mech: 'Blocks vagal (parasympathetic) M2 receptors on the SA node and AV node, increasing sinus node automaticity and accelerating AV nodal conduction.',
+          ind: '1) First-line drug for Symptomatic Sinus Bradycardia, Junctional Bradycardia, and 2nd-Degree Mobitz Type I (Wenckebach) AV Block: 1 mg IV bolus every 3–5 minutes (Maximum total dose = 3 mg). 2) Organophosphate / Nerve Agent Poisoning: 2–5 mg IV, doubled every 5–10 min until pulmonary secretions dry.',
+          warn: '1) INEFFECTIVE in Infranodal Blocks (Mobitz Type II and 3rd-Degree Complete Heart Block with wide QRS) and denervated transplanted hearts—do NOT delay Transcutaneous Pacing (TCP) or Dopamine/Epinephrine infusion! 2) Doses <0.5 mg can cause paradoxical central vagal bradycardia, 3) Use cautiously in Acute MI (tachycardia increases myocardial oxygen demand).'
+        },
+        ar: {
+          title: '11. أتروبين (Atropine Sulfate) — الخط الأول لبطء القلب العرضي والتسمم بالمبيدات',
+          cls: 'حالّ للاودي (يغلق مستقبلات المسكارين M2 للعصب الحائر في عقدتي SA و AV)',
+          mech: 'يثبط تأثير العصب المبهم (Vagus Nerve) على العقدة الجيبية والعقدة الأذينية البطينية فيرفع سرعة النبض ويحسن التوصيل العقدي.',
+          ind: '1) الخط الأول في بطء القلب الجيبي العرضي وحصار الدرجة الثانية موبتز 1 (Wenckebach): 1 ملغ وريدياً كل 3–5 دقائق (الحد الأقصى الكلي 3 ملغ). 2) التسمم بالمبيدات الحشرية الفسفورية العضوية: 2–5 ملغ وريدياً وتُضاعف كل 5 دقائق حتى جفاف المفرزات القصبية.',
+          warn: '1) غير فعّال في الحصار تحت العقدي (Mobitz II والحصار الكامل الدرجة الثالثة ذي الـ QRS العريض) ولا في القلب المزروع — لا تؤخر الناظم عبر الجلد (TCP)! 2) إعطاء جرعة أقل من 0.5 ملغ يسبب بطء قلب عكسي!'
+        }
+      },
+
+      lidocaine: {
+        cat: 'acls',
+        shortBadge: 'Lidocaine (1–1.5 mg/kg + 1–4 mg/min)',
+        caseEn: 'Ischemic Ventricular Tachycardia / Frequent R-on-T PVCs / Shock-Refractory VF',
+        caseAr: 'تسرع بطيني إقفاري (VT) أو خوارج بطينية خبيثة R-on-T بعد الجلطة',
+        pre:  { hr: 176, sbp: 108, dbp: 68, spo2: 94, rr: 20, co: 3.6, svr: 1440, wave: 'vt', rhythmEn: 'Ischemic Ventricular Tachycardia (176 bpm)', rhythmAr: 'تسرع بطيني إقفاري (VT — 176 نبضة/د)', labs: 'Class IB selective for ischemic Purkinje/ventricular tissue | Does NOT prolong QT!' },
+        post: { hr: 80, sbp: 124, dbp: 76, spo2: 98, rr: 16, co: 5.0, svr: 1210, wave: 'normal', rhythmEn: 'Sinus Rhythm (Ventricular Ectopy Suppressed)', rhythmAr: 'عودة النظم الجيبي وإخماد البؤر البطينية المنتبذة', labs: 'Maintenance infusion: 1–4 mg/min (15–60 mL/hr on 4 mg/mL bag) | Watch for CNS toxicity!' },
+        calcFn: (w, isAr) => {
+          const b1 = Math.round(w * 1.0);
+          const b15 = Math.round(w * 1.5);
+          const b2 = Math.round(w * 0.5);
+          const maxTot = Math.round(w * 3.0);
+          return {
+            prep: `Bolus: 2% Cardiac Lidocaine (20 mg/mL = 100 mg/5 mL) | Bag: 1,000 mg (1g) in 250 mL D5W = 4 mg/mL`,
+            dose: `1st Bolus (1–1.5 mg/kg) = ${b1}–${b15} mg IV | Repeat (0.5–0.75 mg/kg) = ${b2} mg (Max ${maxTot} mg) | Infuse 1–4 mg/min`,
+            pump: `1 mg/min = 15 mL/hr | 2 mg/min = 30 mL/hr | 3 mg/min = 45 mL/hr | 4 mg/min = 60 mL/hr`,
+            math: `• [INITIAL BOLUS]: 1 to 1.5 mg/kg × ${w} kg = ${b1} to ${b15} mg (${(b1/20).toFixed(1)} to ${(b15/20).toFixed(1)} mL of 2% Lidocaine).\n• [REPEAT BOLUS q5–10m]: 0.5 to 0.75 mg/kg = ${b2} to ${Math.round(w*0.75)} mg (Max cumulative 3 mg/kg = ${maxTot} mg).\n• [MAINTENANCE INFUSION (1g / 250 mL = 4 mg/mL)]: Rate (mL/hr) = (Desired mg/min × 60) ÷ 4 = 15 mL/hr per 1 mg/min.`
+          };
+        },
+        en: {
+          title: '12. Lidocaine (Xylocaine) — Class IB Ventricular Antiarrhythmic',
+          cls: 'Vaughan Williams Class IB Fast Na+ Channel Blocker (Selective for Ischemic Ventricular Tissue)',
+          mech: 'Blocks inactivated fast Na+ channels predominantly in depolarized/ischemic Purkinje and ventricular myocardium, shortening action potential duration and suppressing ventricular automaticity without prolonging QT or affecting AV conduction.',
+          ind: '1) Alternative to Amiodarone in Shock-Refractory VF / Pulseless VT, 2) Stable Monomorphic VT and Malignant ischemic PVCs (R-on-T): 1 to 1.5 mg/kg IV bolus, repeat 0.5–0.75 mg/kg q5–10m (Max 3 mg/kg), followed by 1–4 mg/min continuous infusion.',
+          warn: '1) LETHAL TRAP: NEVER give Lidocaine in Idioventricular Rhythm (IVR / AIVR) or Complete Heart Block with ventricular escape—suppressing the escape focus causes instant Asystole! 2) Halve maintenance infusion after 24h or in Heart Failure / Liver Disease to prevent CNS toxicity (perioral numbness, tinnitus, slurred speech, muscle twitching -> seizures).'
+        },
+        ar: {
+          title: '12. ليدوكائين (Lidocaine / Xylocaine) — مضاد اللانظميات البطينية الإقفارية (Class IB)',
+          cls: 'صنف IB (يغلق قنوات الصوديوم السريعة في الأنسجة البطينية الإقفارية ويقصر جهد الفعل)',
+          mech: 'يثبط البؤر البطينية المنتبذة خاصة في العضلة القلبية الإقفارية دون أن يطيل فترة QT أو يضعف التوصيل الأذيني البطيني.',
+          ind: '1) بديل للأميودارون في الرجفان البطيني والتسرع البطيني بدون نبض، 2) التسرع البطيني المستقر وخوارج الانقباض الخبيثة (R-on-T): بولس 1–1.5 ملغ/كغ وريدياً، ثم تسريب مستمر 1–4 ملغ/دقيقة (15–60 مل/ساعة).',
+          warn: '1) تحذير قاتل: يُمنع منعاً باتاً إعطاؤه في النظم البطيني الذاتي (IVR / AIVR) أو الحصار الكامل لأنه يوقف البؤرة البطينية الوحيدة ويسبب توقف قلب فوري (Asystole)! 2) راقب علامات السمية العصبية (خدر حول الفم، طنين، تلعثم الكلام، ارتعاش عضلي).'
+        }
+      },
+
+      mgso4: {
+        cat: 'acls',
+        shortBadge: 'MgSO4 (1–2g IV Torsades / Asthma)',
+        caseEn: 'Polymorphic VT — Torsades de Pointes (235 bpm, Prolonged QTc > 520 ms)',
+        caseAr: 'تورساد دي بوانت (Torsades de Pointes — تسرع بطيني متعدد الأشكال مع استطالة QT)',
+        pre:  { hr: 235, sbp: 76, dbp: 44, spo2: 89, rr: 24, co: 2.4, svr: 1520, wave: 'tdp', rhythmEn: 'Torsades de Pointes (Polymorphic Twisting VT)', rhythmAr: 'تورساد دي بوانت (يلتف حول خط السواء 235/د)', labs: 'QTc: 545 ms | Mg2+: 1.3 mg/dL ↓ | K+: 3.2 mEq/L ↓ | Suppress EADs with MgSO4!' },
+        post: { hr: 82, sbp: 120, dbp: 74, spo2: 98, rr: 16, co: 5.0, svr: 1210, wave: 'normal', rhythmEn: 'Sinus Rhythm Restored (EADs Suppressed)', rhythmAr: 'عودة النظم الجيبي وإخماد التفريغات المبكرة (EADs)', labs: 'Mg2+: 2.4 mg/dL (Target >2.0!) | Replete K+ >4.0 mEq/L | Avoid QT-prolonging drugs!' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `50% MgSO4 ampoule = 500 mg/mL (2 g = 4 mL) diluted in 10 mL (Arrest) or 50–100 mL D5W/NS`,
+            dose: `Pulseless Torsades = 1–2 g IV/IO push | Torsades with Pulse / Severe Asthma = 2 g IV over 15–20 min | Eclampsia = 4–6g load + 1–2g/hr`,
+            pump: `2 g in 100 mL over 15 min = 400 mL/hr (or over 20 min = 300 mL/hr)`,
+            math: `• [PULSELESS TORSADES]: 1–2 g (2–4 mL of 50% MgSO4) diluted in 10 mL D5W/NS given IV/IO over 1–2 min.\n• [PERFUSING TORSADES / SEVERE REFRACTORY ASTHMA]: 2 g in 50–100 mL NS infused over 15–20 min (Pump = 300–400 mL/hr).\n• [PRE-ECLAMPSIA / ECLAMPSIA]: 4–6 g IV loading over 20 min, then 1–2 g/hr continuous maintenance.`
+          };
+        },
+        en: {
+          title: '13. Magnesium Sulfate (MgSO4) — Torsades de Pointes, Asthma & Eclampsia',
+          cls: 'Physiological Calcium Channel Blocker & Na+/K+-ATPase Cofactor',
+          mech: 'Suppresses Early Afterdepolarizations (EADs) by inhibiting L-type Ca2+ influx during Phase 2/3 of the prolonged action potential (terminating Torsades de Pointes even when serum Mg2+ is normal!), and relaxes bronchial smooth muscle in status asthmaticus.',
+          ind: '1) Drug of Choice for Torsades de Pointes (Polymorphic VT with Long QT): 1–2 g IV/IO diluted in 10 mL D5W as a rapid push if pulseless, or 1–2 g in 50–100 mL over 5–60 min (typically 15–20 min) if with a pulse. Pulseless / unstable Torsades also needs immediate unsynchronized defibrillation; then correct K+ (>4.0) and Mg2+ (>2.0), stop QT-prolonging drugs, and use overdrive pacing or isoproterenol if bradycardia-dependent. 2) Severe Status Asthmaticus / MAT: 2 g IV over 20 min. 3) Eclampsia Seizure Prophylaxis/Treatment: 4–6 g IV load over 20 min, then 1–2 g/hr.',
+          warn: '1) Rapid IV push in a perfusing patient causes flushing and hypotension, 2) Monitor Deep Tendon Reflexes (loss of the patellar reflex is the first clinical sign of Mg toxicity at ~7–10 mEq/L [8–12 mg/dL]; the therapeutic eclampsia range is 4–7 mEq/L), RR (>12/min), and Urine Output (≥30 mL/hr), 3) Specific Antidote for MgSO4 toxicity: Calcium Gluconate 1–3 g IV (or Calcium Chloride 1 g IV).'
+        },
+        ar: {
+          title: '13. كبريتات المغنيسيوم (Magnesium Sulfate — MgSO4) — العلاج النوعي للـ Torsades والربو الوخيم',
+          cls: 'حاصر كالسيوم فيزيولوجي ومثبت لغشاء الخلية القلبية والقصبية',
+          mech: 'يخمد زوال الاستقطاب المبكر (EADs) عبر تثبيط دخول الكالسيوم في الطور 2 و3 فيوقف نوبات Torsades de Pointes (حتى لو كان مستوى المغنيسيوم في الدم طبيعياً!)، كما يسبب ارتخاء العضلات الملساء القصبية.',
+          ind: '1) الدواء النوعي الأول لـ Torsades de Pointes: يُعطى 1–2 غرام وريدياً (دفعة سريعة مخففة في 10 مل في توقف القلب، أو خلال 5–60 دقيقة وعادة 15–20 دقيقة بوجود نبض). وفي حالة عدم وجود نبض أو عدم الاستقرار تُعطى صدمة كهربائية غير متزامنة فوراً، مع تصحيح البوتاسيوم (>4) والمغنيسيوم (>2) وإيقاف أدوية إطالة QT. 2) نوبات الربو الحادة الوخيمة والتسرع الأذيني MAT: 2 غرام وريدياً خلال 20 دقيقة. 3) تسمم الحمل (Eclampsia): 4–6 غرام تحميل ثم 1–2 غرام/ساعة.',
+          warn: '1) راقب المنعكسات الوترية العميقة (غياب منعكس الركبة هو أول علامة سريرية لسمية المغنيسيوم عند مستوى 7–10 mEq/L تقريباً!) وسرعة التنفس، 2) الترياق النوعي لسمية المغنيسيوم هو الكالسيوم الوريدي (Calcium Gluconate أو Calcium Chloride).'
+        }
+      },
+
+      diltiazem_metoprolol: {
+        cat: 'acls',
+        shortBadge: 'Diltiazem (0.25mg/kg) & Metoprolol (5mg)',
+        caseEn: 'Atrial Fibrillation with Rapid Ventricular Response (AFib RVR 164 bpm, Stable BP 132/82)',
+        caseAr: 'رجفان أذيني سريع الاستجابة البطينية (AFib RVR بسرعة 164 نبضة/د وضغط مستقر)',
+        pre:  { hr: 164, sbp: 132, dbp: 82, spo2: 95, rr: 20, co: 4.2, svr: 1340, wave: 'afib', rhythmEn: 'Rapid Atrial Fibrillation (AFib RVR 164 bpm)', rhythmAr: 'رجفان أذيني سريع غير منتظم (164 نبضة/د)', labs: 'EF: 55% (Preserved) | Irregularly irregular narrow QRS | Goal HR < 100–110 bpm' },
+        post: { hr: 86, sbp: 122, dbp: 76, spo2: 98, rr: 16, co: 5.1, svr: 1200, wave: 'afib_slow', rhythmEn: 'Rate-Controlled AFib (86 bpm — Improved Diastolic Filling)', rhythmAr: 'رجفان أذيني مضبوط السرعة (86 نبضة/د — تحسن الامتلاء الانبساطي)', labs: 'AV node refractory period prolonged | Assess CHA2DS2-VASc score for anticoagulation!' },
+        calcFn: (w, isAr) => {
+          const diltBolus1 = Math.round(w * 0.25);
+          const diltBolus2 = Math.round(w * 0.35);
+          return {
+            prep: `Diltiazem Bag: 125 mg in 100 mL D5W/NS (total 125 mL) = 1 mg/mL | Metoprolol Vial: 5 mg / 5 mL`,
+            dose: `Diltiazem 1st Bolus (0.25 mg/kg) = ${diltBolus1} mg IV over 2m -> Infuse 5–15 mg/hr | Metoprolol = 5 mg slow IV q5m (Max 15 mg)`,
+            pump: `Diltiazem Infusion (1 mg/mL): 5 mg/hr = 5 mL/hr | 10 mg/hr = 10 mL/hr | 15 mg/hr = 15 mL/hr`,
+            math: `• [DILTIAZEM WEIGHT-BASED BOLUS]: 1st Dose = 0.25 mg/kg × ${w} kg = ${diltBolus1} mg IV over 2 min | If inadequate after 15 min, 2nd Dose = 0.35 mg/kg × ${w} kg = ${diltBolus2} mg IV.\n• [DILTIAZEM INFUSION]: 5 to 15 mg/hr (5 to 15 mL/hr on 1 mg/mL standard concentration).\n• [METOPROLOL IV REGIMEN]: 5 mg slow IV over 2 min every 5 minutes up to 3 doses (15 mg total).`
+          };
+        },
+        en: {
+          title: '14. Diltiazem (Cardizem — Class IV CCB) & Metoprolol (Lopressor — Class II Beta-Blocker)',
+          cls: 'Non-Dihydropyridine L-Type Ca2+ Channel Blocker (Class IV) & Cardioselective Beta-1 Blocker (Class II)',
+          mech: 'Slow Phase 0 depolarization (Diltiazem) and Phase 4 slope (Metoprolol) in the SA and AV nodes, prolonging AV nodal refractoriness and controlling ventricular rate in Atrial Fibrillation, Atrial Flutter, and SVT.',
+          ind: 'First-line rate control for stable Atrial Fibrillation / Flutter with RVR: 1) Diltiazem: 0.25 mg/kg (~20 mg) IV over 2 min; may repeat 0.35 mg/kg (~25 mg) after 15 min, then infuse at 5–15 mg/hr. 2) Metoprolol: 5 mg slow IV every 5 min up to 3 doses (15 mg).',
+          warn: '1) CONTRAINDICATED in Pre-Excited AFib (WPW Syndrome — blocking the AV node forces impulses down the Bundle of Kent and triggers lethal VFib!), 2) Avoid Diltiazem/Verapamil in Decompensated Heart Failure with Reduced Ejection Fraction (HFrEF / Low EF — use Digoxin or Amiodarone instead!), 3) Avoid IV Beta-Blockers in decompensated HF, severe bronchospasm, or cocaine-induced tachycardia. 4) Do NOT give IV Diltiazem and IV Beta-Blocker together or back-to-back (profound bradycardia / hypotension / asystole). 5) Unstable AFib (hypotension, ongoing ischemia, pulmonary edema) needs synchronized cardioversion, not drugs.'
+        },
+        ar: {
+          title: '14. ديلتيازيم (Diltiazem — Class IV) وميتوبرولول (Metoprolol — Class II) — ضبط سرعة الـ A.Fib',
+          cls: 'حاصر قنوات الكالسيوم غير الديهيدروبيريديني (Class IV) وحاصر بيتا-1 الانتقائي للقلب (Class II)',
+          mech: 'يبطئان التوصيل عبر العقدة الأذينية البطينية (AV Node) ويطيلان فترة عصيانها، مما يخفض الاستجابة البطينية السريعة في الرجفان الأذيني والرفرفة الأذينية.',
+          ind: 'الخط الأول لضبط سرعة الرجفان الأذيني المستقر (AFib RVR): 1) ديلتيازيم: بولس 0.25 ملغ/كغ وريدياً خلال دقيقتين (ويمكن تكرار 0.35 ملغ/كغ بعد 15 دقيقة) ثم تسريب مستمر 5–15 ملغ/ساعة. 2) ميتوبرولول: 5 ملغ وريدياً ببطء كل 5 دقائق حتى 3 جرعات (15 ملغ).',
+          warn: '1) ممنوعان منعاً باتاً في الرجفان الأذيني المترافق مع متلازمة WPW (يحولانه إلى رجفان بطيني قاتل!)، 2) يُمنع الديلتيازيم في قصور القلب الانقباضي (Low EF — يُستعاض عنه بالأميودارون أو الديجوكسين). 3) لا يُجمع بين الديلتيازيم الوريدي وحاصر بيتا الوريدي لخطر بطء القلب وهبوط الضغط الشديد. 4) الرجفان غير المستقر (هبوط ضغط/إقفار/وذمة رئوية) يُعالج بالصدمة الكهربائية المتزامنة.'
+        }
+      },
+
+      procainamide_digoxin: {
+        cat: 'acls',
+        shortBadge: 'Procainamide (WPW/VT) & Digoxin (HF AFib)',
+        caseEn: 'Pre-Excited AFib in WPW ("FBI" 195 bpm) OR Rapid AFib in Severe HFrEF (EF 25%)',
+        caseAr: 'رجفان أذيني مع متلازمة WPW (سريع وعريض وغير منتظم) أو رجفان أذيني مع فشل قلب',
+        pre:  { hr: 195, sbp: 112, dbp: 70, spo2: 94, rr: 22, co: 3.5, svr: 1410, wave: 'wpw', rhythmEn: 'Pre-Excited AFib in WPW (Fast, Broad, Irregular)', rhythmAr: 'رجفان أذيني مع WPW (موجة دلتا — سريع وعريض وغير منتظم)', labs: 'NEVER give AV Nodal Blockers (Adenosine/BB/CCB/Digoxin/Amio) in WPW! -> Give Procainamide!' },
+        post: { hr: 78, sbp: 124, dbp: 76, spo2: 98, rr: 16, co: 5.0, svr: 1210, wave: 'normal', rhythmEn: 'Converted to Sinus Rhythm (Accessory Pathway Blocked)', rhythmAr: 'تحول للنظم الجيبي (تثبيط حزمة كينت الإضافية بأمان)', labs: 'Stop Procainamide infusion once Max 17 mg/kg reached or if QRS widens >50%!' },
+        calcFn: (w, isAr) => {
+          const maxProc = Math.round(w * 17);
+          return {
+            prep: `Procainamide: 1,000 mg in 250 mL NS = 4 mg/mL | Digoxin Ampoule: 0.5 mg (500 mcg) / 2 mL`,
+            dose: `Procainamide = 20–50 mg/min IV until arrhythmia stops or Max 17 mg/kg (${maxProc} mg) | Digoxin Load = 0.25–0.5 mg IV, then 0.25 mg q6h (total digitalizing dose ≈ 8–15 mcg/kg = 0.75–1.25 mg over 24h)`,
+            pump: `Procainamide at 30 mg/min (1,800 mg/hr) = 450 mL/hr until max ${maxProc} mg, then maintenance 1–4 mg/min (15–60 mL/hr)`,
+            math: `• [PROCAINAMIDE MAX LOADING DOSE]: 17 mg/kg × ${w} kg = ${maxProc} mg (${(maxProc/4).toFixed(0)} mL of 4 mg/mL bag). Infuse at 20–50 mg/min until: 1) Arrhythmia suppressed, 2) Hypotension occurs, 3) QRS widens >50%, or 4) Max ${maxProc} mg given.\n• [DIGOXIN IV DIGITALIZATION IN HF + AFIB]: Initial 0.25–0.5 mg slow IV over 5 min, then 0.25 mg IV q6h to total 0.75–1.25 mg.`
+          };
+        },
+        en: {
+          title: '15. Procainamide (Class IA — Drug of Choice for WPW+AFib & Stable VT) & Digoxin (HF Rate Control)',
+          cls: 'Class IA Na+/K+ Blocker (Procainamide) & Cardiac Glycoside Na+/K+-ATPase Inhibitor (Digoxin)',
+          mech: 'Procainamide blocks fast Na+ channels in the accessory pathway (Bundle of Kent) and ventricular myocardium (slowing conduction across Kent without favoring VF). Digoxin inhibits Na+/K+-ATPase (increasing intracellular Ca2+ -> positive inotropy) and increases vagal tone at the AV node (slowing AFib rate in HFrEF without dropping BP!).',
+          ind: '1) Procainamide: Drug of choice for stable Pre-Excited AFib (WPW) and stable Monomorphic VT (20–50 mg/min IV up to 17 mg/kg, then 1–4 mg/min). 2) Digoxin: Adjunct rate control of Atrial Fibrillation in patients with decompensated Heart Failure (Low EF) or borderline BP who cannot tolerate CCBs/Beta-Blockers (0.25–0.5 mg IV load). IV onset is 5–30 min with peak effect at 1–4 h, so it is slow for urgent control (Amiodarone is the usual alternative).',
+          warn: '1) NEVER give Digoxin in WPW + AFib (shortens accessory pathway refractoriness -> VFib!), 2) Procainamide: stop if QRS widens >50%, hypotension occurs, or the max dose is reached; avoid in prolonged QT / Torsades and use caution in severe HFrEF; unstable pre-excited AFib needs synchronized cardioversion. 3) Hypokalemia, Hypomagnesemia, and Hypercalcemia precipitate Digoxin Toxicity (nausea, yellow-green halos, bidirectional VT / Accelerated Junctional Rhythm -> treat with Digoxin Immune Fab [Digibind]!).'
+        },
+        ar: {
+          title: '15. بروكاييناميد (Procainamide — دواء WPW+AFib الأول) وديجوكسين (Digoxin — لفشل القلب)',
+          cls: 'صنف IA (بروكاييناميد) وغليكوزيد قلبي مقوي للعضلة ومبطئ لعقدة AV (ديجوكسين)',
+          mech: 'يبطئ البروكاييناميد التوصيل في المسار الإضافي (حزمة كينت) بأمان فيوقف رجفان WPW، بينما يقوي الديجوكسين انقباض البطين ويبطئ عقدة AV دون أن يخفض ضغط الدم عند مرضى فشل القلب.',
+          ind: '1) بروكاييناميد: الدواء الأول والوحيد الآمن في الرجفان الأذيني المترافق مع WPW وفي الـ VT المستقر (20–50 ملغ/دقيقة حتى حد أقصى 17 ملغ/كغ). 2) ديجوكسين: ضبط سرعة الرجفان الأذيني عند مرضى فشل القلب الحاد (Low EF) بجرعة تحميل 0.25–0.5 ملغ وريدياً.',
+          warn: '1) يُمنع الديجوكسين منعاً باتاً في متلازمة WPW، 2) يُوقف البروكاييناميد عند اتساع QRS أكثر من 50% أو هبوط الضغط أو بلوغ الجرعة القصوى، ويُتجنب في استطالة QT/Torsades؛ والرجفان مع WPW غير المستقر يُعالج بالصدمة المتزامنة. 3) نقص البوتاسيوم يؤهب بشدة لتسمم الديجوكسين (غثيان، هالات صفراء، ونظم وصلي متسارع ← يعالج بالترياق Digoxin Immune Fab / Digibind).'
+        }
+      },
+
+      calcium_bicarb: {
+        cat: 'acls',
+        shortBadge: 'Calcium Chloride 1g & NaHCO3 8.4%',
+        caseEn: 'Severe Hyperkalemia (K+ 8.2 mEq/L — Sine-Wave / Peaked T) & TCA Overdose / Severe Acidosis',
+        caseAr: 'فرط البوتاسيوم القاتل (K+ 8.2 — موجة الجيب / T المؤنفة) والتسمم بـ TCA والحماض الحرج',
+        pre:  { hr: 52, sbp: 78, dbp: 46, spo2: 92, rr: 24, co: 2.7, svr: 1180, wave: 'hyperk', rhythmEn: 'Severe Hyperkalemia (Wide QRS + Tall Tented T)', rhythmAr: 'فرط بوتاسيوم شديد (اتساع QRS وموجة T مؤنفة كالخيمة)', labs: 'K+: 8.2 mEq/L ↑↑ | pH: 7.08 | Step 1: Stabilize cardiac membrane with IV Calcium immediately!' },
+        post: { hr: 76, sbp: 120, dbp: 74, spo2: 98, rr: 18, co: 4.9, svr: 1220, wave: 'normal', rhythmEn: 'Membrane Stabilized -> Normal Narrow QRS Sinus Rhythm', rhythmAr: 'تثبيت غشاء الخلية القلبية وعودة مركب QRS للضيق الطبيعي', labs: 'Membrane protected in 1–3 min! | Step 2: Shift K+ into cells (10 U Regular Insulin + 50mL D50W + NaHCO3)!' },
+        calcFn: (w, isAr) => {
+          const bicarbMeq = Math.round(w * 1.0);
+          return {
+            prep: `CaCl2 10% = 1 g/10 mL (272 mg elemental Ca2+) | Ca Gluconate 10% = 1 g/10 mL (93 mg Ca2+) | NaHCO3 8.4% = 50 mEq/50 mL (1 mEq/mL)`,
+            dose: `CaCl2 10% = 1 g (10 mL) IV over 2–5m (or Ca Gluconate 3 g = 30 mL) | NaHCO3 8.4% = 1 mEq/kg (${bicarbMeq} mEq = ${bicarbMeq} mL) IV`,
+            pump: `Slow IV push over 2–5 min in SEPARATE lines (Flush with 20 mL NS between Calcium and Bicarbonate!)`,
+            math: `• [CALCIUM POTENCY RULE]: 10 mL of 10% Calcium Chloride contains 3× more elemental Ca2+ (272 mg / 13.6 mEq) than 10 mL of 10% Calcium Gluconate (93 mg / 4.6 mEq) -> 1 g CaCl2 = 3 g Ca Gluconate!\n• [SODIUM BICARBONATE 8.4% (1 mEq/mL)]: 1 mEq/kg × ${w} kg = ${bicarbMeq} mEq (${bicarbMeq} mL IV bolus) for TCA QRS >100ms, Hyperkalemia, or severe acidosis.`
+          };
+        },
+        en: {
+          title: '16. Calcium Chloride / Gluconate & Sodium Bicarbonate 8.4% — Membrane Stabilizers & Antidotes',
+          cls: 'Myocardial Threshold Stabilizer (Ca2+) & Systemic Alkalinizing / Na+-Loading Agent (NaHCO3)',
+          mech: 'Calcium raises the myocardial threshold potential, restoring the normal voltage gradient against depolarized resting membrane potential in Hyperkalemia within 1–3 minutes (without changing serum K+). Sodium Bicarbonate overcomes TCA fast Na+-channel blockade and shifts K+ intracellularly.',
+          ind: '1) Calcium (1 g CaCl2 10% via Central Line or 2–3 g Calcium Gluconate 10% via Peripheral Line): Hyperkalemia with ECG changes, Hypocalcemia, CCB/Beta-Blocker/MgSO4 overdose. 2) Sodium Bicarbonate 8.4% (1 mEq/kg IV bolus): Tricyclic Antidepressant (TCA) overdose with QRS >100 ms, severe metabolic acidosis (pH <7.1), and hyperkalemic arrest.',
+          warn: '1) NEVER mix Calcium and Sodium Bicarbonate in the same IV line without flushing thoroughly—they immediately precipitate into insoluble Calcium Carbonate (chalk)! 2) Prefer Calcium Gluconate for peripheral veins (Calcium Chloride extravasation causes severe tissue sloughing). 3) Calcium protects the heart for only 30–60 min and does not lower K+: repeat the dose if ECG changes persist after 5 min and start K+ shifting (Insulin + Dextrose, nebulized Salbutamol) and K+ removal. 4) Bicarbonate lowers K+ only modestly and mainly when metabolic acidosis is present. 5) Give Calcium cautiously if Digoxin toxicity is suspected (treat with Digoxin Immune Fab).'
+        },
+        ar: {
+          title: '16. كلوريد/غلوكونات الكالسيوم وبيكربونات الصوديوم 8.4% — تثبيت غشاء القلب ومضادات السموم',
+          cls: 'مثبت عتبة استثارة غشاء القلب (الكالسيوم) ومقلون للدم ورافع صوديوم (البيكربونات)',
+          mech: 'يرفع الكالسيوم عتبة استثارة الخلية القلبية فيحمي القلب فوراً خلال 1–3 دقائق من الرجفان البطيني في فرط البوتاسيوم، بينما تفتح بيكربونات الصوديوم قنوات الصوديوم المغلقة بالتسمم بمضادات الاكتئاب ثلاثية الحلقات (TCA) وتدخل البوتاسيوم للخلايا.',
+          ind: '1) الكالسيوم: كلوريد الكالسيوم 10% (1 غرام = 10 مل عبر خط مركزي) أو غلوكونات الكالسيوم 10% (3 غرام = 30 مل عبر وريد طرفي) كخط أول فوري عند وجود تغيرات ECG في فرط البوتاسيوم، وفي التسمم بالمغنيسيوم وحاصرات الكالسيوم. 2) بيكربونات الصوديوم 8.4%: 1 ميلي مكافئ/كغ في التسمم بـ TCA والحماض الشديد.',
+          warn: '1) يُمنع منعاً باتاً خلط الكالسيوم مع بيكربونات الصوديوم في نفس الخط الوريدي دون غسله جيداً بالمحلول الملحي لأنهما يترسبان فوراً على شكل كربونات الكالسيوم (طباشير)! 2) كلوريد الكالسيوم أقوى بـ 3 أضعاف من غلوكونات الكالسيوم ويفضل إعطاؤه في خط مركزي. 3) تأثير الكالسيوم الحامي للقلب يدوم 30–60 دقيقة فقط ولا يخفض البوتاسيوم، فتُكرر الجرعة إذا استمرت تغيرات ECG ويُضاف الإنسولين مع الدكستروز وبخاخ السالبوتامول. 4) البيكربونات تخفض البوتاسيوم بشكل متواضع وتفيد خصوصاً مع الحماض. 5) يُعطى الكالسيوم بحذر عند الشك بتسمم الديجوكسين.'
+        }
+      },
+
+      // =======================================================================
+      // CATEGORY 4: ICU VASOPRESSORS, INOTROPES, VASODILATORS, SEDATION & INSULIN
+      // =======================================================================
+      norepinephrine: {
+        cat: 'icu',
+        shortBadge: 'Norepinephrine / Levophed (0.05–0.5 mcg/kg/min)',
+        caseEn: 'Septic / Distributive Shock & Post-ROSC Hypotension (BP 68/38, MAP 48 mmHg)',
+        caseAr: 'صدمة إنتانية (Septic Shock) أو هبوط ضغط ما بعد الإنعاش (ضغط 68/38، MAP = 48)',
+        pre:  { hr: 118, sbp: 68, dbp: 38, spo2: 92, rr: 24, co: 6.8, svr: 480, wave: 'shock', rhythmEn: 'Sinus Tachycardia + Profound Vasoplegic Shock', rhythmAr: 'تسرع جيبي مع صدمة توسع وعائي شديدة (MAP 48)', labs: 'Lactate: 4.8 mmol/L ↑ | SVR: 480 (Critically Low!) | Target MAP ≥ 65 mmHg!' },
+        post: { hr: 94, sbp: 112, dbp: 68, spo2: 97, rr: 18, co: 5.8, svr: 1150, wave: 'normal', rhythmEn: 'Hemodynamics Restored (MAP 83 mmHg ≥ 65 Target)', rhythmAr: 'استعادة ضغط التروية للأعضاء الحيوية (MAP = 83 ≥ 65)', labs: 'Lactate clearing (2.1 mmol/L) | Urine Output > 0.5 mL/kg/hr | Infuse via Central Line!' },
+        calcFn: (w, isAr) => {
+          const doseMcgKgMin = 0.15;
+          const mcgMin = +(w * doseMcgKgMin).toFixed(2);
+          const mlHrStd = +((mcgMin * 60) / 16).toFixed(1);
+          const mlHrDbl = +((mcgMin * 60) / 32).toFixed(1);
+          return {
+            prep: `Standard Bag: 4 mg in 250 mL D5W (or NS) = 16 mcg/mL | Double-Strength: 8 mg in 250 mL = 32 mcg/mL`,
+            dose: `Titrate 0.05–0.5 mcg/kg/min (2–30 mcg/min) to keep MAP ≥ 65 mmHg | At 0.15 mcg/kg/min = ${mcgMin} mcg/min`,
+            pump: `At 0.15 mcg/kg/min (${mcgMin} mcg/min): Standard (16 mcg/mL) = ${mlHrStd} mL/hr | Double (32 mcg/mL) = ${mlHrDbl} mL/hr`,
+            math: `• [CONCENTRATION]: 4 mg (4,000 mcg) ÷ 250 mL = 16 mcg/mL.\n• [PUMP RATE FORMULA]: Rate (mL/hr) = [Dose (mcg/kg/min) × Weight (${w} kg) × 60 min/hr] ÷ Concentration (16 mcg/mL).\n• [EXAMPLE AT 0.15 mcg/kg/min]: (0.15 × ${w} × 60) ÷ 16 = ${(0.15*w*60).toFixed(0)} ÷ 16 = ${mlHrStd} mL/hr.`
+          };
+        },
+        en: {
+          title: '17. Norepinephrine (Levophed) — First-Line ICU Vasopressor for Shock',
+          cls: 'Potent Alpha-1 Adrenergic Agonist + Moderate Beta-1 Agonist',
+          mech: 'Powerful Alpha-1 arterial and venous vasoconstriction increases Systemic Vascular Resistance (SVR) and Mean Arterial Pressure (MAP), while modest Beta-1 activity maintains cardiac output without excessive tachycardia.',
+          ind: 'First-line vasopressor of choice in Septic Shock, Cardiogenic Shock with severe hypotension, and Post-ROSC Shock (after 30 mL/kg crystalloid fluid resuscitation if hypovolemic): start at 0.05–0.1 mcg/kg/min (2–12 mcg/min) and titrate to maintain MAP ≥ 65 mmHg.',
+          warn: '1) Always correct hypovolemia before/during vasopressor initiation (vasoconstricting an empty vascular bed causes severe organ/digital ischemia!), 2) Preferably give via Central Venous Catheter (CVC) and monitor BP continuously with an Arterial Line — but do not delay it: start through a good proximal peripheral vein for a short period if no central access (Surviving Sepsis 2021), 3) If extravasation occurs: leave cannula in place, aspirate, and infiltrate 5–10 mg Phentolamine in 10–15 mL NS.'
+        },
+        ar: {
+          title: '17. نورإبينفرين / ليفوفيد (Norepinephrine / Levophed) — رافع الضغط الأول في العناية الحثيثة',
+          cls: 'منبه قوي لمستقبلات ألفا-1 الوعائية + منبه معتدل لمستقبلات بيتا-1 القلبية',
+          mech: 'يقبض الأوعية الشريانية والوريدية بقوة عبر مستقبلات ألفا-1 فيرفع المقاومة الوعائية (SVR) ومتوسط الضغط الشرياني (MAP ≥ 65 mmHg) مع الحفاظ على النتاج القلبي.',
+          ind: 'رافع الضغط الأول في الصدمة الإنتانية (Septic Shock)، الصدمة القلبية المترافقة مع هبوط ضغط شديد، وما بعد الإنعاش القلبي (Post-ROSC): يبدأ بمعدل 0.05–0.1 ميكروغرام/كغ/دقيقة ويُعاير للحفاظ على MAP ≥ 65 mmHg.',
+          warn: '1) يجب تعويض السوائل أولاً لأن قبض الأوعية في مريض ناقص الحجم يسبب إقفاراً حاداً للأعضاء والأطراف، 2) يُفضل إعطاؤه عبر خط وريدي مركزي (CVC) دون تأخير البدء، ويجوز البدء مؤقتاً عبر وريد طرفي كبير جيد عند عدم توفر خط مركزي، وعند تسربه تحت الجلد يُحقن الترياق الموضعي Phentolamine.'
+        }
+      },
+
+      dopamine: {
+        cat: 'icu',
+        shortBadge: 'Dopamine (3 Tiers: 1–5 D1 | 5–10 β1 | 10–20 α1)',
+        caseEn: 'Symptomatic Bradycardia Refractory to Atropine (HR 40 bpm, BP 80/48)',
+        caseAr: 'بطء قلب عرضي معند للأتروبين أو صدمة مع بطء نبض (HR 40، ضغط 80/48)',
+        pre:  { hr: 40, sbp: 80, dbp: 48, spo2: 93, rr: 18, co: 2.9, svr: 1120, wave: 'brady', rhythmEn: 'Refractory Symptomatic Bradycardia (40 bpm)', rhythmAr: 'بطء قلب عرضي مع هبوط ضغط (40 نبضة/د)', labs: 'Dose-dependent receptor tiers: 1–5 D1 | 5–10 Beta-1 | 10–20 Alpha-1 mcg/kg/min!' },
+        post: { hr: 82, sbp: 118, dbp: 72, spo2: 98, rr: 16, co: 4.9, svr: 1280, wave: 'normal', rhythmEn: 'Chronotropic & Inotropic Response (82 bpm, BP 118/72)', rhythmAr: 'تحسن سرعة القلب والقلوصية وضغط الدم (82/د، 118/72)', labs: 'Standard Bag: 400 mg in 250 mL = 1,600 mcg/mL | Watch for tachyarrhythmias at high doses!' },
+        calcFn: (w, isAr) => {
+          const rLow = +((3 * w * 60) / 1600).toFixed(1);
+          const rMid = +((7.5 * w * 60) / 1600).toFixed(1);
+          const rHigh = +((15 * w * 60) / 1600).toFixed(1);
+          return {
+            prep: `Standard ICU Bag: 400 mg (2 ampoules of 200mg) in 250 mL D5W/NS = 1,600 mcg/mL`,
+            dose: `Tier 1 (D1): 1–5 mcg/kg/min | Tier 2 (β1 Cardiac): 5–10 mcg/kg/min | Tier 3 (α1 Pressor): 10–20 mcg/kg/min`,
+            pump: `For ${w} kg on 1600 mcg/mL: 3 mcg/kg/m = ${rLow} mL/hr | 7.5 mcg/kg/m = ${rMid} mL/hr | 15 mcg/kg/m = ${rHigh} mL/hr`,
+            math: `• [CONCENTRATION]: 400 mg (400,000 mcg) ÷ 250 mL = 1,600 mcg/mL.\n• [PUMP FORMULA]: mL/hr = [Dose (mcg/kg/min) × ${w} kg × 60] ÷ 1,600.\n  1) Low Tier (3 mcg/kg/min — D1 dopaminergic; no proven renal protection): (3 × ${w} × 60) ÷ 1600 = ${rLow} mL/hr.\n  2) Intermediate Tier (7.5 mcg/kg/min — β1 Inotropic/Chronotropic): (7.5 × ${w} × 60) ÷ 1600 = ${rMid} mL/hr.\n  3) High Tier (15 mcg/kg/min — α1 Vasoconstrictor): (15 × ${w} × 60) ÷ 1600 = ${rHigh} mL/hr.`
+          };
+        },
+        en: {
+          title: '18. Dopamine (Intropin) — Dose-Dependent 3-Tier Receptor Agonist',
+          cls: 'Endogenous Catecholamine Precursor (Dose-Dependent D1, Beta-1, and Alpha-1 Agonist)',
+          mech: 'Acts on 3 distinct receptor tiers depending on the infusion rate (mcg/kg/min): 1) Low Dose (1–5 mcg/kg/min): Dopaminergic D1 receptors (renal/mesenteric vasodilation — no proven renal protection, so NOT recommended for AKI prevention), 2) Intermediate Dose (5–10 mcg/kg/min): Beta-1 Cardiac receptors (increases contractility, stroke volume, SA node rate, and AV conduction), 3) High Dose (10–20 mcg/kg/min): Alpha-1 Vascular receptors (systemic vasoconstriction to raise SVR and BP).',
+          ind: '1) Second-line therapy for Symptomatic Bradycardia after Atropine (5–20 mcg/kg/min), 2) Shock with concomitant bradycardia.',
+          warn: '1) Causes more sinus tachycardia and ventricular/atrial arrhythmias (AFib/VT) than Norepinephrine (SOAP-II trial: no overall mortality difference, but more arrhythmias with Dopamine and higher 28-day mortality in the cardiogenic shock subgroup, so Norepinephrine is preferred), 2) Inactivated by alkaline solutions (NEVER mix in same line with Sodium Bicarbonate!).'
+        },
+        ar: {
+          title: '18. دوبامين (Dopamine) — الدواء ذو المستويات الثلاثة حسب الجرعة والمستقبلات',
+          cls: 'كاتيكولامين يعتمد تأثيره على الجرعة (مستقبلات D1 ثم Beta-1 ثم Alpha-1)',
+          mech: 'يعمل على 3 مستويات حسب الجرعة: 1) الجرعة المنخفضة (1–5 مكغ/كغ/د): تنبه مستقبلات الدوبامين D1 الكلوية والمساريقية (دون فائدة مثبتة لحماية الكلى ولا يُنصح بها للوقاية من الفشل الكلوي)، 2) الجرعة المتوسطة (5–10 مكغ/كغ/د): تنبه مستقبلات بيتا-1 القلبية (تزيد القلوصية وسرعة النبض والنتاج القلبي)، 3) الجرعة العالية (10–20 مكغ/كغ/د): تنبه مستقبلات ألفا-1 الوعائية (تقبض الأوعية وترفع الضغط بشدة).',
+          ind: '1) بطء القلب العرضي غير المستجيب للأتروبين (بجرعة 5–20 مكغ/كغ/د)، 2) حالات هبوط الضغط المترافقة مع بطء النبض.',
+          warn: '1) يسبب تسرع قلب ولانظميات أكثر من النورإبينفرين، 2) يتخرب في المحاليل القلوية (يُمنع خلطه في نفس الخط مع بيكربونات الصوديوم!).'
+        }
+      },
+
+      dobutamine: {
+        cat: 'icu',
+        shortBadge: 'Dobutamine (2–20 mcg/kg/min Inotrope)',
+        caseEn: 'Cardiogenic Shock / Decompensated HFrEF (Low CO 2.4 L/min, PCWP 24 mmHg, BP 92/60)',
+        caseAr: 'صدمة قلبية وفشل قلب انقباضي حاد (انخفاض النتاج القلبي CO = 2.4 L/min مع ركودة رئوية)',
+        pre:  { hr: 96, sbp: 92, dbp: 60, spo2: 90, rr: 24, co: 2.4, svr: 1850, wave: 'shock', rhythmEn: 'Low-Output Cardiogenic State (CI ≈ 1.3 L/min/m²)', rhythmAr: 'هبوط شديد في النتاج القلبي (قلس وانقباض ضعيف)', labs: 'EF: 20% | PCWP: 24 mmHg ↑ | Cold extremities | Needs Beta-1 Inotropic Pump Support!' },
+        post: { hr: 102, sbp: 108, dbp: 66, spo2: 96, rr: 18, co: 4.6, svr: 1280, wave: 'normal', rhythmEn: 'Improved Stroke Volume & Cardiac Output (CO 4.6 L/m)', rhythmAr: 'تحسن قوة انقباض البطين الأيسر وارتفاع النتاج القلبي (4.6 L/min)', labs: 'PCWP dropped to 15 mmHg | Combine with Norepinephrine if SBP < 85–90 mmHg!' },
+        calcFn: (w, isAr) => {
+          const dose = 5;
+          const mcgMin = +(w * dose).toFixed(1);
+          const mlHr = +((mcgMin * 60) / 1000).toFixed(1);
+          return {
+            prep: `Standard ICU Bag: 250 mg (1 vial) in 250 mL D5W/NS = 1,000 mcg/mL (1 mg/mL)`,
+            dose: `Titrate 2 to 20 mcg/kg/min | At 5 mcg/kg/min for ${w} kg = ${mcgMin} mcg/min`,
+            pump: `At 5 mcg/kg/min = ${mlHr} mL/hr | At 10 mcg/kg/min = ${(mlHr*2).toFixed(1)} mL/hr (on 1,000 mcg/mL bag)`,
+            math: `• [CONCENTRATION]: 250 mg (250,000 mcg) ÷ 250 mL = 1,000 mcg/mL.\n• [PUMP FORMULA]: mL/hr = [Dose (mcg/kg/min) × ${w} kg × 60] ÷ 1,000.\n• [EXAMPLE AT 5 mcg/kg/min]: (5 × ${w} × 60) ÷ 1,000 = ${mlHr} mL/hr.`
+          };
+        },
+        en: {
+          title: '19. Dobutamine (Dobutrex) — Pure Inodilator for Cardiogenic Shock & Low CO',
+          cls: 'Predominant Beta-1 Adrenergic Agonist + Mild Beta-2 Vasodilator (Inodilator)',
+          mech: 'Strongly stimulates myocardial Beta-1 receptors to increase contractility (stroke volume and cardiac output), while mild Beta-2 peripheral vasodilation reduces Left Ventricular afterload and Pulmonary Capillary Wedge Pressure (PCWP).',
+          ind: 'Cardiogenic Shock, acute decompensated systolic Heart Failure (HFrEF), and Septic Myocardial Dysfunction with low Cardiac Index (<2.2 L/min/m²): 2 to 20 mcg/kg/min continuous IV infusion.',
+          warn: '1) Because Beta-2 vasodilation can lower SVR and blood pressure, if Systolic BP is <85–90 mmHg (profound Cardiogenic Shock), ALWAYS start Norepinephrine FIRST to support MAP, then add Dobutamine for contractility! 2) May increase ventricular rate in AFib or trigger PVCs / VT. 3) Tachyphylaxis develops after 48–72 h, and its effect is blunted in patients on chronic Beta-Blockers (Milrinone is an alternative).'
+        },
+        ar: {
+          title: '19. دوبيوتامين (Dobutamine) — مقوي العضلة القلبية الأول في الصدمة القلبية',
+          cls: 'منبه قوي لمستقبلات بيتا-1 القلبية مع توسيع وعائي خفيف عبر بيتا-2 (Inodilator)',
+          mech: 'يزيد قوة انقباض العضلة القلبية وحجم الضربة والنتاج القلبي (CO) عبر تنبيه بيتا-1، ويخفف الحمل البعدي وضغط الإسفين الرئوي (PCWP) عبر بيتا-2.',
+          ind: 'الصدمة القلبية وفشل القلب الانقباضي الحاد منخفض النتاج: يُسرب وريدياً بمعدل 2 إلى 20 ميكروغرام/كغ/دقيقة.',
+          warn: 'قاعدة ذهبية في الـ ICU: لأن الدوبيوتامين يوسع الأوعية قليلاً وقد يخفض الضغط، إذا كان الضغط الانقباضي للمريض <85–90 mmHg يجب البدء بـ Norepinephrine أولاً لرفع الضغط ثم إضافة Dobutamine لتحسين القلوصية! وقد يسبب لانظميات، ويضعف تأثيره عند مرضى حاصرات بيتا المزمنة، ويقل مفعوله بعد 48–72 ساعة.'
+        }
+      },
+
+      ntg_furosemide: {
+        cat: 'icu',
+        shortBadge: 'Nitroglycerin (5–200 mcg/m) & Lasix',
+        caseEn: 'Acute Cardiogenic Pulmonary Edema & Hypertensive ACS (BP 196/112, SpO2 86%, Crackles)',
+        caseAr: 'وذمة رئوية قلبية حادة مع ارتفاع ضغط وألم إقفاري (ضغط 196/112، خراخر رئوية)',
+        pre:  { hr: 112, sbp: 196, dbp: 112, spo2: 86, rr: 30, co: 3.8, svr: 1920, wave: 'stemi', rhythmEn: 'Sinus Tachycardia + Hypertensive Pulmonary Edema', rhythmAr: 'وذمة رئوية حادة وارتفاع ضغط شديد (196/112)', labs: 'PCWP: 28 mmHg ↑↑ | Bilateral crackles | Check RV Infarction & PDE-5 inhibitors before NTG!' },
+        post: { hr: 84, sbp: 134, dbp: 80, spo2: 97, rr: 18, co: 5.0, svr: 1240, wave: 'normal', rhythmEn: 'Preload/Afterload Reduced & Lungs Cleared', rhythmAr: 'انخفاض الاحتقان الرئوي والضغط وتحسن الأكسجة (97%)', labs: 'PCWP dropped to 14 mmHg | Monitor Urine Output & Serum K+ after Furosemide diuresis!' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `NTG Bag: 50 mg in 250 mL D5W/NS (glass bottle) = 200 mcg/mL | Furosemide (Lasix): 20 mg / 2 mL ampoule`,
+            dose: `NTG Infusion: Start 5–10 mcg/min, titrate by 5–10 q3–5m up to 200 mcg/min | Lasix: 40–80 mg IV bolus (or 5–20 mg/hr)`,
+            pump: `NTG (200 mcg/mL): 10 mcg/min = 3 mL/hr | 20 mcg/min = 6 mL/hr | 50 mcg/min = 15 mL/hr | 100 mcg/min = 30 mL/hr`,
+            math: `• [NITROGLYCERIN CONCENTRATION]: 50 mg (50,000 mcg) ÷ 250 mL = 200 mcg/mL.\n• [NTG PUMP FORMULA]: mL/hr = [Desired mcg/min × 60] ÷ 200 = Desired mcg/min × 0.3.\n  - 10 mcg/min = 3 mL/hr | 30 mcg/min = 9 mL/hr | 50 mcg/min = 15 mL/hr | 100 mcg/min = 30 mL/hr.\n• [FUROSEMIDE (LASIX) IV DOSE]: 0.5–1 mg/kg (40–80 mg IV slow push over 1–2 min; if on chronic oral Furosemide give 1–2.5× the oral daily dose IV; infuse high doses at ≤4 mg/min).`
+          };
+        },
+        en: {
+          title: '20. Nitroglycerin Infusion (Tridil) & Furosemide (Lasix) — Acute Pulmonary Edema & Ischemic ACS',
+          cls: 'Nitric Oxide Donor Venodilator/Coronary Vasodilator (NTG) + Loop Diuretic (Furosemide)',
+          mech: 'Nitroglycerin releases Nitric Oxide (NO -> cGMP), dilating capacitance veins at low doses (reducing preload & pulmonary congestion) and coronary/systemic arteries at higher doses (reducing afterload). Furosemide causes immediate venodilation within 5 min followed by potent loop diuresis (inhibiting NKCC2 in thick ascending loop of Henle).',
+          ind: '1) Acute Cardiogenic Pulmonary Edema (with BiPAP), 2) Refractory Ischemic Chest Pain in ACS, 3) Hypertensive Emergency with ACS/Heart Failure: NTG start 5–10 mcg/min IV and titrate q3–5m up to 200 mcg/min; Furosemide 40–80 mg IV bolus.',
+          warn: '1) ABSOLUTE CONTRAINDICATIONS TO NTG: Right Ventricular Infarction (Inferior STEMI — RV is preload-dependent and NTG causes cardiovascular collapse!), Systolic BP <90 mmHg, and PDE-5 Inhibitor use (Sildenafil/Viagra within 24h; Tadalafil within 48h)! 2) Furosemide causes hypokalemia, hypomagnesemia, and ototoxicity if high doses are given faster than 4 mg/min (infuse slowly); avoid NTG also in severe aortic stenosis.'
+        },
+        ar: {
+          title: '20. تسريب النايتروجليسرين (Nitroglycerin) ولازكس (Furosemide) — بروتوكول الوذمة الرئوية الحادة',
+          cls: 'موسع وريدي وتاجي مانح لأكسيد النتريك (NTG) + مدر عروة قوي (Furosemide)',
+          mech: 'يوسع النايتروجليسرين الأوردة فيخفض الحمل القبلي (Preload) والاحتقان الرئوي فوراً ويوسع الشرايين التاجية، بينما يبدأ اللازكس بتوسيع الأوردة خلال 5 دقائق يتبعه إدرار بولي غزير بتثبيط نواقل NKCC2 في عروة هنلي.',
+          ind: 'الوذمة الرئوية القلبية الحادة، الألم الصدري الإقفاري المستمر في الجلطة، وارتفاع الضغط الإسعافي القلبي: يبدأ تسريب NTG بمعدل 5–10 ميكروغرام/دقيقة (1.5–3 مل/ساعة) ويُرفع تدريجياً حسب الضغط؛ ويُعطى اللازكس 40–80 ملغ وريدياً.',
+          warn: '1) موانع استطباب النايتروجليسرين المطلقة: احتشاء البطين الأيمن (RV MI المرافق للجلطة السفلية — لأنه يعتمد على الحمل القبلي والنايتروجليسرين يسبب انهياراً حاداً بالضغط!)، الضغط الانقباضي <90 mmHg، أو تناول Sildenafil خلال 24–48 ساعة! 2) راقب البوتاسيوم والسمع مع اللازكس.'
+        }
+      },
+
+      propofol_rocuronium: {
+        cat: 'icu',
+        shortBadge: 'Propofol & Rocuronium (RSI & ICU Sedation)',
+        caseEn: 'Rapid Sequence Intubation (RSI) & Mechanical Ventilation Sedation/Paralysis',
+        caseAr: 'التنبيب الرغامي السريع (RSI) والتخدير والشلل العضلي على المنفسة',
+        pre:  { hr: 108, sbp: 142, dbp: 88, spo2: 91, rr: 28, co: 5.4, svr: 1380, wave: 'normal', rhythmEn: 'Agitated Tachypneic Patient Requiring Intubation', rhythmAr: 'مريض متهيج يعاني من فشل تنفسي ويحتاج لتنبيب رغامي', labs: 'ALWAYS administer Sedation (Propofol) + Analgesia (Fentanyl) BEFORE Paralytic (Rocuronium)!' },
+        post: { hr: 76, sbp: 112, dbp: 70, spo2: 99, rr: 14, co: 4.8, svr: 1140, wave: 'normal', rhythmEn: 'Sedated & Synchronized on Mechanical Ventilator (RASS -2)', rhythmAr: 'مخدر ومتزامن تماماً على جهاز التنفس الاصطناعي', labs: 'Monitor BP (Propofol vasodilation), Triglycerides, and Train-of-Four (TOF) if paralyzed!' },
+        calcFn: (w, isAr) => {
+          const propRsi = Math.round(w * 1.5);
+          const propInfMcg = Math.round(w * 25);
+          const propMlHr = +((propInfMcg * 60) / 10000).toFixed(1);
+          const rocRsi = Math.round(w * 1.0);
+          const rocInfMlHr = +((w * 10 * 60) / 10000).toFixed(1);
+          return {
+            prep: `Propofol 1% Emulsion = 10 mg/mL (10,000 mcg/mL) | Rocuronium Vial = 50 mg/5 mL (10 mg/mL)`,
+            dose: `Propofol: RSI 1.5–2 mg/kg (${propRsi} mg), ICU Sedation 5–50 mcg/kg/min | Rocuronium: RSI 0.6–1.2 mg/kg (${rocRsi} mg), Infuse 8–12 mcg/kg/min`,
+            pump: `Propofol at 25 mcg/kg/min = ${propMlHr} mL/hr | Rocuronium at 10 mcg/kg/min = ${rocInfMlHr} mL/hr`,
+            math: `• [PROPOFOL 1% (10 mg/mL = 10,000 mcg/mL)]:\n  - Intubation Induction (1.5 mg/kg): 1.5 × ${w} kg = ${propRsi} mg (${(propRsi/10).toFixed(1)} mL IV).\n  - ICU Continuous Sedation (at 25 mcg/kg/min): (25 × ${w} × 60) ÷ 10,000 = ${propMlHr} mL/hr.\n• [ROCURONIUM (10 mg/mL)]:\n  - RSI Intubation Paralysis (1.0 mg/kg): 1.0 × ${w} kg = ${rocRsi} mg (${(rocRsi/10).toFixed(1)} mL IV — onset 60 sec).`
+          };
+        },
+        en: {
+          title: '21. Propofol (Diprivan) & Rocuronium (Esmeron) — RSI & ICU Sedation/Paralysis',
+          cls: 'GABA-A Agonist Sedative-Hypnotic (Propofol) & Non-Depolarizing Neuromuscular Blocker (Rocuronium)',
+          mech: 'Propofol potentiates GABA-A receptors in the CNS (producing rapid hypnosis within 40 sec, anticonvulsant activity, and decreased ICP, but NO analgesia!). Rocuronium competitively blocks nicotinic ACh receptors at the motor end-plate, producing complete skeletal muscle paralysis within 60 seconds without fasciculations or hyperkalemia.',
+          ind: '1) Propofol: Induction 1.5–2.5 mg/kg IV; ICU Mechanical Ventilation Sedation 5–50 mcg/kg/min (titrate to RASS 0 to -2 with Daily Sedation Vacation). 2) Rocuronium: RSI Intubation 0.6–1.2 mg/kg IV; ARDS Vent-Synchrony Infusion 8–12 mcg/kg/min.',
+          warn: '1) GOLDEN ICU RULE: Rocuronium paralyzes all skeletal muscles (including diaphragm) while leaving the patient 100% AWAKE and feeling pain—NEVER administer Rocuronium without adequate Sedation (Propofol/Midazolam) and Analgesia (Fentanyl) running FIRST! 2) Propofol causes dose-dependent hypotension (vasodilation), provides 1.1 kcal/mL lipid calories (change tubing every 12h), and high doses >60–80 mcg/kg/min for >48h risk Propofol-Related Infusion Syndrome (PRIS: metabolic acidosis, rhabdomyolysis, hyperkalemia). 3) Rocuronium Reversal Agent: Sugammadex (2–16 mg/kg IV). 4) In shock / hypotension, reduce the Propofol induction dose (0.5–1 mg/kg) or choose Etomidate (0.3 mg/kg) or Ketamine (1–2 mg/kg) for RSI.'
+        },
+        ar: {
+          title: '21. بروبوفول (Propofol) وروكورونيوم (Rocuronium) — التنبيب الرغامي والتخدير في العناية الحثيثة',
+          cls: 'منوم وريدي مفعل لمستقبلات GABA-A (بروبوفول) + مرخٍ عضلي غير مزيل للاستقطاب (روكورونيوم)',
+          mech: 'يحدث البروبوفول تنويماً سريعاً خلال 40 ثانية ويخفض الضغط داخل القحف (لكنه لا يسكن الألم!)، بينما يغلق الروكورونيوم مستقبلات الأستيل كولين النيكوتينية في اللوحة المحركة محدثاً شللاً عضلياً كاملاً خلال 60 ثانية دون أن يرفع البوتاسيوم.',
+          ind: '1) بروبوفول: تحريض التنبيب 1.5–2.5 ملغ/كغ وريدياً؛ وتسريب التهدئة المستمر على المنفسة 5–50 ميكروغرام/كغ/دقيقة. 2) روكورونيوم: شلل التنبيب السريع (RSI) بجرعة 0.6–1.2 ملغ/كغ وريدياً؛ وتسريب ARDS المستمر 8–12 ميكروغرام/كغ/دقيقة.',
+          warn: '1) تحذير ذهبي صارم: الروكورونيوم يشل العضلات والتنفس بالكامل لكن المريض يبقى واعياً ويشعر بالألم 100% — يُمنع منعاً باتاً إعطاء المرخي العضلي بدون إعطاء المخدر (Propofol/Midazolam) والمسكن (Fentanyl) أولاً! 2) البروبوفول يخفض ضغط الدم، وتُغير أنابيبه كل 12 ساعة لأنه مستحلب دهني، 3) الترياق النوعي لعكس الروكورونيوم فوراً هو Sugammadex. 4) عند وجود صدمة أو هبوط ضغط تُخفض جرعة البروبوفول (0.5–1 ملغ/كغ) أو يُستعاض عنه بـ Etomidate أو Ketamine في التنبيب السريع.'
+        }
+      },
+
+      insulin_infusion: {
+        cat: 'icu',
+        shortBadge: 'Regular Insulin (0.1 U/kg/hr DKA & HyperK)',
+        caseEn: 'Diabetic Ketoacidosis (Glucose 480 mg/dL, pH 7.14, AG 26) & Hyperkalemic Shift',
+        caseAr: 'الحماض الكيتوني السكري (DKA — سكر 480، pH 7.14، AG = 26) أو خفض البوتاسيوم',
+        pre:  { hr: 114, sbp: 102, dbp: 64, spo2: 97, rr: 28, co: 4.5, svr: 1210, wave: 'normal', rhythmEn: 'Sinus Tachycardia + Kussmaul Breathing (DKA)', rhythmAr: 'تسرع جيبي مع تنفس كوسماول العميق (DKA)', labs: 'Glucose: 480 mg/dL | pH: 7.14 | HCO3: 10 | AG: 26 | K+: 4.8 mEq/L (Check K+ ≥ 3.3 BEFORE Insulin!)' },
+        post: { hr: 82, sbp: 120, dbp: 76, spo2: 98, rr: 16, co: 5.1, svr: 1200, wave: 'normal', rhythmEn: 'Sinus Rhythm (Ketogenesis Halted & Anion Gap Closed)', rhythmAr: 'نظم جيبي (توقف تصنيع الكيتونات وإغلاق الفجوة الأنيونية)', labs: 'Glucose: 185 mg/dL (Add D5W + 0.45% NS!) | pH: 7.36 | AG: 10 (Closed!) | K+: 4.1 mEq/L' },
+        calcFn: (w, isAr) => {
+          const uHr = +(w * 0.1).toFixed(1);
+          return {
+            prep: `Standard ICU Syringe/Bag: 50 Units Regular Insulin (Actrapid/Humulin-R) in 50 mL 0.9% NS = 1 Unit/mL`,
+            dose: `DKA Continuous Infusion (0.1 U/kg/hr) = ${uHr} Units/hr | Hyperkalemia Shift = 10 Units IV + 50 mL D50W`,
+            pump: `DKA Pump Rate (on 1 Unit/mL concentration) = ${uHr} mL/hr (Halve to ${(uHr/2).toFixed(1)} mL/hr once Glucose < 200–250 mg/dL!)`,
+            math: `• [STANDARD ICU INSULIN CONCENTRATION]: 50 Units Regular Insulin ÷ 50 mL NS = 1 Unit/mL (Flush 20 mL through tubing first to saturate plastic binding sites!).\n• [DKA INFUSION RATE]: 0.1 Units/kg/hr × ${w} kg = ${uHr} Units/hr = ${uHr} mL/hr.\n• [WHEN GLUCOSE REACHES 200–250 mg/dL]: Do NOT stop Insulin until Anion Gap closes (<12)! Instead, add Dextrose (D5W with 0.45% NS) and reduce Insulin rate to 0.02–0.05 U/kg/hr (${(w*0.05).toFixed(1)} mL/hr).`
+          };
+        },
+        en: {
+          title: '22. Regular Insulin IV Infusion (Actrapid / Humulin-R) — DKA Protocol & Hyperkalemia Shift',
+          cls: 'Short-Acting Human Regular Insulin (ONLY Insulin Safe for IV Use!)',
+          mech: '1) Suppresses hepatic ketogenesis and lipolysis (closing the high Anion Gap in DKA), 2) Stimulates cell-membrane Na+/K+-ATPase pump to drive extracellular Potassium (K+) into cells within 15–30 minutes.',
+          ind: '1) Diabetic Ketoacidosis (DKA) & HHS: After starting 1L 0.9% NS and confirming serum K+ ≥ 3.3 mEq/L, infuse Regular Insulin at 0.1 units/kg/hr (1 Unit/mL concentration). 2) Moderate-to-Severe Hyperkalemia: 10 units Regular Insulin IV push + 50 mL D50W (25 g Dextrose) over 15 min (lowers K+ by 0.5–1.2 mEq/L within 30 min).',
+          warn: '1) LETHAL DKA TRAP: NEVER start IV Insulin if Serum K+ is < 3.3 mEq/L! Insulin will drive the remaining K+ into cells and trigger fatal hypokalemic arrhythmias/cardiac arrest—replete KCl (20–40 mEq/hr) FIRST until K+ ≥ 3.3! 2) In DKA, Glucose normalizes BEFORE ketones clear—when Glucose drops to 200–250 mg/dL, add D5W to IV fluids and continue Insulin at 0.05 U/kg/hr until Anion Gap is ≤12 and HCO3- ≥18!'
+        },
+        ar: {
+          title: '22. تسريب الإنسولين الصافي الوريدي (Regular Insulin — Actrapid) — بروتوكول الـ DKA وفرط البوتاسيوم',
+          cls: 'إنسولين بشري قصير الأمد (النوع الوحيد المسموح بإعطائه وريدياً!)',
+          mech: '1) يوقف تصنيع الأحماض الكيتونية وتحلل الدهون فيغلق الفجوة الأنيونية في الـ DKA، 2) ينشط مضخة Na+/K+-ATPase فيدخل البوتاسيوم من الدم إلى داخل الخلايا خلال 15–30 دقيقة.',
+          ind: '1) الحماض الكيتوني السكري (DKA): يُحضر بتركيز 1 وحدة/مل (50 وحدة في 50 مل محلول ملحي) ويُسرب بمعدل 0.1 وحدة/كغ/ساعة. 2) خفض البوتاسيوم في فرط البوتاسيوم: 10 وحدات إنسولين صافي وريدياً مع 50 مل دكستروز 50% (D50W).',
+          warn: '1) قاعدة قاتلة في الـ DKA: يُمنع منعاً باتاً البدء بتسريب الإنسولين إذا كان بوتاسيوم الدم < 3.3 mEq/L لأن الإنسولين سيدخل البوتاسيوم للخلايا ويسبب توقف قلب فوري — عوّض البوتاسيوم أولاً! 2) عندما ينخفض السكر إلى 200–250 ملغ/ديسيلتر لا توقف الإنسولين قبل إغلاق الفجوة الأنيونية (AG ≤ 12)، بل أضف دكستروز D5W للسوائل واخفض سرعة الإنسولين إلى النصف (0.05 وحدة/كغ/ساعة).'
+        }
+      },
+
+      vasopressin_labetalol: {
+        cat: 'icu',
+        shortBadge: 'Vasopressin (0.03 U/m) & Labetalol',
+        caseEn: 'Refractory Septic Shock (Adding Vasopressin) OR Hypertensive Stroke Emergency (Labetalol)',
+        caseAr: 'صدمة إنتانية معندة (فازوبريسين) أو ارتفاع ضغط إسعافي قبل مذيب الجلطة (لابيتالول)',
+        pre:  { hr: 112, sbp: 205, dbp: 118, spo2: 95, rr: 20, co: 5.2, svr: 1890, wave: 'normal', rhythmEn: 'Hypertensive Emergency (BP 205/118 mmHg)', rhythmAr: 'فرط ضغط دم إسعافي حرج (205/118 mmHg)', labs: 'In Ischemic Stroke: Lower BP < 185/110 before tPA! | In Aortic Dissection: Target SBP < 120 & HR 60–80 (Beta-Blocker first)!' },
+        post: { hr: 76, sbp: 162, dbp: 92, spo2: 98, rr: 16, co: 5.0, svr: 1320, wave: 'normal', rhythmEn: 'Controlled BP Reduction (162/92 mmHg — Safe for tPA)', rhythmAr: 'خفض الضغط التدريجي الآمن إلى 162/92 (جاهز لإعطاء المذيب)', labs: 'Avoid dropping MAP >20–25% in 1st hour to prevent cerebral/coronary watershed ischemia!' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `Vasopressin: 20 Units in 100 mL NS/D5W = 0.2 Units/mL | Labetalol Vial: 100 mg / 20 mL (5 mg/mL)`,
+            dose: `Vasopressin Fixed Rate = 0.03–0.04 Units/min (NOT weight-based!) | Labetalol = 10–20 mg IV bolus over 2m, or infuse 1–8 mg/min`,
+            pump: `Vasopressin at 0.03 Units/min (1.8 Units/hr) on 0.2 U/mL bag = 9.0 mL/hr | At 0.04 Units/min = 12.0 mL/hr`,
+            math: `• [VASOPRESSIN FIXED-DOSE SEPTIC SHOCK RULE]: Never titrate by weight! Fixed dose = 0.03 to 0.04 Units/min (1.8 to 2.4 Units/hr). On 20 U / 100 mL (0.2 U/mL) bag: Pump Rate = 9.0 to 12.0 mL/hr.\n• [LABETALOL — ACUTE ISCHEMIC STROKE (BP >185/110 before tPA)]: 10–20 mg (2–4 mL) IV over 1–2 min, may repeat ONCE (alternative: Nicardipine 5 mg/hr, increase by 2.5 mg/hr every 5–15 min, max 15 mg/hr).\n• [LABETALOL — OTHER HYPERTENSIVE EMERGENCIES]: 20 mg IV, then 40–80 mg every 10 min as needed (Max 300 mg total), or infuse 0.5–2 mg/min.`
+          };
+        },
+        en: {
+          title: '23. Vasopressin (Pitressin) & Labetalol (Trandate) — ICU Vascular Control',
+          cls: 'Non-Adrenergic V1 Vascular Agonist (Vasopressin) & Combined Alpha-1 / Beta-1,2 Blocker (Labetalol)',
+          mech: 'Vasopressin directly stimulates vascular smooth muscle V1 receptors (independent of Alpha-1 receptors, so it works even in severe acidemia where catecholamines fail!). Labetalol blocks Alpha-1 (vasodilation) and Beta-1/2 (preventing reflex tachycardia) in a 1:7 IV ratio.',
+          ind: '1) Vasopressin: Second-line catecholamine-sparing pressor added to Norepinephrine in Refractory Septic Shock at a FIXED dose of 0.03–0.04 units/min. 2) Labetalol: First-line IV antihypertensive for Acute Ischemic Stroke (to bring BP <185/110 before Alteplase: 10–20 mg IV over 1–2 min, may repeat once), Intracerebral Hemorrhage, Aortic Dissection (with an HR target of 60–80 bpm), and Eclampsia.',
+          warn: '1) Never titrate Vasopressin above 0.04 units/min in septic shock (causes cardiac, mesenteric, and digital ischemia!), 2) Labetalol is contraindicated in Asthma/COPD, Bradycardia, AV Block, and Decompensated Heart Failure.'
+        },
+        ar: {
+          title: '23. فازوبريسين (Vasopressin) ولابيتالول (Labetalol) — التحكم الوعائي في العناية الحثيثة',
+          cls: 'منبه لمستقبلات V1 الوعائية غير الأدرينالية (فازوبريسين) + حاصر مشترك لألفا-1 وبيتا (لابيتالول)',
+          mech: 'يقبض الفازوبريسين الأوعية عبر مستقبلات V1 المستقلة عن مستقبلات ألفا-1 (لذلك يعمل حتى في الحماض الشديد الذي يضعف استجابة النورإبينفرين!)، بينما يخفض اللابيتالول الضغط بسلاسة دون إحداث تسرع قلب انعكاسي.',
+          ind: '1) فازوبريسين: يُضاف كرافع ضغط خط ثانٍ بجانب النورإبينفرين في الصدمة الإنتانية المعندة بجرعة ثابتة (0.03–0.04 وحدة/دقيقة = 9–12 مل/ساعة) لا تعتمد على الوزن. 2) لابيتالول: الدواء الأول لخفض الضغط في الجلطة الدماغية قبل إعطاء المذيب (<185/110) وفي تسلخ الأبهر وتسمم الحمل (10–20 ملغ وريدياً ببطء).',
+          warn: '1) لا ترفع الفازوبريسين فوق 0.04 وحدة/دقيقة لتجنب إقفار الأمعاء والقلب، 2) يُمنع اللابيتالول في الربو وبطء القلب وحصار القلب وفشل القلب الحاد.'
+        }
+      },
+
+      midazolam_fentanyl: {
+        cat: 'icu',
+        shortBadge: 'Fentanyl (25–100 mcg/h) & Midazolam',
+        caseEn: 'Intubated Post-CABG / Trauma ICU Patient Requiring Analgosedation & Seizure Control',
+        caseAr: 'مريض عناية حثيثة منبب يحتاج لتسكين الألم والتهدئة (Analgosedation) أو حالة صرعية',
+        pre:  { hr: 116, sbp: 158, dbp: 94, spo2: 94, rr: 26, co: 5.5, svr: 1450, wave: 'normal', rhythmEn: 'Sinus Tachycardia (Severe Pain & Ventilator Dyssynchrony)', rhythmAr: 'تسرع جيبي بسبب الألم الشديد وعدم التزامن مع المنفسة', labs: 'CPOT Pain Score: 6/8 | RASS: +2 (Agitated) | ICU Analgesia-First (Fentanyl) Principle!' },
+        post: { hr: 78, sbp: 122, dbp: 76, spo2: 99, rr: 14, co: 5.0, svr: 1200, wave: 'normal', rhythmEn: 'Pain-Free & Calm (CPOT 0, RASS -1)', rhythmAr: 'تسكين كامل للألم وهدوء وتزامن تام (CPOT = 0, RASS = -1)', labs: 'Antidotes: Naloxone (0.04–0.4 mg IV) for Fentanyl | Flumazenil (0.2 mg IV) for Midazolam' },
+        calcFn: (w, isAr) => {
+          return {
+            prep: `Fentanyl Syringe: 500 mcg in 50 mL NS = 10 mcg/mL | Midazolam (Dormicum) Syringe: 50 mg in 50 mL NS = 1 mg/mL`,
+            dose: `Fentanyl: Bolus 25–100 mcg IV, Infuse 25–100 mcg/hr (≈0.5–1.5 mcg/kg/hr) | Midazolam: Bolus 2–5 mg IV, Infuse 2–8 mg/hr`,
+            pump: `Fentanyl (10 mcg/mL): 50 mcg/hr = 5 mL/hr | Midazolam (1 mg/mL): 3 mg/hr = 3 mL/hr`,
+            math: `• [FENTANYL (500 mcg / 50 mL = 10 mcg/mL)]: At 1 mcg/kg/hr for ${w} kg = ${w} mcg/hr ÷ 10 mcg/mL = ${(w/10).toFixed(1)} mL/hr.\n• [MIDAZOLAM / DORMICUM (50 mg / 50 mL = 1 mg/mL)]: Status Epilepticus = 10 mg IM if >40 kg (5 mg if 13–40 kg) or IV 0.1–0.2 mg/kg (Max 10 mg) = ${Math.min(10, +(w*0.1).toFixed(1))}–${Math.min(10, +(w*0.2).toFixed(1))} mg for ${w} kg; ICU Sedation Infusion = 2 to 6 mg/hr (2 to 6 mL/hr).`
+          };
+        },
+        en: {
+          title: '24. Fentanyl (Sublimaze) & Midazolam (Dormicum) — ICU Analgosedation & Status Epilepticus',
+          cls: 'Synthetic Mu-Opioid Analgesic (Fentanyl — 100× Morphine Potency) & Benzodiazepine GABA-A Agonist (Midazolam)',
+          mech: 'Fentanyl binds central μ-opioid receptors with rapid onset (1–2 min) and ZERO histamine release (hemodynamically stable in shock unlike Morphine!). Midazolam potentiates GABA-A chloride channels to produce anxiolysis, amnesia, sedation, and seizure termination.',
+          ind: '1) Fentanyl: First-line ICU Analgesia-First ("Analgosedation") for ventilated/post-op/trauma patients: 25–100 mcg IV bolus, then 25–100 mcg/hr (≈0.5–1.5 mcg/kg/hr). 2) Midazolam: Status Epilepticus (IM 10 mg if >40 kg, or IV 0.1–0.2 mg/kg up to 10 mg), procedural sedation (2–5 mg IV), and short-term continuous ICU sedation (2–8 mg/hr) — current ICU guidelines (PADIS) prefer Propofol or Dexmedetomidine over benzodiazepines for ventilated adults to reduce delirium.',
+          warn: '1) Rapid high-dose Fentanyl push can cause Wooden Chest Syndrome (chest wall rigidity impairing ventilation -> treat with Naloxone or Rocuronium!), 2) Midazolam accumulates in renal/hepatic failure and adipose tissue, increasing ICU delirium risk. 3) Specific Antidotes: Naloxone (0.04–0.4 mg IV titrated) for Fentanyl; Flumazenil (0.2 mg IV) for Midazolam — avoid Flumazenil in chronic benzodiazepine users, seizure disorders or mixed TCA overdose (can precipitate seizures).'
+        },
+        ar: {
+          title: '24. فنتانيل (Fentanyl) وميدازولام / دورميكوم (Midazolam) — التسكين والتهدئة والصرع في الـ ICU',
+          cls: 'مسكن أفيوني تركيبي قوي (أقوى بـ 100 مرة من المورفين) + بنزوديازيبين مهدئ ومضاد اختلاج',
+          mech: 'يسكن الفنتانيل الألم بسرعة فائقة (خلال 1-2 دقيقة) دون تحرير الهيستامين (لذلك لا يسبب هبوط ضغط مثل المورفين!)، بينما ينشط الميدازولام مستقبلات GABA-A لإحداث التهدئة وفقدان الذاكرة وإيقاف الاختلاجات.',
+          ind: '1) فنتانيل: حجر الأساس في تسكين مرضى المنفسة وما بعد العمليات (Analgosedation): بولس 25–100 ميكروغرام ثم تسريب مستمر 25–100 ميكروغرام/ساعة (2.5–10 مل/ساعة). 2) ميدازولام (Dormicum): إيقاف الحالة الصرعية (5–10 ملغ وريدياً أو عضلياً) والتهدئة المستمرة (2–8 ملغ/ساعة).',
+          warn: '1) الدفع السريع لجرعة عالية من الفنتانيل قد يسبب تيبس جدار الصدر (Wooden Chest Syndrome)، 2) الترياق النوعي للفنتانيل هو Naloxone، والترياق النوعي للميدازولام هو Flumazenil (يُتجنب عند مستخدمي البنزوديازيبين المزمن أو مرضى الصرع أو التسمم المختلط بـ TCA لأنه قد يسبب اختلاجات). 3) توصي إرشادات الـ ICU الحديثة (PADIS) بتفضيل البروبوفول أو الديكسميديتوميدين على البنزوديازيبينات للمرضى على المنفسة لتقليل الهذيان.'
+        }
+      }
+    };
+
+    function setDrugCat(cat) {
+      currentCat = cat;
+      ['all', 'lysis', 'anticoag', 'acls', 'icu'].forEach(c => {
+        const b = document.getElementById('dcat-' + c);
+        if (b) b.classList.toggle('active', c === cat);
+      });
+      renderDrugSidebar();
+    }
+
+    function renderDrugSidebar() {
+      const box = document.getById ? document.getById('clinix-sidebar-scroll') : document.getElementById('clinix-sidebar-scroll');
+      if (!box) return;
+      const isAr = (currentLang === 'ar');
+      box.innerHTML = '';
+
+      const catTag = {
+        lysis:    { en: 'Thrombolytic',   ar: 'مذيب جلطة',    bg: '#ffe4e6', col: '#9f1239' },
+        anticoag: { en: 'Anticoag/Plt',   ar: 'مميع/صفيحات',  bg: '#f3e8ff', col: '#6b21a8' },
+        acls:     { en: 'ACLS Rhythm',    ar: 'طوارئ ACLS',   bg: '#fef3c7', col: '#92400e' },
+        icu:      { en: 'ICU Infusion',   ar: 'عناية حثيثة',  bg: '#e0f2fe', col: '#075985' }
+      };
+
+      Object.keys(DRUG_DB).forEach(k => {
+        const d = DRUG_DB[k];
+        if (currentCat !== 'all' && d.cat !== currentCat) return;
+        const isSel = (currentDrugKey === k);
+        const badge = catTag[d.cat];
+        const title = isAr ? d.ar.title : d.en.title;
+
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'sc-card' + (isSel ? ' active' : '');
+        btn.innerHTML = `
+          <div class="flex items-center justify-between gap-1">
+            <span class="px-2 py-0.5 rounded text-[10px] font-extrabold" style="background:${isSel ? 'rgba(255,255,255,0.22)' : badge.bg};color:${isSel ? '#fff' : badge.col}">
+              ${isAr ? badge.ar : badge.en}
+            </span>
+            <span class="num-ltr text-[10px] font-mono font-extrabold px-1.5 py-0.5 rounded ${isSel ? 'bg-black/25 text-white' : 'bg-slate-100 text-slate-700'}">
+              ${d.shortBadge}
+            </span>
+          </div>
+          <div class="text-xs font-extrabold ${isSel ? 'text-white' : 'text-slate-900'} leading-snug">${title}</div>
+        `;
+        btn.onclick = () => selectDrug(k);
+        box.appendChild(btn);
+      });
+    }
+
+    function selectDrug(key) {
+      currentDrugKey = key;
+      drugGiven = false;
+      resetMonitorTrace();
+      renderDrugSidebar();
+      updateMonitorAndCalculator();
+    }
+
+    function onWeightChange(val) {
+      ptWeight = parseFloat(val) || 75;
+      document.getElementById('val-pt-weight').textContent = `${ptWeight} kg`;
+      document.getElementById('calc-weight-pill').textContent = `Weight = ${ptWeight} kg`;
+      updateMonitorAndCalculator();
+    }
+
+    function administerSelectedDrug() {
+      drugGiven = true;
+      updateMonitorAndCalculator();
+    }
+
+    function resetPatientToBaseline() {
+      drugGiven = false;
+      updateMonitorAndCalculator();
+    }
+
+    function updateMonitorAndCalculator() {
+      const d = DRUG_DB[currentDrugKey] || DRUG_DB.alteplase;
+      const isAr = (currentLang === 'ar');
+      const st = drugGiven ? d.post : d.pre;
+
+      document.getElementById('mon-case-badge').textContent = (isAr ? 'حالة المريض: ' : 'PATIENT CASE: ') + (isAr ? d.caseAr : d.caseEn);
+      document.getElementById('mon-drug-pill').textContent = d.shortBadge;
+
+      const pBadge = document.getElementById('mon-phase-badge');
+      if (drugGiven) {
+        pBadge.className = 'px-3 py-1 rounded-xl bg-emerald-500 text-slate-950 text-xs font-black shadow';
+        pBadge.textContent = isAr ? '✅ بعد إعطاء الدواء (POST-DRUG RESPONSE)' : '✅ POST-DRUG RESPONSE ACTIVE';
+      } else {
+        pBadge.className = 'px-3 py-1 rounded-xl bg-amber-500/20 border border-amber-400/50 text-amber-300 text-xs font-black';
+        pBadge.textContent = isAr ? '● الحالة القاعدية قبل الدواء (PRE-DRUG BASELINE)' : '● PRE-DRUG BASELINE STATE';
+      }
+
+      const mapVal = st.sbp === 0 ? 0 : Math.round((st.sbp + 2 * st.dbp) / 3);
+      document.getElementById('mon-hr').textContent = st.hr;
+      document.getElementById('mon-rhythm').textContent = isAr ? st.rhythmAr : st.rhythmEn;
+      document.getElementById('mon-bp').textContent = `${st.sbp}/${st.dbp}`;
+      document.getElementById('mon-map').textContent = `MAP: ${mapVal} mmHg`;
+      document.getElementById('mon-spo2').textContent = `${st.spo2}%`;
+      document.getElementById('mon-rr').textContent = `RR: ${st.rr} /min`;
+      document.getElementById('mon-co').textContent = `CO: ${st.co.toFixed(1)} L/m`;
+      document.getElementById('mon-svr').textContent = `SVR: ${st.svr}`;
+      document.getElementById('mon-labs').textContent = st.labs;
+
+      const respBanner = document.getElementById('mon-response-banner');
+      const respTxt = document.getElementById('mon-response-txt');
+      if (drugGiven) {
+        respBanner.className = 'mb-3 p-3 rounded-xl bg-emerald-950/90 border-2 border-emerald-400 text-xs font-bold text-emerald-100';
+        respTxt.innerHTML = isAr
+          ? `💉 <strong>تم إعطاء (${d.shortBadge}) لمريض بوزن ${ptWeight} كغ:</strong> تحولت حالة المونيتور من [${d.pre.rhythmAr} | BP ${d.pre.sbp}/${d.pre.dbp}] ➔ إلى <strong>[${d.post.rhythmAr} | HR ${d.post.hr} bpm | BP ${d.post.sbp}/${d.post.dbp} (MAP ${mapVal})]</strong>!`
+          : `💉 <strong>Administered (${d.shortBadge}) for ${ptWeight} kg Patient:</strong> Monitor converted from [${d.pre.rhythmEn} | BP ${d.pre.sbp}/${d.pre.dbp}] ➔ to <strong>[${d.post.rhythmEn} | HR ${d.post.hr} bpm | BP ${d.post.sbp}/${d.post.dbp} (MAP ${mapVal} mmHg)]</strong>!`;
+      } else {
+        respBanner.className = 'mb-3 p-3 rounded-xl bg-slate-900/90 border border-slate-700 text-xs font-bold text-slate-200';
+        respTxt.textContent = isAr
+          ? `المونيتور يعرض حالياً حالة المريض قبل إعطاء الدواء (${d.pre.rhythmAr}). اضغط على كبسة "💉 إعطاء الدواء / بدء التسريب" بالأعلى لمشاهدة التأثير الفوري على التخطيط والضغط والفحوصات!`
+          : `Monitor currently shows the patient's Pre-Drug Baseline (${d.pre.rhythmEn}). Click "💉 Administer Drug / Start IV Infusion" above to watch the real-time ECG, BP, and Lab response!`;
+      }
+
+      // Dose & Pump Calculator
+      const calc = d.calcFn(ptWeight, isAr);
+      document.getElementById('calc-prep-val').textContent = calc.prep;
+      document.getElementById('calc-dose-val').textContent = calc.dose;
+      document.getElementById('calc-pump-val').textContent = calc.pump;
+      document.getElementById('calc-math-steps').innerHTML = calc.math.replace(/\n/g, '<br>');
+
+      // Pharmacology Masterguide Cards
+      const loc = isAr ? d.ar : d.en;
+      document.getElementById('drug-class-badge').textContent = loc.cls;
+      document.getElementById('drug-full-title').textContent = loc.title;
+      document.getElementById('drug-mech-txt').textContent = loc.mech;
+      document.getElementById('drug-ind-txt').textContent = loc.ind;
+      document.getElementById('drug-warn-txt').textContent = loc.warn;
+    }
+
+    // =====================================================================
+    // BEDSIDE MONITOR ENGINE (beat-synchronised)
+    // One shared list of heart beats drives ECG, arterial BP and SpO2 pleth,
+    // so the three traces always agree with each other and with the HR shown:
+    //   ECG R-wave  ->  arterial upstroke (+ART_DELAY)  ->  finger pleth upstroke (+PLETH_DELAY)
+    // The trace scrolls in real time at ~25 mm/s (WAVE_PX_PER_SEC), frame-rate independent.
+    // =====================================================================
+    const WAVE_PX_PER_SEC = 95;      // ≈ 25 mm/s (clinical standard sweep). Lower = slower trace.
+    const ART_DELAY_MS    = 150;     // R wave -> arterial pressure upstroke
+    const PLETH_DELAY_MS  = 300;     // R wave -> peripheral (finger) pulse upstroke
+    const BEAT_LOOKAHEAD  = 350;     // schedule beats slightly ahead so P waves can be drawn
+    const ABP_MAX_MMHG    = 230;     // vertical scale of the arterial trace (0 – 230 mmHg)
+
+    let wavesVisible = true;
+    let simStart = performance.now();
+    let simNow = 0;
+    let beatList = [];
+    let nextBeatT = 0;
+    let stateLog = [];
+    let lastLoggedSt = null;
+    let lastBeatRR = 800;
+
+    function gPulse(t, c, w, a) {
+      return a * Math.exp(-Math.pow((t - c) / w, 2));
+    }
+    function clampV(x, lo, hi) { return Math.max(lo, Math.min(hi, x)); }
+    function sigm(x) { return 1 / (1 + Math.exp(-x)); }
+
+    function currentMonitorState() {
+      const d = DRUG_DB[currentDrugKey] || DRUG_DB.alteplase;
+      return drugGiven ? d.post : d.pre;
+    }
+
+    function stateAt(t) {
+      for (let i = stateLog.length - 1; i >= 0; i--) {
+        if (stateLog[i].t <= t) return stateLog[i].st;
+      }
+      return stateLog.length ? stateLog[0].st : currentMonitorState();
+    }
+
+    function resetMonitorTrace() {
+      simNow = performance.now() - simStart;
+      const st = currentMonitorState();
+      beatList = [];
+      lastBeatRR = st.hr > 0 ? 60000 / st.hr : 800;
+      stateLog = [{ t: simNow - 1e7, st: st }];
+      lastLoggedSt = st;
+      // pre-fill the screen with history so the trace is never empty
+      nextBeatT = simNow - 24000;
+    }
+
+    function nextRR(st) {
+      const T = 60000 / st.hr;
+      if (st.wave === 'afib' || st.wave === 'afib_slow') {
+        return clampV(T * (0.70 + 0.60 * Math.random()), 280, 2200);   // irregularly irregular
+      }
+      if (st.wave === 'wpw') {
+        return clampV(T * (0.72 + 0.56 * Math.random()), 240, 600);   // pre-excited AF: fast & irregular
+      }
+      return T;                                                       // regular rhythms
+    }
+
+    function scheduleBeats(st) {
+      if (!st || st.hr <= 0 || st.wave === 'asystole') {
+        nextBeatT = Math.max(nextBeatT, simNow + 150);
+        return;
+      }
+      if (simNow - nextBeatT > 40000) nextBeatT = simNow - 2000;      // e.g. after the tab was in background
+      let guard = 0;
+      while (nextBeatT <= simNow + BEAT_LOOKAHEAD && guard++ < 400) {
+        const rr = nextRR(st);
+        beatList.push({
+          t: nextBeatT, rr: rr, prevRR: lastBeatRR, T: 60000 / st.hr,
+          wave: st.wave, sbp: st.sbp, dbp: st.dbp, spo2: st.spo2
+        });
+        lastBeatRR = rr;
+        nextBeatT += rr;
+      }
+    }
+
+    function updateMonitorEngine() {
+      simNow = performance.now() - simStart;
+      const st = currentMonitorState();
+      if (st !== lastLoggedSt) {                 // drug given / reset / new drug -> log the transition
+        stateLog.push({ t: simNow, st: st });
+        lastLoggedSt = st;
+      }
+      while (stateLog.length > 2 && stateLog[1].t < simNow - 31000) stateLog.shift();
+      scheduleBeats(st);
+      const keepFrom = simNow - 30000;
+      while (beatList.length && beatList[0].t < keepFrom) beatList.shift();
+    }
+
+    // ---------------- ECG ----------------
+    function ecgBeat(b, tau) {
+      const f = clampV(Math.sqrt(b.rr / 760), 0.62, 1.45);       // QT-like rate scaling
+      const pOff = -122 * (0.8 + 0.2 * f);
+      switch (b.wave) {
+        case 'vt':
+          return gPulse(tau, 0, 32, 1.35) - gPulse(tau, 90, 28, 0.75);
+        case 'tdp': {
+          if (tau < -b.rr || tau > b.rr) return 0;
+          const env = Math.sin((b.t / 1600) * Math.PI * 2);
+          const hann = Math.pow(Math.cos((Math.PI * tau) / (2 * b.rr)), 2);
+          return 1.35 * env * Math.cos((2 * Math.PI * tau) / b.rr) * hann;
+        }
+        case 'svt':
+          return -gPulse(tau, -13, 5, 0.10) + gPulse(tau, 0, 7.5, 1.35) - gPulse(tau, 13, 6, 0.25) + gPulse(tau, 100, 24, 0.32);
+        case 'afib':
+        case 'afib_slow': {
+          const tOff = 120 + 55 * clampV((b.rr - 500) / 700, 0, 1);
+          const tW = 28 + 6 * clampV((b.rr - 500) / 700, 0, 1);
+          return gPulse(tau, 0, 8.5, 1.2) - gPulse(tau, 16, 7, 0.22) + gPulse(tau, tOff, tW, 0.25);
+        }
+        case 'wpw':
+          return gPulse(tau, -18, 18, 0.45) + gPulse(tau, 0, 22, 1.35) - gPulse(tau, 115, 32, 0.30);
+        case 'hyperk':
+          return gPulse(tau, -155, 25, 0.04) - gPulse(tau, -30, 14, 0.18) + gPulse(tau, 0, 19, 0.95)
+               - gPulse(tau, 35, 16, 0.35) + gPulse(tau, 205 * f, 20, 1.35);
+        default: {   // normal sinus family: 'normal', 'stemi', 'brady', 'shock'
+          let v = gPulse(tau, pOff, 18, 0.18) - gPulse(tau, -20, 6, 0.11) + gPulse(tau, 0, 9.5, 1.32) - gPulse(tau, 20, 8, 0.25);
+          if (b.wave === 'stemi') {
+            v += 0.56 * Math.exp(-Math.pow((tau - 123 * f) / (98 * f), 2)) * sigm((tau - 8) / 6) * sigm((278 * f - tau) / 20);
+            v += gPulse(tau, 213 * f, 42 * f, 0.38);
+          } else {
+            v += gPulse(tau, 213 * f, 38 * f, 0.35);
+          }
+          return v;
+        }
+      }
+    }
+
+    function ecgAt(t) {
+      const sT = stateAt(t);
+      let v = 0.03 * Math.sin(2 * Math.PI * (sT.rr / 60000) * t);    // respiratory baseline wander (follows RR)
+      if (sT.wave === 'asystole') v += 0.02 * Math.sin(t * 0.01);
+      if (sT.wave === 'afib' || sT.wave === 'afib_slow' || sT.wave === 'wpw') {
+        v += 0.05 * Math.sin(t * 0.05) + 0.035 * Math.cos(t * 0.034 + 1);   // fibrillatory f-waves (~5–8 Hz)
+      }
+      for (let i = 0; i < beatList.length; i++) {
+        const b = beatList[i];
+        const tau = t - b.t;
+        if (tau < -400) break;                  // list is time-ordered
+        if (tau > 1400) continue;
+        v += ecgBeat(b, tau);
+      }
+      return v;
+    }
+
+    // ---------------- Arterial pressure (mmHg) ----------------
+    function abpAt(t) {
+      let best = -1;
+      let any = false;
+      for (let i = 0; i < beatList.length; i++) {
+        const b = beatList[i];
+        const tau = t - (b.t + ART_DELAY_MS);
+        if (tau < 0) break;
+        if (tau > 9000) continue;
+        any = true;
+        const g = clampV(Math.sqrt(b.rr / 800), 0.6, 1.3);
+        const ampF = clampV(Math.pow(b.prevRR / b.T, 0.5), 0.55, 1.15);   // short filling time -> smaller pulse (AF pulse deficit)
+        const pp = Math.max(0, (b.sbp - b.dbp) * ampF);
+        const dbp = b.dbp;
+        const tr = 110 * g, tn = 300 * g, td = 60 * g, nL = 0.45;
+        let p;
+        if (tau < tr) {
+          p = dbp + pp * Math.sin((Math.PI / 2) * (tau / tr));
+        } else if (tau < tn) {
+          p = dbp + pp * (nL + (1 - nL) * 0.5 * (1 + Math.cos(Math.PI * (tau - tr) / (tn - tr))));
+        } else if (tau < tn + td) {
+          p = dbp + pp * (nL + 0.05 * Math.sin(Math.PI * (tau - tn) / td));     // dicrotic notch / wave
+        } else {
+          const pn = dbp + pp * nL;
+          const tEnd = tn + td;
+          const ratio = Math.max(pn / Math.max(dbp, 5), 1.02);
+          const tauD = (b.rr - tEnd) > 40 ? (b.rr - tEnd) / Math.log(ratio) : 350;
+          p = pn * Math.exp(-(tau - tEnd) / tauD);   // diastolic run-off (keeps falling after the last beat)
+        }
+        if (p > best) best = p;
+      }
+      const sT = stateAt(t);
+      if (!any) return 0;                                                       // no pulse yet / cardiac arrest
+      const swing = (sT.sbp > 0) ? 1.0 : 0;                                     // slight respiratory swing
+      return best + swing * Math.sin(2 * Math.PI * (sT.rr / 60000) * t);
+    }
+
+    // ---------------- SpO2 plethysmograph (0..1 relative) ----------------
+    function plethAt(t) {
+      let best = 0;
+      for (let i = 0; i < beatList.length; i++) {
+        const b = beatList[i];
+        const tau = t - (b.t + PLETH_DELAY_MS);
+        if (tau < 0) break;
+        if (tau > 7000) continue;
+        const g = clampV(Math.sqrt(b.rr / 800), 0.6, 1.3);
+        const ampF = clampV(Math.pow(b.prevRR / b.T, 0.5), 0.55, 1.15);
+        const perf = (b.spo2 > 0 && b.sbp > 0) ? clampV(((b.sbp - b.dbp) * ampF) / 40, 0.18, 1.1) : 0;
+        const tr = 170 * g;
+        let s;
+        if (tau < tr) {
+          s = Math.sin((Math.PI / 2) * (tau / tr));
+        } else {
+          s = Math.exp(-(tau - tr) / (0.26 * b.rr + 60)) + 0.07 * Math.exp(-Math.pow((tau - (tr + 230 * g)) / 40, 2));
+        }
+        const val = perf * s;
+        if (val > best) best = val;
+      }
+      const sT = stateAt(t);
+      const swing = (best > 0.02 && sT.hr > 0) ? 0.05 : 0;                      // respiratory baseline modulation
+      return best + swing * Math.sin(2 * Math.PI * (sT.rr / 60000) * t);
+    }
+
+    function drawBedsideMonitor() {
+      if (!wavesVisible) return;
+      const c = document.getElementById('icu-monitor-canvas');
+      if (!c) return;
+      const rect = c.getBoundingClientRect();
+      if (rect.width < 10 || rect.height < 10) return;
+      const dpr = window.devicePixelRatio || 1;
+      if (c.width !== Math.round(rect.width * dpr) || c.height !== Math.round(rect.height * dpr)) {
+        c.width = Math.round(rect.width * dpr);
+        c.height = Math.round(rect.height * dpr);
+      }
+      const ctx = c.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = rect.width, h = rect.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.direction = 'ltr';
+
+      const st = currentMonitorState();
+      const bandH = h / 3;
+
+      // Grid lines
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1;
+      for (let x = 0; x <= w; x += 40) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+      for (let y = 0; y <= h; y += bandH) { ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(w, y); ctx.stroke(); }
+
+      // time of the right edge = "now"; pixel px shows the signal from (w-px)/speed seconds ago
+      const tAt = (px) => simNow - ((w - px) / WAVE_PX_PER_SEC) * 1000;
+
+      // 1. ECG Lead II (Green)
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#10b981';
+      ctx.lineWidth = 2.3;
+      const ecgBaseY = bandH * 0.64;
+      const ecgScale = bandH * 0.34;
+      for (let px = 0; px <= w; px += 2) {
+        const v = ecgAt(tAt(px));
+        const py = Math.max(4, Math.min(bandH - 4, ecgBaseY - v * ecgScale));
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.fillStyle = '#34d399';
+      ctx.font = '900 10.5px Inter, sans-serif';
+      ctx.fillText(`ECG Lead II — ${currentLang === 'ar' ? st.rhythmAr : st.rhythmEn}`, 8, 14);
+      ctx.restore();
+
+      // 2. Arterial Blood Pressure Waveform (Red) — true pressure scale: peak = SBP, trough = DBP
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 2.3;
+      const abpBottom = bandH * 1.94;
+      const abpHeight = bandH * 0.80;
+      for (let px = 0; px <= w; px += 2) {
+        const pr = clampV(abpAt(tAt(px)), 0, ABP_MAX_MMHG);
+        const py = abpBottom - (pr / ABP_MAX_MMHG) * abpHeight;
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.fillStyle = '#fb7185';
+      ctx.font = '900 10.5px Inter, sans-serif';
+      ctx.fillText(`ART BP — ${st.sbp}/${st.dbp} mmHg (Dicrotic Notch)`, 8, bandH + 14);
+      ctx.restore();
+
+      // 3. SpO2 Plethysmograph (Cyan)
+      ctx.save();
+      ctx.beginPath();
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 2.2;
+      const spo2BaseY = bandH * 2.80;
+      const spo2Amp = bandH * 0.42;
+      for (let px = 0; px <= w; px += 2) {
+        const pv = plethAt(tAt(px));
+        const py = spo2BaseY - pv * spo2Amp;
+        if (px === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+      }
+      ctx.stroke();
+      ctx.fillStyle = '#38bdf8';
+      ctx.font = '900 10.5px Inter, sans-serif';
+      ctx.fillText(`SpO2 Pleth — ${st.spo2}% | RR ${st.rr}/min`, 8, bandH * 2 + 14);
+      ctx.restore();
+    }
+
+    function updateWaveToggleLabel() {
+      const isAr = (currentLang === 'ar');
+      const lbl = document.getElementById('lbl-toggle-wave');
+      const ico = document.getElementById('ico-toggle-wave');
+      if (lbl) lbl.textContent = wavesVisible
+        ? (isAr ? 'إخفاء الموجات' : 'Hide Waveforms')
+        : (isAr ? 'إظهار الموجات' : 'Show Waveforms');
+      if (ico) ico.className = 'fa-solid ' + (wavesVisible ? 'fa-eye-slash' : 'fa-eye');
+    }
+
+    function toggleWaveforms() {
+      wavesVisible = !wavesVisible;
+      const panel = document.getElementById('mon-wave-panel');
+      const vit = document.getElementById('mon-vitals-col');
+      if (panel) panel.style.display = wavesVisible ? '' : 'none';
+      if (vit) vit.classList.toggle('vitals-wide', !wavesVisible);
+      updateWaveToggleLabel();
+    }
+
+    function toggleLanguage() {
+      currentLang = (currentLang === 'en') ? 'ar' : 'en';
+      const isAr = (currentLang === 'ar');
+      const root = document.getElementById('html-root');
+      root.lang = currentLang;
+      root.dir = isAr ? 'rtl' : 'ltr';
+
+      document.getElementById('ui-lang-btn').textContent = isAr ? 'English (EN)' : 'العربية (AR)';
+      document.getElementById('ui-back-hub').textContent = isAr ? 'العودة للرئيسية (Hub)' : 'Back to Hub';
+      document.getElementById('ui-title').textContent = isAr
+        ? 'CliniX Lab — مونيتور المريض التفاعلي وموسوعة أدوية الطوارئ والعناية الحثيثة (24 دواء)'
+        : 'CliniX Lab — ICU Patient Monitor & Emergency / Critical Care Pharmacology (24 Drugs)';
+      document.getElementById('ui-subtitle').textContent = isAr
+        ? 'مذيبات الجلطات (Alteplase, Tenecteplase/Metalyse, Streptokinase) • المميعات (Heparin, Clexane, Plavix) • أدوية ACLS ورافعات الضغط مع حاسبة الجرعات'
+        : 'Thrombolytics (Alteplase, Tenecteplase/Metalyse, Streptokinase) • Anticoagulants & Antiplatelets (Heparin, Clexane, Clopidogrel) • ACLS & ICU Infusions + Calculator';
+
+      document.getElementById('dcat-all').textContent = isAr ? 'جميع أدوية الطوارئ والعناية الحثيثة (24)' : 'All ICU & Emergency Drugs (24)';
+      document.getElementById('dcat-lysis').textContent = isAr ? '1. مذيبات الجلطات (3)' : '1. Thrombolytics (3)';
+      document.getElementById('dcat-anticoag').textContent = isAr ? '2. المميعات والبلافيكس (4)' : '2. Heparin & Plavix (4)';
+      document.getElementById('dcat-acls').textContent = isAr ? '3. أدوية اللانظميات ACLS (9)' : '3. ACLS Rhythms (9)';
+      document.getElementById('dcat-icu').textContent = isAr ? '4. رافعات الضغط والـ ICU (8)' : '4. Pressors & ICU (8)';
+
+      document.getElementById('lbl-give-drug').textContent = isAr
+        ? '💉 إعطاء الدواء / بدء التسريب الوريدي ومشاهدة استجابة المونيتور'
+        : '💉 Administer Drug / Start IV Infusion & Watch Monitor Response';
+      document.getElementById('lbl-reset-pt').textContent = isAr ? 'إعادة المريض للحالة القاعدية' : 'Reset Patient Baseline';
+      document.getElementById('lbl-pt-weight').textContent = isAr ? 'وزن المريض:' : 'Patient Weight:';
+
+      document.getElementById('ui-calc-title').innerHTML = `<i class="fa-solid fa-calculator text-amber-600"></i> <span>${isAr ? 'حاسبة الجرعات الدقيقة والتمديد وسرعة المضخة الوريدية (حسب وزن المريض)' : 'Interactive Weight-Based Dose, Dilution & IV Infusion Pump Calculator'}</span>`;
+      document.getElementById('lbl-calc-prep').textContent = isAr ? '1. التحضير والتمديد القياسي في الـ ICU:' : '1. Standard ICU Preparation & Concentration:';
+      document.getElementById('lbl-calc-dose').textContent = isAr ? '2. الجرعة المحسوبة بدقة لهذا المريض:' : '2. Exact Calculated Dose for This Patient:';
+      document.getElementById('lbl-calc-pump').textContent = isAr ? '3. سرعة مضخة التسريب (mL/hr) وطريقة الإعطاء:' : '3. Infusion Pump Rate (mL/hr) & Formula:';
+
+      document.getElementById('lbl-mech').textContent = isAr ? 'آلية العمل الخلوية والمستقبلات:' : 'Cellular Mechanism & Receptor Action:';
+      document.getElementById('lbl-ind').textContent = isAr ? 'الاستطبابات السريرية وبروتوكولات الجرعات:' : 'Clinical Indications & Dosing Regimens (Stroke vs STEMI vs ICU):';
+      document.getElementById('lbl-warn').textContent = isAr ? 'أهم المحاذير التمريضية ومضادات الاستطباب والترياق (Antidote):' : 'Critical ICU Nursing Precautions, Contraindications & Antidotes:';
+
+      updateWaveToggleLabel();
+      renderDrugSidebar();
+      updateMonitorAndCalculator();
+    }
+
+    function tickMonitor() {
+      animTick++;
+      updateMonitorEngine();
+      drawBedsideMonitor();
+      requestAnimationFrame(tickMonitor);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      selectDrug('alteplase');
+      requestAnimationFrame(tickMonitor);
+    });
+  </script>
+</body>
+</html>
