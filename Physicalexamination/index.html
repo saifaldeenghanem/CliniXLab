@@ -1,1 +1,231 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr" id="html-root" class="light" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CliniX Lab | Physical Examination & Auscultation Body Systems (Jarvis)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root, #html-root, body {
+      color-scheme: light !important;
+      background-color: #f1f5f9 !important;
+      color: #0f172a !important;
+      font-family: 'Inter', 'Cairo', sans-serif;
+      margin: 0;
+    }
+    .panel-card {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 18px;
+      box-shadow: 0 8px 22px -6px rgba(15, 23, 42, 0.06);
+    }
+    .organ-card {
+      transition: all 0.2s ease;
+    }
+    .organ-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 14px 28px -8px rgba(13, 148, 136, 0.18);
+    }
+    .num-ltr { direction: ltr !important; unicode-bidi: embed; font-family: 'Inter', monospace !important; }
+  </style>
+</head>
+<body class="min-h-screen p-2 sm:p-3 lg:p-4 flex flex-col justify-between">
+  <div>
+    <header class="max-w-[1680px] mx-auto mb-5 panel-card p-4 border-b-2 border-teal-500/40">
+      <div class="flex flex-wrap justify-between items-center gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-rose-500 to-teal-600 flex items-center justify-center text-white text-xl shadow-md">
+            <i class="fa-solid fa-stethoscope"></i>
+          </div>
+          <div>
+            <div class="flex flex-wrap items-center gap-2">
+              <h1 id="ui-title" class="text-xl sm:text-2xl font-black text-slate-900">
+                Jarvis Physical Examination & Step-by-Step OSCE Simulators
+              </h1>
+              <span class="num-ltr px-2.5 py-0.5 rounded-md bg-teal-50 text-teal-800 border border-teal-200 text-xs font-mono font-extrabold">
+                /CliniXLab/Physicalexamination
+              </span>
+            </div>
+            <p id="ui-subtitle" class="text-xs text-slate-500 font-semibold">
+              Select a body system below to launch its Step-by-Step University Checklist Simulator, Audio Synthesizer & OSCE Grading Sheet
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <a href="../index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('hub');return false;}"
+            class="px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 text-xs font-extrabold flex items-center gap-1.5">
+            <i class="fa-solid fa-house text-teal-600"></i>
+            <span id="ui-back-hub">Back to Main Hub</span>
+          </a>
+          <button type="button" onclick="toggleLanguage()" class="px-3.5 py-2 rounded-xl bg-gradient-to-r from-teal-600 to-sky-600 text-white text-xs font-extrabold flex items-center gap-1.5 shadow">
+            <i class="fa-solid fa-globe"></i>
+            <span id="ui-lang-btn">العربية (AR)</span>
+          </button>
+        </div>
+      </div>
+    </header>
 
+    <main class="max-w-[1680px] mx-auto mb-6">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
+        <!-- 1. EYE (/CliniXLab/Physicalexamination/eye) -->
+        <a href="eye/index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('pe_eye');return false;}"
+          class="organ-card panel-card p-5 border-2 border-sky-400/70 flex flex-col justify-between cursor-pointer no-underline">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 rounded-xl bg-sky-100 text-sky-700 border border-sky-200 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-eye"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-black">LIVE • 6 STEPS 🟢</span>
+            </div>
+            <h2 id="c-eye-t" class="text-base font-black text-slate-900 mb-1.5">1. Eye & Vision Assessment</h2>
+            <p class="num-ltr text-[11px] font-mono font-bold text-sky-700 mb-2">/CliniXLab/Physicalexamination/eye</p>
+            <p id="c-eye-d" class="text-xs text-slate-600 font-semibold leading-relaxed mb-4">
+              Step-by-step Snellen Acuity (6m), Confrontation Fields (60cm, 5mm Red Pin), Hirschberg, Cover-Uncover, 6 Cardinal Gaze, External/Lacrimal, PERRLA & Ophthalmoscope.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-black text-sky-700">
+            <span id="c-eye-btn">Launch Step-by-Step Eye Exam</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- 2. EAR (/CliniXLab/Physicalexamination/ear) -->
+        <a href="ear/index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('pe_ear');return false;}"
+          class="organ-card panel-card p-5 border-2 border-teal-400/70 flex flex-col justify-between cursor-pointer no-underline">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 rounded-xl bg-teal-100 text-teal-700 border border-teal-200 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-ear-listen"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-black">LIVE • 4 STEPS 🟢</span>
+            </div>
+            <h2 id="c-ear-t" class="text-base font-black text-slate-900 mb-1.5">2. Ear, Otoscopy & Hearing (512 Hz)</h2>
+            <p class="num-ltr text-[11px] font-mono font-bold text-teal-700 mb-2">/CliniXLab/Physicalexamination/ear</p>
+            <p id="c-ear-d" class="text-xs text-slate-600 font-semibold leading-relaxed mb-4">
+              Step-by-step Pinna & Tragus Palpation, Otoscope Bracing (Up & Back), Tympanic Membrane (Cone of Light 5 & 7 o'clock), Whisper Test & 512 Hz Weber/Rinne.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-black text-teal-700">
+            <span id="c-ear-btn">Launch Step-by-Step Ear Exam</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- 3. HEART, NECK & PERIPHERAL VASCULAR / EXTREMITIES (/CliniXLab/Physicalexamination/heart) -->
+        <a href="heart/index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('pe_heart');return false;}"
+          class="organ-card panel-card p-5 border-2 border-rose-400/70 flex flex-col justify-between cursor-pointer no-underline">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 rounded-xl bg-rose-100 text-rose-700 border border-rose-200 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-heart-pulse"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-black">LIVE • 12 STEPS 🟢</span>
+            </div>
+            <h2 id="c-heart-t" class="text-base font-black text-slate-900 mb-1.5">3. Heart, Neck Vessels & Extremities (PVS)</h2>
+            <p class="num-ltr text-[11px] font-mono font-bold text-rose-700 mb-2">/CliniXLab/Physicalexamination/heart</p>
+            <p id="c-heart-d" class="text-xs text-slate-600 font-semibold leading-relaxed mb-4">
+              Carotid & JVP (30–45°), PMI, 5 Precordial Areas, S1/S2/S3/S4 & Murmurs + Upper & Lower Extremities (CRT &lt;2s, Modified Allen &lt;7s, 4 Leg Pulses & Pitting Edema 1+–4+).
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-black text-rose-700">
+            <span id="c-heart-btn">Launch Cardiac & Extremities Exam</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- 4. LUNGS (/CliniXLab/Physicalexamination/lungs) -->
+        <a href="lungs/index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('pe_lungs');return false;}"
+          class="organ-card panel-card p-5 border-2 border-emerald-400/70 flex flex-col justify-between cursor-pointer no-underline">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-12 h-12 rounded-xl bg-emerald-100 text-emerald-700 border border-emerald-200 flex items-center justify-center text-xl">
+                <i class="fa-solid fa-lungs"></i>
+              </div>
+              <span class="px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[11px] font-black">LIVE • 5 STEPS 🟢</span>
+            </div>
+            <h2 id="c-lungs-t" class="text-base font-black text-slate-900 mb-1.5">4. Lungs & Thoracic Auscultation</h2>
+            <p class="num-ltr text-[11px] font-mono font-bold text-emerald-700 mb-2">/CliniXLab/Physicalexamination/lungs</p>
+            <p id="c-lungs-d" class="text-xs text-slate-600 font-semibold leading-relaxed mb-4">
+              Step-by-step AP:T Ratio (1:2 vs Barrel Chest), Symmetric Expansion (T9–T10), Tactile Fremitus ("99"), Percussion Ladder, Breath Sounds, Crackles/Wheezes & Egophony.
+            </p>
+          </div>
+          <div class="pt-3 border-t border-slate-200 flex items-center justify-between text-xs font-black text-emerald-700">
+            <span id="c-lungs-btn">Launch Step-by-Step Lung Exam</span>
+            <i class="fa-solid fa-arrow-right"></i>
+          </div>
+        </a>
+
+        <!-- 5–8: Remaining Systems -->
+        <div class="panel-card p-5 opacity-80 border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-11 h-11 rounded-xl bg-purple-100 text-purple-700 flex items-center justify-center text-lg"><i class="fa-solid fa-brain"></i></div>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-300 text-[10.5px] font-extrabold">Coming Soon 🔒</span>
+            </div>
+            <h3 class="text-sm font-black text-slate-800 mb-1">5. Neurological & Cranial Nerves (CN I–XII)</h3>
+            <p class="text-xs text-slate-500 font-semibold">Glasgow Coma Scale, Deep Tendon Reflexes (0 to 4+), Cerebellar Coordination & Dermatomes.</p>
+          </div>
+        </div>
+
+        <div class="panel-card p-5 opacity-80 border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-11 h-11 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center text-lg"><i class="fa-solid fa-hand-dots"></i></div>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-300 text-[10.5px] font-extrabold">Coming Soon 🔒</span>
+            </div>
+            <h3 class="text-sm font-black text-slate-800 mb-1">6. Abdominal Examination (I → A → P → P)</h3>
+            <p class="text-xs text-slate-500 font-semibold">4-Quadrant Bowel Sounds, Liver Span Percussion, Murphy's, McBurney's, Rovsing's & Psoas Signs.</p>
+          </div>
+        </div>
+
+        <a href="heart/index.html" onclick="if(window.parent && window.parent.__clinixOpenModule){window.parent.__clinixOpenModule('pe_heart');return false;}"
+          class="organ-card panel-card p-5 border-2 border-rose-300 flex flex-col justify-between cursor-pointer no-underline">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-11 h-11 rounded-xl bg-rose-100 text-rose-700 flex items-center justify-center text-lg"><i class="fa-solid fa-person-walking"></i></div>
+              <span class="px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 text-[10.5px] font-extrabold">INCLUDED IN #3 🟢</span>
+            </div>
+            <h3 id="c-pvs-t" class="text-sm font-black text-slate-900 mb-1">7. Peripheral Vascular & Extremities (Upper & Lower)</h3>
+            <p class="text-xs text-slate-600 font-semibold">Included inside Module #3 (Cardiac & Peripheral Lab Day): CRT &lt;2s, Radial/Brachial/Femoral/Popliteal/PT/DP Pulses, Allen Test &lt;7s & Pitting Edema (1+–4+).</p>
+          </div>
+        </a>
+
+        <div class="panel-card p-5 opacity-80 border border-slate-200 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-3">
+              <div class="w-11 h-11 rounded-xl bg-cyan-100 text-cyan-700 flex items-center justify-center text-lg"><i class="fa-solid fa-bone"></i></div>
+              <span class="px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-600 border border-slate-300 text-[10.5px] font-extrabold">Coming Soon 🔒</span>
+            </div>
+            <h3 class="text-sm font-black text-slate-800 mb-1">8. Musculoskeletal & Joint ROM</h3>
+            <p class="text-xs text-slate-500 font-semibold">5-Point Muscle Strength Grading (0/5 to 5/5), Phalen/Tinel Tests, McMurray & Lachman Maneuvers.</p>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <footer class="max-w-[1680px] mx-auto w-full panel-card py-3 px-6 text-center text-sm font-black text-slate-700">
+    By: MSN, RN Saif AlDeen Ghanem
+  </footer>
+
+<script>
+  let currentLang = 'en';
+  function toggleLanguage() {
+    currentLang = (currentLang === 'en') ? 'ar' : 'en';
+    const isAr = (currentLang === 'ar');
+    const root = document.getElementById('html-root');
+    root.lang = currentLang;
+    root.dir = isAr ? 'rtl' : 'ltr';
+    document.getElementById('ui-lang-btn').textContent = isAr ? 'English (EN)' : 'العربية (AR)';
+    document.getElementById('ui-title').textContent = isAr ? 'منصة الفحص السريري خطوة بخطوة حسب التشيك ليست (كتاب Jarvis)' : 'Jarvis Physical Examination & Step-by-Step OSCE Simulators';
+    document.getElementById('ui-back-hub').textContent = isAr ? 'العودة للرئيسية (Hub)' : 'Back to Main Hub';
+    document.getElementById('c-eye-t').textContent = isAr ? '1. فحص العين والإبصار وقاع العين (6 خطوات)' : '1. Eye & Vision Assessment';
+    document.getElementById('c-ear-t').textContent = isAr ? '2. فحص الأذن والسمع والشوكة الرنانة 512 Hz (4 خطوات)' : '2. Ear, Otoscopy & Hearing (512 Hz)';
+    document.getElementById('c-heart-t').textContent = isAr ? '3. فحص القلب وأوعية العنق والأطراف العلوية والسفلية (12 خطوة)' : '3. Heart, Neck Vessels & Extremities (PVS)';
+    document.getElementById('c-lungs-t').textContent = isAr ? '4. فحص الصدر والرئتين وأصوات التنفس (5 خطوات)' : '4. Lungs & Thoracic Auscultation';
+  }
+</script>
+</body>
+</html>
