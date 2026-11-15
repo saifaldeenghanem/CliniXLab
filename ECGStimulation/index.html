@@ -4,7 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>CliniX Lab | Interactive Medical & Clinical Simulation Platform</title>
-    <meta name="theme-color" content="#060913">
+    <meta name="theme-color" content="#f1f5f9">
+    <style id="clinix-instant-clean-boot">
+        :root, #html-root, html, body {
+            color-scheme: light !important;
+            background-color: #f1f5f9 !important;
+            color: #0f172a !important;
+        }
+        #main-hub-view,
+        #hub-footer,
+        #theme-toggle-btn,
+        #btn-ecg-theme-mode,
+        #btn-3d-sketchfab,
+        #btn-3d-studio-bg,
+        #btn-collapse-scenarios,
+        #clinix-route-bar,
+        #github-arch-modal {
+            display: none !important;
+        }
+        #ecg-simulator-view,
+        #ecg-simulator-view:not(.hidden) {
+            animation: none !important;
+            transform: none !important;
+        }
+        html:not(.clinix-v8-ready) body {
+            opacity: 0 !important;
+            pointer-events: none !important;
+        }
+        html.clinix-v8-ready body {
+            opacity: 1 !important;
+        }
+    </style>
     <script id="clinix-theme-initializer">
     (function () {
         var root = document.documentElement;
@@ -9145,13 +9175,7 @@ function updateDynamicECGMetrics(){
         window.updateDynamicECGMetrics();
         window.updateLeadVectorInspectorBanner();
 
-        // Check if URL already requests /ECGStimulation
-        const initPath = (window.location.pathname || '') + (window.location.hash || '');
-        if (/ECGStimulation/i.test(initPath)) {
-            window.launchModule('ecg', true);
-        } else {
-            updateRouteDisplay('/');
-        }
+        updateRouteDisplay('/ECGStimulation');
     }
 
     if (document.readyState === 'loading') {
@@ -10690,11 +10714,7 @@ function updateDynamicECGMetrics(){
         renderThreeJSHeart();
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPhase2Upgrades, { once: true });
-    } else {
-        setTimeout(initPhase2Upgrades, 50);
-    }
+    initPhase2Upgrades();
 })();
 </script>
 
@@ -12097,25 +12117,13 @@ function updateDynamicECGMetrics(){
         // Add `stemi_inf_lcx` to UNIFIED_MEAS if present
         window.renderScenarioButtons();
 
-        // Restore active view if user refreshed while inside ECG Simulator
-        let savedPage = 'hub';
-        try { savedPage = sessionStorage.getItem('clinixActivePage') || 'hub'; } catch (_) {}
-        if (/ECGStimulation/i.test(window.location.hash || '') || savedPage === 'ecg') {
-            window.launchModule('ecg');
-        } else {
-            // Strictly ensure #ecg-simulator-view is hidden on the Main Hub!
-            const ecgV = document.getElementById('ecg-simulator-view');
-            const hubV = document.getElementById('main-hub-view');
-            if (ecgV) ecgV.classList.add('hidden');
-            if (hubV) hubV.classList.remove('hidden');
-        }
+        const ecgV = document.getElementById('ecg-simulator-view');
+        const hubV = document.getElementById('main-hub-view');
+        if (hubV) hubV.classList.add('hidden');
+        if (ecgV) ecgV.classList.remove('hidden');
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', initPhase3Final, { once: true });
-    } else {
-        setTimeout(initPhase3Final, 60);
-    }
+    initPhase3Final();
 })();
 </script>
 
@@ -13292,31 +13300,15 @@ window.__isStandaloneECGSimulator = true;
     // 4. CLEAN STARTUP FOR BOTH UNIFIED `index.html` AND STANDALONE `ECGStimulation/index.html`
     // =========================================================================
     function initPhase5Consolidated() {
-        renderQuick12LeadBar();
-        if (typeof window.updateLeadChangesPanel === 'function') window.updateLeadChangesPanel();
-
-        // If this is the standalone ECGStimulation page OR URL has ECGStimulation, keep #ecg-simulator-view open!
-        const fullUrl = (window.location.pathname || '') + (window.location.hash || '');
         const ecgV = document.getElementById('ecg-simulator-view');
         const hubV = document.getElementById('main-hub-view');
-        if (window.__isStandaloneECGSimulator || /ECGStimulation/i.test(fullUrl) || (hubV && hubV.classList.contains('hidden'))) {
-            if (hubV) hubV.classList.add('hidden');
-            if (ecgV) ecgV.classList.remove('hidden');
-            window.ensureECGSimulatorBooted();
-            if (!isPlaying && typeof togglePlay === 'function') togglePlay();
-            requestAnimationFrame(() => {
-                resizeAllCanvases();
-                drawAll2D();
-                renderThreeJSHeart();
-            });
-        }
+        if (hubV) hubV.classList.add('hidden');
+        if (ecgV) ecgV.classList.remove('hidden');
+        renderQuick12LeadBar();
+        if (typeof window.updateLeadChangesPanel === 'function') window.updateLeadChangesPanel();
     }
 
-    if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', () => setTimeout(initPhase5Consolidated, 80), { once: true });
-    } else {
-        setTimeout(initPhase5Consolidated, 80);
-    }
+    initPhase5Consolidated();
 })();
 </script>
 
@@ -13328,7 +13320,8 @@ window.__isStandaloneECGSimulator = true;
     color: #0f172a !important;
   }
 
-  /* Hide removed buttons permanently */
+  /* Hide embedded legacy hub & removed buttons permanently in standalone ECG page */
+  #main-hub-view,
   #theme-toggle-btn,
   #btn-ecg-theme-mode,
   #btn-3d-sketchfab,
@@ -15722,21 +15715,21 @@ window.__isStandaloneECGSimulator = true;
       window.renderScenarioButtons();
     }
 
+    if (typeof window.ensureECGSimulatorBooted === 'function') {
+      window.ensureECGSimulatorBooted();
+    }
+    if (!isPlaying && typeof togglePlay === 'function') {
+      togglePlay();
+    }
+    if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
+    if (typeof drawAll2D === 'function') drawAll2D();
+    if (typeof renderThreeJSHeart === 'function') renderThreeJSHeart();
     updateStickyMiniBarScrollVisibility();
 
-    setTimeout(() => {
-      if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
-      if (typeof drawAll2D === 'function') drawAll2D();
-      if (typeof renderThreeJSHeart === 'function') renderThreeJSHeart();
-      updateStickyMiniBarScrollVisibility();
-    }, 120);
+    document.documentElement.classList.add('clinix-v8-ready');
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => setTimeout(initCliniXV8Perfected, 90), { once: true });
-  } else {
-    setTimeout(initCliniXV8Perfected, 90);
-  }
+  initCliniXV8Perfected();
 })();
 </script>
 
