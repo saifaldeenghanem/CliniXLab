@@ -15802,7 +15802,22 @@ window.__isStandaloneECGSimulator = false;
     window.__clinixOpenModule('hub');
   }
 
+  // Real page routes: each module lives in its own repo folder (so the URL becomes /ECGStimulation/ ...)
+  const CLINIX_ROUTES = {
+    ecg: 'ECGStimulation/',
+    pe_hub: 'Physicalexamination/',
+    acls: 'ACLSPharmacology/',
+    abg: 'ABGStimulation/',
+    vent: 'VentilatorStimulation/',
+    hemo: 'Hemodynamics/'
+  };
+
   window.__clinixOpenModule = function (key) {
+    if (CLINIX_ROUTES[key]) {
+      // On GitHub Pages / any web server the folder URL works; on file:// (local test) we need index.html explicitly
+      window.location.href = './' + CLINIX_ROUTES[key] + (location.protocol === 'file:' ? 'index.html' : '');
+      return;
+    }
     activeModuleKey = key;
     const hubView = document.getElementById('main-hub-view');
     const ecgView = document.getElementById('ecg-simulator-view');
