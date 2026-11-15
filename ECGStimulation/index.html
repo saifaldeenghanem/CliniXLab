@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" id="html-root" class="dark">
+<html lang="en" dir="ltr" id="html-root" class="light" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -8,19 +8,17 @@
     <script id="clinix-theme-initializer">
     (function () {
         var root = document.documentElement;
-        var saved = null;
-        try { saved = window.localStorage.getItem('clinix-theme'); } catch (e) {}
-        var systemDark = !!(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        var mode = (saved === 'dark' || saved === 'light') ? saved : (systemDark ? 'dark' : 'light');
-        window.__clinixThemeManual = saved === 'dark' || saved === 'light';
-        root.classList.toggle('dark', mode === 'dark');
-        root.classList.toggle('light', mode === 'light');
-        root.dataset.theme = mode;
-        root.style.colorScheme = mode;
+        try { window.localStorage.setItem('clinix-theme', 'light'); } catch (e) {}
+        window.__clinixThemeManual = true;
+        root.classList.remove('dark');
+        root.classList.add('light');
+        root.dataset.theme = 'light';
+        root.style.colorScheme = 'light';
         var meta = document.querySelector('meta[name="theme-color"]');
-        if (meta) meta.content = mode === 'dark' ? '#060913' : '#f4f7fb';
+        if (meta) meta.content = '#f4f7fb';
     })();
     </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <script src="https://cdn.tailwindcss.com"></script>
@@ -3072,18 +3070,28 @@
         let camRadius = 9.6;
 
         function createDeformedOrganGeometry(radius, scaleX, scaleY, scaleZ, tapperBottom = 0, curveX = 0) {
-            const geom = new THREE.SphereGeometry(radius, 40, 32);
+            const geom = new THREE.SphereGeometry(radius, 64, 48);
             const pos = geom.attributes.position;
+            const maxY = radius * scaleY;
             for (let i = 0; i < pos.count; i++) {
                 let x = pos.getX(i) * scaleX;
                 let y = pos.getY(i) * scaleY;
                 let z = pos.getZ(i) * scaleZ;
+                const ny = y / (maxY || 1);
                 if (y < 0 && tapperBottom !== 0) {
-                    const factor = 1 + (y / (radius * scaleY)) * tapperBottom;
-                    x *= Math.max(0.20, factor);
-                    z *= Math.max(0.20, factor);
+                    const tNorm = Math.min(1, Math.abs(ny));
+                    const smoothTaper = 1 - Math.pow(tNorm, 1.35) * tapperBottom * 0.88;
+                    x *= Math.max(0.18, smoothTaper);
+                    z *= Math.max(0.18, smoothTaper);
                 }
-                x += Math.sin((y / (radius * scaleY)) * Math.PI * 0.5) * curveX;
+                if (y > 0 && tapperBottom !== 0) {
+                    const baseBlend = 1 - 0.10 * Math.pow(Math.max(0, ny), 2.2);
+                    x *= baseBlend;
+                    z *= baseBlend;
+                }
+                if (z < 0) z *= 0.88;
+                else z *= 1.04;
+                x += Math.sin(ny * Math.PI * 0.5) * curveX;
                 pos.setXYZ(i, x, y, z);
             }
             geom.computeVertexNormals();
@@ -4734,10 +4742,10 @@
             document.getElementById('ui-3d-label-vessels').textContent = t.labelVessels;
             document.getElementById('ui-3d-label-conduction').textContent = t.labelConduction;
             document.getElementById('ui-cat-label').textContent = t.catLabel;
-            document.getElementById('cat-normal_elec').textContent = t.cat_normal_elec;
-            document.getElementById('cat-mi_struct').textContent = t.cat_mi_struct;
-            document.getElementById('cat-avblocks').textContent = t.cat_avblocks;
-            document.getElementById('cat-acls').textContent = t.cat_acls;
+            if(document.getElementById('cat-txt-normal_elec')) document.getElementById('cat-txt-normal_elec').textContent = t.cat_normal_elec;
+            if(document.getElementById('cat-txt-mi_struct')) document.getElementById('cat-txt-mi_struct').textContent = t.cat_mi_struct;
+            if(document.getElementById('cat-txt-avblocks')) document.getElementById('cat-txt-avblocks').textContent = t.cat_avblocks;
+            if(document.getElementById('cat-txt-acls')) document.getElementById('cat-txt-acls').textContent = t.cat_acls;
             document.getElementById('play-text').textContent = isPlaying ? t.playPause[0] : t.playPause[1];
             document.getElementById('ui-speed-label').textContent = t.speedLbl;
             document.getElementById('ui-time-title').textContent = t.timeTitle;
@@ -5328,10 +5336,16 @@
             const V = (a) => ({ x: a[0], y: a[1], z: a[2] });
 
             function render(sc) {
-                const t = currentTime;
-                const T = continuousCycleCount * 800 + currentTime;
-                const stripDrop = (typeof stripMode !== 'undefined') && stripMode && (continuousCycleCount % 2 === 1);
-                const plan = buildEvents(sc, t, T, stripDrop);
+                const rawT = (typeof window.__clinixRawCurrentTime === 'number') ? window.__clinixRawCurrentTime : currentTime;
+                const T = (typeof window.__clinixActiveScanTime === 'function') ? window.__clinixActiveScanTime(rawT) : (continuousCycleCount * 800 + rawT);
+                const syncState = (typeof window.getExactCardiacSyncState === 'function')
+                    ? window.getExactCardiacSyncState(T, rawT, sc)
+                    : { effVentT: currentTime, isDroppedBeat: false };
+                const t = syncState.effVentT;
+                const stripDrop = !!syncState.isDroppedBeat;
+                const plan = (typeof window.__clinixBuildSyncedEvents === 'function')
+                    ? window.__clinixBuildSyncedEvents(sc, t, T, rawT, syncState, { P, curves, pkt, bur, pul, blk, atria, saCharging, ventricles, conduct, atrialBlock, orbit, GOLD, ORANGE, CYAN, SKY, VIOLET, BLUE, ROSE, RED })
+                    : buildEvents(sc, t, T, stripDrop);
 
                 // depth behaviour follows the X-Ray toggle
                 const dt = !layers3D.xray;
@@ -6283,7 +6297,7 @@
 
 
 <style id="clinix-zoom-toolbar-position-fix">
-  #heart3d-container > [data-3d-control] { position:static!important; inset:auto!important; }
+  /* neutralized legacy static rule */
   #heart3d-container > [data-3d-control] button { flex:0 0 auto!important; }
 </style>
 <script id="clinix-zoom-toolbar-position-fix-js">
@@ -6295,7 +6309,7 @@
     if(!toolbar || toolbar.dataset.toolbarMoved==='true') return;
     toolbar.className='flex items-center justify-end gap-1 mb-2';
     toolbar.dataset.toolbarMoved='true';
-    heart.parentElement.insertBefore(toolbar, heart);
+    /* Kept inside #heart3d-container for v8 in-model floating icon dock */
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',moveHeartZoomToolbar,{once:true});
   else moveHeartZoomToolbar();
@@ -6315,9 +6329,9 @@
 #html-root .sticky-master-timeline .phase-btn,
 #html-root .sticky-master-timeline button[id^="jmp-"] {font-size:10px!important;line-height:1.15!important;padding:5px 6px!important;min-width:0!important;}
 #html-root #meas-p,#html-root #meas-pr,#html-root #meas-qrs,#html-root #meas-st,#html-root #meas-qt {height:auto!important;min-height:0!important;max-height:none!important;white-space:normal!important;overflow:visible!important;overflow-wrap:anywhere!important;}
-#html-root #heart3d-container [data-3d-control] {z-index:35!important;}
+/* neutralized legacy z-index 35 rule */
 #html-root #heart3d-container .clinix-charge-caption {top:48px!important;left:8px!important;right:8px!important;max-width:calc(100% - 16px)!important;pointer-events:none!important;}
-#html-root #ecg-simulator-view footer {display:none!important;}
+#html-root #ecg-simulator-view footer {display:block!important;}
 #html-root #ecg-simulator-view canvas {direction:ltr!important;}
 #html-root[dir="rtl"] #ecg-simulator-view .lead-change-card,
 #html-root[dir="rtl"] #ecg-simulator-view #lead-changes-panel {direction:rtl!important;text-align:right!important;}
@@ -10134,12 +10148,14 @@ function updateDynamicECGMetrics(){
         return rawT;
     }
 
+    window.__rawBaseGetAP = window.__rawBaseGetAP || window.getActionPotential;
     const prevGetAP = window.getActionPotential;
     window.getActionPotential = function (t, sc, forHealthyReference = false) {
         const effT = forHealthyReference ? t : getEffectiveCardiacCycleTime(t, sc);
         return prevGetAP(effT, sc, forHealthyReference);
     };
 
+    window.__rawBaseGetTen = window.__rawBaseGetTen || window.getMechanicalTension;
     const prevGetTen = window.getMechanicalTension;
     window.getMechanicalTension = function (t, sc, forLeadSpecific = false) {
         const effT = getEffectiveCardiacCycleTime(t, sc);
@@ -10672,10 +10688,15 @@ function updateDynamicECGMetrics(){
             sketchfabUpgraded = true;
         }
         const savedTime = currentTime;
-        // Temporarily map currentTime to effective cardiac cycle time so the 3D Heart contracts at the exact physiological rate!
-        currentTime = getEffectiveCardiacCycleTime(savedTime, currentScenario);
+        window.__clinixRawCurrentTime = savedTime;
+        const absT_now = (typeof window.__clinixActiveScanTime === 'function') ? window.__clinixActiveScanTime(savedTime) : (continuousCycleCount * 800 + savedTime);
+        const syncSt = (typeof window.getExactCardiacSyncState === 'function')
+            ? window.getExactCardiacSyncState(absT_now, savedTime, currentScenario)
+            : { effVentT: getEffectiveCardiacCycleTime(savedTime, currentScenario) };
+        currentTime = syncSt.effVentT;
         prevRenderHeart();
         currentTime = savedTime;
+        window.__clinixRawCurrentTime = savedTime;
 
         // Extra Atrial Flutter 300/min rapid right-atrial flutter contraction in 3D
         if (currentScenario === 'aflutter' && meshRA && meshLA) {
@@ -12391,11 +12412,11 @@ function updateDynamicECGMetrics(){
                 styleClass = 'bg-slate-950/95 text-sky-100 border-sky-400';
             }
 
-            dot.style.cssText = `position:absolute;left:${ax}px;top:${ay}px;width:6px;height:6px;border-radius:999px;background:${dotCol};border:1.5px solid #fff;transform:translate(-50%,-50%);z-index:24;`;
+            dot.style.cssText = `position:absolute;left:${ax}px;top:${ay}px;width:6px;height:6px;border-radius:999px;background:${dotCol};border:1.5px solid #fff;transform:translate(-50%,-50%);z-index:12;pointer-events:none;`;
             overlay.appendChild(dot);
 
             const tag = document.createElement('div');
-            tag.className = `clinix-3d-tag absolute border -translate-x-1/2 -translate-y-1/2 z-25 ${styleClass}`;
+            tag.className = `clinix-3d-tag absolute border -translate-x-1/2 -translate-y-1/2 ${styleClass}`; tag.style.zIndex = '28';
             const labelTxt = (currentLang === 'ar' && item.ar) ? item.ar : item.id;
             tag.innerHTML = `<span style="display:inline-block;width:6px;height:6px;border-radius:99px;background:${dotCol};margin-inline-end:5px;vertical-align:middle;"></span><span>${labelTxt}</span>`;
             tag.style.left = `${x}px`;
@@ -13329,6 +13350,2343 @@ window.__isStandaloneECGSimulator = true;
     } else {
         setTimeout(initPhase5Consolidated, 80);
     }
+})();
+</script>
+
+
+<style id="clinix-v8-perfected-styles">
+  :root, #html-root, body {
+    color-scheme: light !important;
+    background-color: #f1f5f9 !important;
+    color: #0f172a !important;
+  }
+
+  /* Hide removed buttons permanently */
+  #theme-toggle-btn,
+  #btn-ecg-theme-mode,
+  #btn-3d-sketchfab,
+  #btn-3d-studio-bg,
+  #btn-collapse-scenarios {
+    display: none !important;
+  }
+
+  /* Ensure User Signature Footer is ALWAYS crisp, visible, and properly styled */
+  #html-root footer.panel-card,
+  #html-root #hub-footer {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-top: 2px solid #0284c7 !important;
+    border-radius: 16px !important;
+    padding: 14px 24px !important;
+    margin-top: 16px !important;
+    margin-bottom: 8px !important;
+    text-align: center !important;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05) !important;
+  }
+  #html-root footer.panel-card span,
+  #html-root #hub-footer span {
+    color: #0f172a !important;
+    -webkit-text-fill-color: #0f172a !important;
+    font-weight: 900 !important;
+    font-size: 15px !important;
+    letter-spacing: 0.02em !important;
+  }
+
+  /* Remove ALL inner scrollbars, fixed heights, and narrow clamps in #phase-explanation-board & titles */
+  #html-root #phase-explanation-board,
+  #html-root #phase-explanation-board > div:first-child,
+  #html-root #phase-explanation-board > div:first-child > div:first-child,
+  #html-root #phase-explanation-board .grid,
+  #html-root #phase-explanation-board .grid > div,
+  #html-root #phase-explanation-board .grid > div:first-child > div:last-child,
+  #html-root #phase-explanation-board .grid > div:first-child > div:last-child > span,
+  #html-root #norm-phase-desc,
+  #html-root #path-phase-desc,
+  #html-root #path-overall-summary,
+  #html-root #acls-protocol-box,
+  #html-root #heart3d-statusbar,
+  #html-root #heart3d-statusbar > div,
+  #html-root #heart3d-statusbar #val-3d-conduction,
+  #html-root #heart3d-statusbar #val-3d-wall,
+  #html-root #meas-p,
+  #html-root #meas-pr,
+  #html-root #meas-qrs,
+  #html-root #meas-st,
+  #html-root #meas-qt {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    overflow: visible !important;
+    overflow-y: visible !important;
+    scrollbar-gutter: auto !important;
+    -webkit-line-clamp: unset !important;
+    display: block !important;
+  }
+  #html-root #phase-explanation-board .grid {
+    display: grid !important;
+  }
+  #html-root #phase-explanation-board .grid > div {
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: space-between !important;
+  }
+  #html-root #phase-explanation-board > div:first-child {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 8px !important;
+  }
+  #html-root #phase-exp-main-title,
+  #html-root #ui-main-title,
+  #html-root #ui-sub-title,
+  #html-root #ui-phase-hint {
+    height: auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    max-width: 100% !important;
+    overflow: visible !important;
+    -webkit-line-clamp: unset !important;
+    display: block !important;
+    white-space: normal !important;
+  }
+  #html-root #heart3d-statusbar {
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    padding-top: 8px !important;
+  }
+
+  /* Two-Column Split Layout Container */
+  #clinix-v6-split-shell {
+    max-width: 1720px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+
+  @media (min-width: 1024px) {
+    #html-root[dir="rtl"] #clinix-v6-split-shell {
+      grid-template-columns: 375px minmax(0, 1fr);
+    }
+    #html-root[dir="ltr"] #clinix-v6-split-shell {
+      grid-template-columns: minmax(0, 1fr) 375px;
+    }
+    #html-root[dir="rtl"] #clinix-v6-sidebar-col { order: 1; }
+    #html-root[dir="rtl"] #clinix-v6-main-col { order: 2; }
+    #html-root[dir="ltr"] #clinix-v6-main-col { order: 1; }
+    #html-root[dir="ltr"] #clinix-v6-sidebar-col { order: 2; }
+  }
+
+  @media (min-width: 1380px) {
+    #html-root[dir="rtl"] #clinix-v6-split-shell {
+      grid-template-columns: 405px minmax(0, 1fr);
+    }
+    #html-root[dir="ltr"] #clinix-v6-split-shell {
+      grid-template-columns: minmax(0, 1fr) 405px;
+    }
+  }
+
+  /* Sticky Right Scrollable Sidebar Card */
+  #clinix-v6-sidebar-col {
+    background: #ffffff !important;
+    border: 1px solid #cbd5e1 !important;
+    border-radius: 18px !important;
+    padding: 12px !important;
+    box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.06) !important;
+  }
+
+  @media (min-width: 1024px) {
+    #clinix-v6-sidebar-col {
+      position: sticky !important;
+      top: 12px !important;
+      max-height: calc(100vh - 24px) !important;
+      display: flex !important;
+      flex-direction: column !important;
+      overflow: hidden !important;
+    }
+  }
+
+  #clinix-v6-sidebar-scroll {
+    overflow-y: auto !important;
+    max-height: calc(100vh - 220px);
+    padding-inline-end: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  #clinix-v6-sidebar-scroll::-webkit-scrollbar { width: 6px; }
+  #clinix-v6-sidebar-scroll::-webkit-scrollbar-track { background: #f1f5f9; border-radius: 4px; }
+  #clinix-v6-sidebar-scroll::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+
+  /* Scenario Cards in Sidebar */
+  .clinix-v6-scenario-card {
+    width: 100%;
+    text-align: start;
+    border-radius: 14px;
+    padding: 11px 13px;
+    background: #ffffff;
+    border: 1.5px solid #e2e8f0;
+    transition: all 0.16s ease;
+    cursor: pointer;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    position: relative;
+    box-shadow: 0 2px 5px rgba(15, 23, 42, 0.03);
+  }
+  .clinix-v6-scenario-card:hover {
+    border-color: #0d9488;
+    background: #f8fafc;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 14px rgba(13, 148, 136, 0.09);
+  }
+  .clinix-v6-scenario-card.active-v6-card {
+    background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%) !important;
+    border-color: #0f766e !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 20px -4px rgba(13, 148, 136, 0.42) !important;
+  }
+  .clinix-v6-scenario-card .v6-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 6px;
+  }
+  .clinix-v6-scenario-card .v6-card-badges {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: wrap;
+  }
+  .clinix-v6-scenario-card .v6-cat-pill {
+    font-size: 10px;
+    font-weight: 800;
+    padding: 2px 8px;
+    border-radius: 6px;
+    line-height: 1.3;
+  }
+  .clinix-v6-scenario-card.active-v6-card .v6-cat-pill {
+    background: rgba(255, 255, 255, 0.22) !important;
+    color: #ffffff !important;
+    border: 1px solid rgba(255, 255, 255, 0.35) !important;
+  }
+  .clinix-v6-scenario-card .v6-hr-pill {
+    font-size: 10.5px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-weight: 800;
+    padding: 1.5px 7px;
+    border-radius: 6px;
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid #cbd5e1;
+  }
+  .clinix-v6-scenario-card.active-v6-card .v6-hr-pill {
+    background: rgba(15, 23, 42, 0.28) !important;
+    color: #ecfdf5 !important;
+    border-color: rgba(255, 255, 255, 0.28) !important;
+  }
+  .clinix-v6-scenario-card .v6-card-title {
+    font-size: 12.5px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.38;
+  }
+  .clinix-v6-scenario-card.active-v6-card .v6-card-title {
+    color: #ffffff !important;
+  }
+  .clinix-v6-scenario-card .v6-radio-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 999px;
+    border: 2px solid #cbd5e1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .clinix-v6-scenario-card.active-v6-card .v6-radio-dot {
+    border-color: #ffffff;
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .clinix-v6-scenario-card.active-v6-card .v6-radio-dot::after {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: 999px;
+    background: #ffffff;
+  }
+
+  /* Permanently lock 3D Heart Container to Studio Light background */
+  #html-root #heart3d-container {
+    background: radial-gradient(circle at 50% 42%, #ffffff 0%, #f1f5f9 58%, #e2e8f0 100%) !important;
+    border: 2px solid #cbd5e1 !important;
+    box-shadow: inset 0 2px 12px rgba(15, 23, 42, 0.06) !important;
+    height: 380px !important;
+    overflow: hidden !important;
+    position: relative !important;
+  }
+  @media (max-width: 640px) {
+    #html-root #heart3d-container {
+      height: 320px !important;
+    }
+  }
+
+  /* Keep #labels-3d-overlay strictly below the floating dock & popovers */
+  #html-root #heart3d-container #labels-3d-overlay {
+    z-index: 20 !important;
+  }
+
+  /* In-Model Floating Icon Controls & Scrollable Popovers inside #heart3d-container */
+  #html-root #heart3d-container #heart3d-floating-dock {
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: 9000 !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    flex-wrap: wrap !important;
+    pointer-events: auto !important;
+  }
+
+  .v6-3d-icon-btn {
+    height: 36px !important;
+    min-width: 36px !important;
+    padding: 0 11px !important;
+    border-radius: 10px !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1.5px solid #94a3b8 !important;
+    color: #0f172a !important;
+    font-size: 12.5px !important;
+    font-weight: 900 !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 5px !important;
+    cursor: pointer !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12) !important;
+    transition: all 0.15s ease !important;
+    line-height: 1 !important;
+  }
+  .v6-3d-icon-btn:hover {
+    background: #f0f9ff !important;
+    border-color: #0284c7 !important;
+    color: #0369a1 !important;
+    transform: translateY(-1px);
+  }
+  .v6-3d-icon-btn.v6-menu-open {
+    background: #0284c7 !important;
+    color: #ffffff !important;
+    border-color: #0369a1 !important;
+    box-shadow: 0 6px 16px rgba(2, 132, 199, 0.35) !important;
+  }
+
+  /* Scrollable Popovers with z-index 9500 so all 6 options are visible, scrollable & never covered by dots */
+  #html-root #heart3d-container #v6-popover-3d-layers,
+  #html-root #heart3d-container #v6-popover-3d-labels {
+    position: absolute !important;
+    top: 52px !important;
+    left: 10px !important;
+    right: auto !important;
+    bottom: auto !important;
+    z-index: 9500 !important;
+    width: 280px !important;
+    max-width: calc(100% - 20px) !important;
+    max-height: 265px !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain !important;
+    background: rgba(255, 255, 255, 0.99) !important;
+    backdrop-filter: blur(16px) !important;
+    border: 2px solid #0284c7 !important;
+    border-radius: 14px !important;
+    padding: 10px !important;
+    box-shadow: 0 18px 38px -6px rgba(15, 23, 42, 0.32) !important;
+    transform-origin: top left;
+    transition: opacity 0.16s ease, transform 0.16s ease;
+  }
+  #html-root #heart3d-container #v6-popover-3d-layers::-webkit-scrollbar,
+  #html-root #heart3d-container #v6-popover-3d-labels::-webkit-scrollbar { width: 7px; }
+  #html-root #heart3d-container #v6-popover-3d-layers::-webkit-scrollbar-track,
+  #html-root #heart3d-container #v6-popover-3d-labels::-webkit-scrollbar-track { background: #e2e8f0; border-radius: 4px; }
+  #html-root #heart3d-container #v6-popover-3d-layers::-webkit-scrollbar-thumb,
+  #html-root #heart3d-container #v6-popover-3d-labels::-webkit-scrollbar-thumb { background: #0284c7; border-radius: 4px; }
+
+  .v6-3d-popover.v6-popover-hidden {
+    opacity: 0 !important;
+    pointer-events: none !important;
+    transform: translateY(-6px) scale(0.96) !important;
+  }
+  .v6-3d-popover.v6-popover-visible {
+    opacity: 1 !important;
+    pointer-events: auto !important;
+    transform: translateY(0) scale(1) !important;
+  }
+
+  .v6-3d-popover button {
+    width: 100% !important;
+    justify-content: flex-start !important;
+    text-align: start !important;
+    padding: 7px 10px !important;
+    border-radius: 9px !important;
+    font-size: 11.5px !important;
+    font-weight: 800 !important;
+    margin-bottom: 5px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+    background: #f8fafc !important;
+    color: #1e293b !important;
+    border: 1.5px solid #cbd5e1 !important;
+    cursor: pointer !important;
+  }
+  .v6-3d-popover button.toggle-pill-active,
+  .v6-3d-popover button[aria-pressed="true"] {
+    background: #e0f2fe !important;
+    color: #0369a1 !important;
+    border-color: #0284c7 !important;
+  }
+  .v6-3d-popover button:hover {
+    border-color: #0284c7 !important;
+    background: #f0f9ff !important;
+  }
+
+  /* Camera orientation buttons inside #heart3d-container bottom-left */
+  #html-root #heart3d-container > div.absolute.bottom-2.left-2 {
+    flex-direction: row !important;
+    flex-wrap: wrap !important;
+    gap: 5px !important;
+    bottom: 8px !important;
+    left: 10px !important;
+    z-index: 40 !important;
+  }
+  #html-root #heart3d-container > div.absolute.bottom-2.left-2 button {
+    background: rgba(255, 255, 255, 0.92) !important;
+    color: #0f172a !important;
+    border: 1px solid #cbd5e1 !important;
+    font-weight: 800 !important;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.08) !important;
+  }
+
+  /* Bottom Expandable Section Toggle Bar (`كبسات تحت`) */
+  #v6-bottom-drawers-bar {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+    gap: 10px;
+    margin-bottom: 12px;
+  }
+  .v6-drawer-toggle-btn {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    padding: 12px 15px;
+    border-radius: 14px;
+    background: #ffffff;
+    border: 2px solid #cbd5e1;
+    color: #1e293b;
+    font-size: 12.5px;
+    font-weight: 800;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+  }
+  .v6-drawer-toggle-btn:hover {
+    border-color: #0284c7;
+    background: #f8fafc;
+    transform: translateY(-1px);
+  }
+  .v6-drawer-toggle-btn.v6-drawer-active {
+    background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+    border-color: #0284c7 !important;
+    color: #ffffff !important;
+    box-shadow: 0 8px 18px -4px rgba(2, 132, 199, 0.38) !important;
+  }
+  .v6-drawer-toggle-btn .v6-drawer-status-pill {
+    font-size: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f1f5f9;
+    color: #475569;
+    font-weight: 800;
+    white-space: nowrap;
+  }
+  .v6-drawer-toggle-btn.v6-drawer-active .v6-drawer-status-pill {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+  }
+
+  .v6-collapsible-section.v6-section-hidden {
+    display: none !important;
+  }
+
+  /* Make 12-Lead Canvas tall enough (`490px`) so every lead cell displays its full waveform + 2-line wrapped clinical interpretation */
+  #twelve-lead-col {
+    height: 490px !important;
+  }
+  #body-map-col {
+    height: 490px !important;
+  }
+  @media (max-width: 640px) {
+    #twelve-lead-col {
+      height: 550px !important;
+    }
+    #body-map-col {
+      height: 360px !important;
+    }
+  }
+
+  /* Scroll-triggered Sticky Mini Bar: Hidden until user scrolls past BOTH 3D Heart & Main ECG */
+  #sticky-mini-monitor-wrapper.v6-sticky-hidden-at-top {
+    display: none !important;
+  }
+</style>
+
+<script id="clinix-v8-perfected-engine">
+(function () {
+  // ===========================================================================
+  // 0. MASTER 35-SCENARIO MILLISECOND SYNCHRONIZATION ENGINE
+  //    Locks the 3D Heart (Chambers, His-Purkinje, Moving Sparks, Clots),
+  //    Ion Gates, Action Potential, Sarcomere, and Phase Timeline 100% in sync
+  //    with the exact millisecond waveforms of `computeLeadVoltage`!
+  // ===========================================================================
+  function lerpMap(val, a0, a1, b0, b1) {
+    if (val <= a0) return b0;
+    if (val >= a1) return b1;
+    return b0 + ((val - a0) / (a1 - a0)) * (b1 - b0);
+  }
+
+  function mapBeatWindowTo800(localMs, pStart, pEnd, qrsStart, qrsEnd, stEnd, tEnd, cycleLen) {
+    if (localMs < pStart) return lerpMap(localMs, 0, Math.max(1, pStart), 0, 70);
+    if (localMs < pEnd) return lerpMap(localMs, pStart, pEnd, 70, 155);
+    if (localMs < qrsStart) return lerpMap(localMs, pEnd, qrsStart, 155, 215);
+    if (localMs < qrsEnd) return lerpMap(localMs, qrsStart, qrsEnd, 215, 285);
+    if (localMs < stEnd) return lerpMap(localMs, qrsEnd, stEnd, 285, 445);
+    if (localMs < tEnd) return lerpMap(localMs, stEnd, tEnd, 445, 575);
+    return lerpMap(localMs, tEnd, Math.max(tEnd + 1, cycleLen), 575, 800);
+  }
+
+  window.getExactCardiacSyncState = function (absMs, rawTime, sc) {
+    const t = ((rawTime % 800) + 800) % 800;
+    const beatIdx = Math.floor(absMs / 800);
+
+    // 1. 1st-Degree AV Block (`avb1`): P at 40..110ms, Prolonged PR hold 110..320ms, QRS 320..376ms, ST 376..500ms, T 500..635ms
+    if (sc === 'avb1') {
+      const effVentT = mapBeatWindowTo800(t, 40, 110, 320, 376, 500, 635, 800);
+      return { effVentT, isDroppedBeat: false, atrialContract: (t >= 50 && t <= 140) ? Math.sin(((t - 50) / 90) * Math.PI) : 0 };
+    }
+
+    // 2. 2nd-Degree AV Block Mobitz I (`avb2_1` - Wenckebach 3:2):
+    //    Step 0: delay=0 (QRS 220..278ms); Step 1: delay=95ms (QRS 315..373ms); Step 2: Blocked P wave (Dropped QRS!)
+    if (sc === 'avb2_1') {
+      const step = ((beatIdx % 3) + 3) % 3;
+      const aCon = (t >= 75 && t <= 165) ? Math.sin(((t - 75) / 90) * Math.PI) : 0;
+      if (step === 2) {
+        // Blocked beat: P wave fires (70..145ms), then blocked at AV node (145..250ms), then rests in diastole (750ms) with ZERO QRS/contraction!
+        let effVentT = 750;
+        if (t < 70) effVentT = lerpMap(t, 0, 70, 0, 70);
+        else if (t < 145) effVentT = lerpMap(t, 70, 145, 70, 155);
+        else if (t < 255) effVentT = lerpMap(t, 145, 255, 155, 210);
+        return { effVentT, isDroppedBeat: true, atrialContract: aCon };
+      }
+      const delay = step * 95;
+      const effVentT = mapBeatWindowTo800(t, 70, 145, 220 + delay, 278 + delay, 420 + delay, 560 + delay, 800);
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 3. 2nd-Degree AV Block Mobitz II (`avb2_2` - 3:2) & High-Grade 3:1 AV Block (`avb_highgrade`)
+    if (sc === 'avb2_2' || sc === 'avb_highgrade') {
+      const mod3 = ((beatIdx % 3) + 3) % 3;
+      const conducted = (sc === 'avb2_2') ? (mod3 !== 2) : (mod3 === 0);
+      const aCon = (t >= 80 && t <= 170) ? Math.sin(((t - 80) / 90) * Math.PI) : 0;
+      if (!conducted) {
+        let effVentT = 750;
+        if (t < 80) effVentT = lerpMap(t, 0, 80, 0, 70);
+        else if (t < 150) effVentT = lerpMap(t, 80, 150, 70, 155);
+        else if (t < 255) effVentT = lerpMap(t, 150, 255, 155, 210);
+        return { effVentT, isDroppedBeat: true, atrialContract: aCon };
+      }
+      return { effVentT: t, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 4. 3rd-Degree Complete Heart Block (`avb3`):
+    //    Atria fire every 750ms (`115 + n*750`); Ventricles fire wide escape QRS only on even cycles (`beatIdx % 2 === 0` at t=235..325ms)
+    if (sc === 'avb3') {
+      const ta = ((absMs - 75) % 750 + 750) % 750;
+      const aCon = (ta >= 0 && ta <= 95) ? Math.sin((ta / 95) * Math.PI) : 0;
+      const isEvenCycle = (((beatIdx % 2) + 2) % 2 === 0);
+      if (!isEvenCycle) {
+        return { effVentT: 750, isDroppedBeat: true, atrialContract: aCon, ta750: ta };
+      }
+      let effVentT = 750;
+      if (t >= 230 && t < 325) effVentT = lerpMap(t, 230, 325, 215, 285);
+      else if (t >= 325 && t < 460) effVentT = lerpMap(t, 325, 460, 285, 445);
+      else if (t >= 460 && t < 575) effVentT = lerpMap(t, 460, 575, 445, 575);
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon, ta750: ta };
+    }
+
+    // 5. Atrial Fibrillation (`afib`): Irregular QRS beats at [155, 590, 885, 1235] inside 1600ms period
+    if (sc === 'afib') {
+      const tm = ((absMs % 1600) + 1600) % 1600;
+      const beats = [155, 590, 885, 1235];
+      let effVentT = 720;
+      for (const bt of beats) {
+        if (tm >= bt - 28 && tm <= bt + 215) {
+          if (tm < bt - 10) effVentT = lerpMap(tm, bt - 28, bt - 10, 175, 215);
+          else if (tm < bt + 28) effVentT = lerpMap(tm, bt - 10, bt + 28, 215, 285);
+          else if (tm < bt + 125) effVentT = lerpMap(tm, bt + 28, bt + 125, 285, 445);
+          else effVentT = lerpMap(tm, bt + 125, bt + 215, 445, 575);
+          break;
+        }
+      }
+      return { effVentT, isDroppedBeat: false, atrialContract: 0.03 * Math.sin(absMs * 0.065) };
+    }
+
+    // 6. Atrial Flutter (`aflutter`): Sawtooth F-waves every 200ms; 3:1 QRS every 600ms around tq = 200ms
+    if (sc === 'aflutter') {
+      const tq = ((absMs % 600) + 600) % 600;
+      const tf = ((absMs % 200) + 200) % 200;
+      const aCon = 0.14 * Math.pow(Math.sin((tf / 200) * Math.PI), 2);
+      let effVentT = 700;
+      if (tq >= 165 && tq < 188) effVentT = lerpMap(tq, 165, 188, 170, 215);
+      else if (tq >= 188 && tq < 226) effVentT = lerpMap(tq, 188, 226, 215, 285);
+      else if (tq >= 226 && tq < 335) effVentT = lerpMap(tq, 226, 335, 285, 445);
+      else if (tq >= 335 && tq < 430) effVentT = lerpMap(tq, 335, 430, 445, 575);
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 7. SVT (`svt`): Period 266.67ms, QRS at ts = 60..92ms, retrograde P' at 96ms, T at 178ms
+    if (sc === 'svt') {
+      const period = 266.67;
+      const ts = ((absMs % period) + period) % period;
+      let effVentT = 680;
+      if (ts >= 42 && ts < 60) effVentT = lerpMap(ts, 42, 60, 175, 215);
+      else if (ts >= 60 && ts < 92) effVentT = lerpMap(ts, 60, 92, 215, 285);
+      else if (ts >= 92 && ts < 155) effVentT = lerpMap(ts, 92, 155, 285, 445);
+      else if (ts >= 155 && ts < 215) effVentT = lerpMap(ts, 155, 215, 445, 575);
+      const aCon = (ts >= 88 && ts <= 135) ? 0.12 * Math.sin(((ts - 88) / 47) * Math.PI) : 0;
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 8. Sinus Tachycardia (`sinus_tachy`): Period 400ms, P at 45..90ms, QRS at 140..180ms, T at 255..335ms
+    if (sc === 'sinus_tachy') {
+      const tb = ((absMs % 400) + 400) % 400;
+      const effVentT = mapBeatWindowTo800(tb, 42, 92, 140, 180, 255, 335, 400);
+      const aCon = (tb >= 45 && tb <= 105) ? 0.17 * Math.sin(((tb - 45) / 60) * Math.PI) : 0;
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 9. Sinus Bradycardia (`sinus_brady`): Period 1400ms
+    if (sc === 'sinus_brady') {
+      const tb = ((absMs % 1400) + 1400) % 1400;
+      const effVentT = (tb < 620) ? tb : 730;
+      const aCon = (tb >= 85 && tb <= 185) ? 0.18 * Math.sin(((tb - 85) / 100) * Math.PI) : 0;
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 10. Junctional Rhythm (`junctional`): Period 1250ms, retrograde P at 175..215ms, QRS at 220..275ms
+    if (sc === 'junctional') {
+      const tj = ((absMs % 1250) + 1250) % 1250;
+      let effVentT = 730;
+      if (tj < 620) {
+        effVentT = mapBeatWindowTo800(tj, 172, 212, 220, 275, 435, 560, 800);
+      }
+      const aCon = (tj >= 175 && tj <= 225) ? 0.14 * Math.sin(((tj - 175) / 50) * Math.PI) : 0;
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 11. Idioventricular Rhythm (`ivr`): Period 1600ms, NO P wave, wide QRS at 235..345ms, T at 460..590ms
+    if (sc === 'ivr') {
+      const ti = ((absMs % 1600) + 1600) % 1600;
+      let effVentT = 740;
+      if (ti >= 230 && ti < 345) effVentT = lerpMap(ti, 230, 345, 215, 285);
+      else if (ti >= 345 && ti < 465) effVentT = lerpMap(ti, 345, 465, 285, 445);
+      else if (ti >= 465 && ti < 595) effVentT = lerpMap(ti, 465, 595, 445, 575);
+      return { effVentT, isDroppedBeat: false, atrialContract: 0 };
+    }
+
+    // 12. Multifocal Atrial Tachycardia (`mat`): 4 beats in 1600ms at qrsT = [210, 560, 980, 1310]
+    if (sc === 'mat') {
+      const tm = ((absMs % 1600) + 1600) % 1600;
+      const beats = [
+        { qrsT: 210, pr: 115 },
+        { qrsT: 560, pr: 155 },
+        { qrsT: 980, pr: 95 },
+        { qrsT: 1310, pr: 140 }
+      ];
+      let effVentT = 720;
+      let aCon = 0;
+      for (const b of beats) {
+        const p0 = b.qrsT - b.pr - 15;
+        const p1 = b.qrsT - b.pr + 30;
+        if (tm >= p0 && tm <= b.qrsT + 185) {
+          if (tm >= p0 && tm <= p1 + 15) {
+            aCon = 0.16 * Math.sin(((tm - p0) / (p1 + 15 - p0)) * Math.PI);
+          }
+          effVentT = mapBeatWindowTo800(tm - p0, 0, p1 - p0, b.qrsT - 12 - p0, b.qrsT + 26 - p0, b.qrsT + 110 - p0, b.qrsT + 180 - p0, 350);
+          break;
+        }
+      }
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 13. Pre-Excited AFib in WPW (`wpw_afib`): 5 beats in 1600ms at [130, 390, 690, 950, 1290]
+    if (sc === 'wpw_afib') {
+      const tm = ((absMs % 1600) + 1600) % 1600;
+      const beats = [130, 390, 690, 950, 1290];
+      let effVentT = 710;
+      for (const bt of beats) {
+        if (tm >= bt - 32 && tm <= bt + 165) {
+          if (tm < bt - 15) effVentT = lerpMap(tm, bt - 32, bt - 15, 190, 215);
+          else if (tm < bt + 35) effVentT = lerpMap(tm, bt - 15, bt + 35, 215, 285);
+          else if (tm < bt + 105) effVentT = lerpMap(tm, bt + 35, bt + 105, 285, 445);
+          else effVentT = lerpMap(tm, bt + 105, bt + 165, 445, 575);
+          break;
+        }
+      }
+      return { effVentT, isDroppedBeat: false, atrialContract: 0.03 * Math.sin(absMs * 0.075) };
+    }
+
+    // 14. Malignant PVCs & R-on-T (`pvc_ront`): 1600ms period
+    //     Beat 1 Sinus (P 105, QRS 228, T 445), Beat 2 R-on-T PVC at 472ms, Beat 3 Sinus (P 960, QRS 1082, T 1295), Beat 4 PVC at 1365ms
+    if (sc === 'pvc_ront') {
+      const tm = ((absMs % 1600) + 1600) % 1600;
+      let effVentT = 720;
+      let aCon = 0;
+      if (tm < 455) {
+        effVentT = mapBeatWindowTo800(tm, 80, 135, 208, 252, 385, 455, 800);
+        if (tm >= 85 && tm <= 155) aCon = 0.17 * Math.sin(((tm - 85) / 70) * Math.PI);
+      } else if (tm >= 455 && tm < 730) {
+        // R-on-T Premature Ventricular Complex!
+        if (tm < 540) effVentT = lerpMap(tm, 455, 540, 215, 285);
+        else if (tm < 625) effVentT = lerpMap(tm, 540, 625, 285, 445);
+        else effVentT = lerpMap(tm, 625, 730, 445, 575);
+      } else if (tm >= 930 && tm < 1340) {
+        effVentT = mapBeatWindowTo800(tm - 855, 80, 135, 208, 252, 385, 475, 800);
+        if (tm >= 940 && tm <= 1010) aCon = 0.17 * Math.sin(((tm - 940) / 70) * Math.PI);
+      } else if (tm >= 1340 && tm < 1575) {
+        // Bigeminal PVC!
+        if (tm < 1425) effVentT = lerpMap(tm, 1340, 1425, 215, 285);
+        else if (tm < 1500) effVentT = lerpMap(tm, 1425, 1500, 285, 445);
+        else effVentT = lerpMap(tm, 1500, 1575, 445, 575);
+      }
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // 15. Monomorphic VT (`vt`): Period 320ms, wide QRS 65..175ms, discordant T 175..280ms
+    if (sc === 'vt') {
+      const tv = ((absMs % 320) + 320) % 320;
+      let effVentT = 680;
+      if (tv >= 55 && tv < 175) effVentT = lerpMap(tv, 55, 175, 215, 285);
+      else if (tv >= 175 && tv < 235) effVentT = lerpMap(tv, 175, 235, 285, 445);
+      else if (tv >= 235 && tv < 295) effVentT = lerpMap(tv, 235, 295, 445, 575);
+      return { effVentT, isDroppedBeat: false, atrialContract: 0 };
+    }
+
+    // 16. Cardiac Tamponade (`tamponade`): Period 533.33ms
+    if (sc === 'tamponade') {
+      const tt = ((absMs % 533.33) + 533.33) % 533.33;
+      const effVentT = (tt / 533.33) * 800;
+      const aCon = (effVentT >= 90 && effVentT <= 190) ? 0.10 * Math.sin(((effVentT - 90) / 100) * Math.PI) : 0;
+      return { effVentT, isDroppedBeat: false, atrialContract: aCon };
+    }
+
+    // Default 800ms cycles (Normal, STEMIs, LBBB, RBBB, LVH, HyperK, HypoK, HypoNa, HyperNa, PEA, etc.)
+    const aCon = (t >= 90 && t <= 195 && !['vfib', 'tdp', 'asystole', 'sinewave', 'pea'].includes(sc))
+      ? (sc === 'hyperk' ? 0.06 : 0.18) * Math.sin(((t - 90) / 105) * Math.PI)
+      : 0;
+    return { effVentT: t, isDroppedBeat: false, atrialContract: aCon };
+  };
+
+  // Custom 3D Electrical Charge-Flow Event Builder covering ALL 35 scenarios in exact sync!
+  window.__clinixBuildSyncedEvents = function (sc, effT, T, rawT, syncState, H) {
+    const ev = [];
+    const E = o => ev.push(o);
+    let base = 'charge';
+    let loops = null;
+
+    if (sc === 'asystole') {
+      return { ev, base: 'charge', loops: null };
+    }
+    if (sc === 'vfib') {
+      return { ev, base: 'vfib', loops: null };
+    }
+    if (sc === 'tdp') {
+      const k = Math.floor(T / 114);
+      for (let j = 0; j < 2; j++) {
+        const age = T - (k - j) * 114;
+        const pos = H.orbit((k - j) * 114);
+        E(H.bur(pos, effT - age, effT - age + 125, 0.08, 1.7, H.ROSE, 'tdp'));
+        if (j === 0) E(H.pul(pos, effT - age, effT - age + 60, H.RED, 'tdp', 'flare'));
+      }
+      return { ev, base: 'tdp', loops: null };
+    }
+    if (sc === 'vt' || sc === 'ivr' || sc === 'sinewave') {
+      E(H.pul(H.P.VT_FOCUS, 200, 235, H.RED, 'vtfocus', 'flare'));
+      E(H.bur(H.P.VT_FOCUS, 215, 340, 0.10, 2.8, H.ROSE, 'vtspread'));
+      return { ev, base: 'vtfocus', loops: null };
+    }
+    if (sc === 'pvc_ront') {
+      const tm = ((T % 1600) + 1600) % 1600;
+      const isPVCBeat = (tm >= 455 && tm < 730) || (tm >= 1340 && tm < 1575);
+      if (isPVCBeat) {
+        E(H.pul(H.P.VT_FOCUS, 200, 240, H.RED, 'vtfocus', 'flare'));
+        E(H.bur(H.P.VT_FOCUS, 215, 345, 0.10, 2.9, H.ROSE, 'vtspread'));
+        return { ev, base: 'vtfocus', loops: null };
+      }
+    }
+    if (sc === 'afib' || sc === 'wpw_afib') {
+      E(H.pul(H.P.AV, 185, 215, H.ORANGE, 'irreg', 'flare'));
+      H.ventricles(E, 215, sc === 'wpw_afib' ? 1.25 : 1, false);
+      return { ev, base: 'chaosA', loops: null };
+    }
+    if (sc === 'aflutter') {
+      E(H.pkt('fToAV', 170, 210, H.ORANGE, 'flutterAV'));
+      E(H.pul(H.P.AV, 195, 215, H.ORANGE, 'flutterAV', 'flare'));
+      H.ventricles(E, 215, 1, false);
+      return { ev, base: 'flutter', loops: 'flutter' };
+    }
+    if (sc === 'svt') {
+      E(H.pul(H.P.AV, 185, 215, H.ORANGE, 'svtloop', 'flare'));
+      H.ventricles(E, 215, 1, false);
+      E(H.pkt('intA', 225, 295, H.GOLD, 'retro', { rev: true }));
+      E(H.bur(H.P.SA, 265, 330, 0.10, 1.35, H.GOLD, 'retro'));
+      return { ev, base: 'svtloop', loops: 'svt' };
+    }
+    if (sc === 'junctional') {
+      E(H.pul(H.P.AV, 70, 155, H.ORANGE, 'av', 'flare'));
+      E(H.pkt('intA', 75, 150, H.GOLD, 'retro', { rev: true }));
+      E(H.bur(H.P.SA, 115, 175, 0.10, 1.3, H.GOLD, 'retro'));
+      H.ventricles(E, 215, 1, false);
+      return { ev, base: 'charge', loops: null };
+    }
+    if (sc === 'avb3') {
+      // Independent Atrial P wave every 750ms blocked at AV node + Independent Ventricular Escape on even cycles
+      H.atrialBlock(E, 72);
+      if (!syncState.isDroppedBeat) {
+        E(H.pul(H.P.ESCAPE, 205, 235, H.RED, 'escape', 'flare'));
+        E(H.bur(H.P.ESCAPE, 215, 325, 0.08, 2.7, H.ROSE, 'escapeSpread'));
+      }
+      return { ev, base: 'charge', loops: null };
+    }
+    if (sc === 'avb2_1' || sc === 'avb2_2' || sc === 'avb_highgrade') {
+      H.saCharging(E, 72);
+      if (syncState.isDroppedBeat) {
+        H.atrialBlock(E, 72);
+      } else {
+        H.atria(E, 72, 150);
+        H.conduct(E, 150, 215, 1, false);
+      }
+      return { ev, base: 'charge', loops: null };
+    }
+    if (sc === 'rbbb') {
+      // Custom RBBB: LBB conducts normally, RBB is blocked with red X and delayed right-ventricular activation!
+      H.saCharging(E, 72);
+      H.atria(E, 72, 150);
+      E(H.pul(H.P.AV, 150, 215, H.ORANGE, 'av', 'hold'));
+      E(H.pkt('avn', 150, 215, H.ORANGE, 'av'));
+      E(H.pkt('his', 215, 232, H.CYAN, 'his'));
+      E(H.pkt('lbb', 232, 250, H.SKY, 'bb'));
+      E(H.pkt('rbb', 232, 245, H.SKY, 'bb', { u1: 0.18 }));
+      E(H.blk(H.curves.rbb.getPointAt(0.18), 242, 335, 'blockAV'));
+      E(H.pkt('pL1', 250, 270, H.VIOLET, 'purk'));
+      E(H.pkt('pL2', 243, 265, H.VIOLET, 'purk'));
+      E(H.pkt('pL3', 250, 270, H.VIOLET, 'purk'));
+      E(H.bur(H.P.LV_LAT, 265, 310, 0.10, 1.0, H.BLUE, 'myo'));
+      // Delayed cell-to-cell spread to Right Ventricle (265..345ms -> draws R' in V1!)
+      E(H.pkt('pR1', 275, 335, H.ROSE, 'cross'));
+      E(H.bur(H.P.SEPTUM, 280, 345, 0.12, 1.25, H.ROSE, 'myo'));
+      return { ev, base: 'charge', loops: null };
+    }
+    if (sc === 'lbbb') {
+      H.saCharging(E, 72);
+      H.atria(E, 72, 150);
+      H.conduct(E, 150, 215, 1, true);
+      return { ev, base: 'charge', loops: null };
+    }
+    // Default (Normal, AVB1 mapped via effVentT, STEMIs, LVH, HyperK, HypoK, HypoNa, HyperNa, MAT, Sinus Brady/Tachy, PEA)
+    H.saCharging(E, 72);
+    H.atria(E, 72, 150);
+    H.conduct(E, 150, 215, sc === 'hyperk' ? 1.25 : 1, false);
+    return { ev, base: 'charge', loops: null };
+  };
+
+  // Canonical Active Scan Time shared 100% between ECG canvas playhead, 3D Heart, Sparks, Gates & Action Potential!
+  window.__clinixNumCycles = 3;
+  window.__clinixActiveScanTime = function (overrideRawT) {
+    const rawT = (typeof overrideRawT === 'number')
+      ? overrideRawT
+      : ((typeof window.__clinixRawCurrentTime === 'number') ? window.__clinixRawCurrentTime : currentTime);
+    if (typeof stripMode !== 'undefined' && stripMode) {
+      const nCyc = window.__clinixNumCycles || 3;
+      return ((continuousCycleCount % nCyc) * 800) + rawT;
+    }
+    // Even in Single-Beat mode, multi-cycle AV blocks (avb2_1, avb2_2, avb_highgrade, avb3) cycle through 3 beats so dropped beats are demonstrated
+    if (['avb2_1', 'avb2_2', 'avb_highgrade', 'avb3'].includes(currentScenario)) {
+      return ((continuousCycleCount % 3) * 800) + rawT;
+    }
+    return rawT;
+  };
+
+  // Synchronize `getPhaseIndex` with the actual active beat phase of the selected scenario!
+  const rawBaseGetPhaseIndex = window.getPhaseIndex;
+  window.getPhaseIndex = function (tArg) {
+    const rawT = (typeof window.__clinixRawCurrentTime === 'number') ? window.__clinixRawCurrentTime : tArg;
+    const absMs = window.__clinixActiveScanTime(rawT);
+    const syncSt = window.getExactCardiacSyncState(absMs, rawT, currentScenario);
+    if (syncSt.isDroppedBeat && rawT >= 155) {
+      return (rawT < 310) ? 1 : 5; // Show AV Nodal Block (Phase 1) then Resting Diastole (Phase 5) when QRS is dropped!
+    }
+    return rawBaseGetPhaseIndex(syncSt.effVentT);
+  };
+
+  // Override `getActionPotential` and `getMechanicalTension` using raw un-wrapped base functions (ZERO double-mapping!)
+  const trueRawGetAP = window.__rawBaseGetAP || window.getActionPotential;
+  window.getActionPotential = function (t, sc, forHealthyReference = false) {
+    if (forHealthyReference) return trueRawGetAP(t, 'normal', true);
+    // If t is already mapped (when called inside prevRenderHeart), use window.__clinixRawCurrentTime
+    const isCurrentBeat = (Math.abs(t - currentTime) < 1.5);
+    const absMs = isCurrentBeat
+      ? window.__clinixActiveScanTime(t)
+      : ((typeof stripMode !== 'undefined' && stripMode) ? (((continuousCycleCount % (window.__clinixNumCycles || 3)) * 800) + t) : t);
+    const syncSt = window.getExactCardiacSyncState(absMs, t, sc);
+    if (syncSt.isDroppedBeat) return -90;
+    return trueRawGetAP(syncSt.effVentT, sc, false);
+  };
+
+  const trueRawGetTen = window.__rawBaseGetTen || window.getMechanicalTension;
+  window.getMechanicalTension = function (t, sc, forLeadSpecific = false) {
+    if (sc === 'pea' || sc === 'asystole' || sc === 'vfib' || sc === 'sinewave') return 0;
+    const rawT = (typeof window.__clinixRawCurrentTime === 'number') ? window.__clinixRawCurrentTime : t;
+    const absMs = window.__clinixActiveScanTime(rawT);
+    const syncSt = window.getExactCardiacSyncState(absMs, rawT, sc);
+    if (syncSt.isDroppedBeat) return 0;
+    return trueRawGetTen(syncSt.effVentT, sc, forLeadSpecific);
+  };
+
+  // Ensure `renderThreeJSHeart` applies exact synchronized atrial & ventricular squeeze (and zero ventricular squeeze on dropped beats!)
+  const baseRenderHeart_V8 = window.renderThreeJSHeart;
+  window.renderThreeJSHeart = function () {
+    window.__clinixRawCurrentTime = currentTime;
+    baseRenderHeart_V8();
+    if (typeof THREE === 'undefined' || !scene || !heartGroup) return;
+    const absMs = window.__clinixActiveScanTime(currentTime);
+    const syncSt = window.getExactCardiacSyncState(absMs, currentTime, currentScenario);
+    if (meshRA && meshLA && typeof syncSt.atrialContract === 'number' && currentScenario !== 'pea' && currentScenario !== 'asystole') {
+      const ac = syncSt.atrialContract;
+      meshRA.scale.set(1 - ac, 1 - ac, 1 - ac);
+      meshLA.scale.set(1 - ac, 1 - ac, 1 - ac);
+    }
+    if (syncSt.isDroppedBeat && currentScenario !== 'tamponade') {
+      if (meshRV) { meshRV.scale.set(1, 1, 1); meshRV.material.emissive.setHex(0x000000); }
+      if (meshLV) {
+        const lvhT = (currentScenario === 'lvh') ? 1.24 : 1.0;
+        meshLV.scale.set(lvhT, 1, lvhT);
+        meshLV.material.emissive.setHex(0x000000);
+      }
+      if (meshAorta) meshAorta.scale.set(1, 1, 1);
+      if (meshPulm) meshPulm.scale.set(1, 1, 1);
+      if (renderer && scene && camera) renderer.render(scene, camera);
+    }
+  };
+
+  // ===========================================================================
+  // 1. LOCK LIGHT MODE & STUDIO LIGHT PERMANENTLY + SYNC STANDARD REF OVERLAY
+  // ===========================================================================
+  window.__v7ShowStandardRefECG = false;
+  window.toggleStandardRefECG = function () {
+    window.__v7ShowStandardRefECG = !window.__v7ShowStandardRefECG;
+    const btn = document.getElementById('btn-std-ref-ecg');
+    const txt = document.getElementById('ui-std-ref-text');
+    const isAr = (currentLang === 'ar');
+    if (btn) btn.classList.toggle('toggle-pill-active', window.__v7ShowStandardRefECG);
+    if (txt) {
+      txt.textContent = window.__v7ShowStandardRefECG
+        ? (isAr ? 'إخفاء المرجع القياسي (Standard)' : 'Hide Standard Ref')
+        : (isAr ? 'إظهار التخطيط القياسي (Standard)' : 'Show Standard Ref');
+    }
+    drawAll2D();
+  };
+
+  window.toggleClinixTheme = function () {
+    const root = document.documentElement;
+    root.classList.remove('dark');
+    root.classList.add('light');
+    root.dataset.theme = 'light';
+    root.style.colorScheme = 'light';
+  };
+
+  window.toggleECGMonitorTheme = function () {
+    const vp = document.getElementById('ecg-paper-viewport');
+    if (vp) vp.classList.remove('classic-dark-monitor');
+    drawAll2D();
+  };
+
+  window.toggle3DStudioBg = function () {
+    layers3D.studioBg = true;
+    const c3d = document.getElementById('heart3d-container');
+    if (c3d) c3d.classList.add('studio-light-bg');
+    renderThreeJSHeart();
+  };
+
+  // ===========================================================================
+  // 2. RESTRUCTURE DOM INTO THE 2-COLUMN SPLIT LAYOUT & FIX EMPTY HEADER SPACE
+  // ===========================================================================
+  function buildV7TwoColumnLayout() {
+    const ecgSimView = document.getElementById('ecg-simulator-view');
+    if (!ecgSimView || document.getElementById('clinix-v6-split-shell')) return;
+
+    const topHeader = ecgSimView.querySelector('header');
+    const stickyTimeline = ecgSimView.querySelector('.sticky-master-timeline');
+    const panel2Heart = document.getElementById('panel-2-heart-card');
+    const ecgCanvas = document.getElementById('ecg-canvas');
+    const panel1ECG = ecgCanvas ? ecgCanvas.closest('.panel-card') : null;
+    if (panel1ECG) panel1ECG.id = 'panel-1-ecg-card';
+
+    const phaseBoard = document.getElementById('phase-explanation-board');
+    const twelveLeadCanvas = document.getElementById('twelve-lead-canvas');
+    const section12Lead = twelveLeadCanvas ? twelveLeadCanvas.closest('section') : null;
+    if (section12Lead) section12Lead.id = 'v6-section-12lead';
+
+    const gatesCanvas = document.getElementById('gates-canvas');
+    const panel4Gates = gatesCanvas ? gatesCanvas.closest('.panel-card') : null;
+    if (panel4Gates) panel4Gates.id = 'v6-section-gates';
+
+    const apCanvas = document.getElementById('ap-mech-canvas');
+    const panel5AP = apCanvas ? apCanvas.closest('.panel-card') : null;
+    if (panel5AP) panel5AP.id = 'v6-section-ap';
+
+    const oldBottomSection = gatesCanvas ? gatesCanvas.closest('section') : null;
+    const footerEl = ecgSimView.querySelector('footer');
+
+    const splitShell = document.createElement('div');
+    splitShell.id = 'clinix-v6-split-shell';
+    splitShell.className = 'px-1 sm:px-2 mb-4';
+
+    // Column A: Scrollable Clinical Scenarios Sidebar (Existing Category Deck + Existing Scenario List)
+    const sidebarCol = document.createElement('aside');
+    sidebarCol.id = 'clinix-v6-sidebar-col';
+
+    const catDeck = document.getElementById('clinical-categories-deck');
+    const subBranchBox = document.getElementById('scenario-subbranch-box');
+    const oldCatWrapper = catDeck ? catDeck.parentElement : null;
+
+    if (catDeck) {
+      catDeck.className = 'mb-2 p-2 rounded-xl bg-slate-50 border border-slate-200';
+      const catGrid = catDeck.querySelector('.grid');
+      if (catGrid) catGrid.className = 'grid grid-cols-2 gap-1.5';
+      sidebarCol.appendChild(catDeck);
+    }
+
+    const sidebarScroll = document.createElement('div');
+    sidebarScroll.id = 'clinix-v6-sidebar-scroll';
+    if (subBranchBox) {
+      subBranchBox.className = 'p-0 bg-transparent border-0 shadow-none m-0';
+      const scList = document.getElementById('scenario-list-container');
+      if (scList) scList.className = 'flex flex-col gap-2';
+      sidebarScroll.appendChild(subBranchBox);
+    }
+    sidebarCol.appendChild(sidebarScroll);
+
+    // Remove empty wrapper inside `<header>` so `#ui-main-title` spans 100% width cleanly
+    if (oldCatWrapper && oldCatWrapper.children.length === 0) {
+      oldCatWrapper.remove();
+    }
+    if (topHeader) {
+      topHeader.classList.remove('max-w-[1650px]');
+      topHeader.classList.add('max-w-[1720px]');
+    }
+
+    // Column B: Main Simulation Workspace Column
+    const mainCol = document.createElement('div');
+    mainCol.id = 'clinix-v6-main-col';
+    mainCol.className = 'flex flex-col gap-3.5 min-w-0';
+
+    if (stickyTimeline) {
+      stickyTimeline.classList.remove('max-w-[1650px]', 'mx-auto', 'mb-3');
+      stickyTimeline.classList.add('w-full');
+      mainCol.appendChild(stickyTimeline);
+    }
+
+    if (panel2Heart) {
+      panel2Heart.classList.remove('lg:col-span-6');
+      panel2Heart.classList.add('w-full');
+      mainCol.appendChild(panel2Heart);
+    }
+
+    if (panel1ECG) {
+      panel1ECG.classList.remove('lg:col-span-6');
+      panel1ECG.classList.add('w-full');
+      mainCol.appendChild(panel1ECG);
+    }
+
+    if (phaseBoard) {
+      phaseBoard.classList.remove('max-w-[1650px]', 'mx-auto', 'mb-4');
+      phaseBoard.classList.add('w-full');
+      mainCol.appendChild(phaseBoard);
+    }
+
+    const drawersBarWrap = document.createElement('div');
+    drawersBarWrap.className = 'panel-card rounded-2xl p-3 border border-slate-200';
+    drawersBarWrap.innerHTML = `
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+        <span id="v6-drawers-heading" class="text-xs sm:text-sm font-black text-slate-800 flex items-center gap-2">
+          <i class="fa-solid fa-sliders text-sky-600"></i>
+          <span>Detailed Clinical & Cellular Sections (Click any button below to show or hide):</span>
+        </span>
+        <button type="button" id="v6-btn-show-all-drawers" onclick="window.toggleAllV6Drawers()"
+          class="px-3 py-1 rounded-xl bg-slate-100 hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-300 text-xs font-extrabold transition">
+          <i class="fa-solid fa-layer-group"></i>
+          <span id="v6-show-all-drawers-txt">Show All Sections</span>
+        </button>
+      </div>
+      <div id="v6-bottom-drawers-bar">
+        <button type="button" id="btn-v6-drawer-12lead" class="v6-drawer-toggle-btn v6-drawer-active" onclick="window.toggleV6Drawer('12lead')">
+          <span class="flex items-center gap-2 min-w-0">
+            <i class="fa-solid fa-table-cells text-base"></i>
+            <span id="lbl-v6-drawer-12lead" class="truncate">3. 12-Lead ECG & Territory Map</span>
+          </span>
+          <span id="pill-v6-drawer-12lead" class="v6-drawer-status-pill">Shown ▼</span>
+        </button>
+        <button type="button" id="btn-v6-drawer-gates" class="v6-drawer-toggle-btn" onclick="window.toggleV6Drawer('gates')">
+          <span class="flex items-center gap-2 min-w-0">
+            <i class="fa-solid fa-door-open text-base"></i>
+            <span id="lbl-v6-drawer-gates" class="truncate">4. Cell Membrane Ion Gates</span>
+          </span>
+          <span id="pill-v6-drawer-gates" class="v6-drawer-status-pill">Hidden ▶</span>
+        </button>
+        <button type="button" id="btn-v6-drawer-ap" class="v6-drawer-toggle-btn" onclick="window.toggleV6Drawer('ap')">
+          <span class="flex items-center gap-2 min-w-0">
+            <i class="fa-solid fa-chart-line text-base"></i>
+            <span id="lbl-v6-drawer-ap" class="truncate">5. Action Potential & Sarcomere</span>
+          </span>
+          <span id="pill-v6-drawer-ap" class="v6-drawer-status-pill">Hidden ▶</span>
+        </button>
+      </div>
+    `;
+    mainCol.appendChild(drawersBarWrap);
+
+    if (section12Lead) {
+      section12Lead.classList.remove('max-w-[1650px]', 'mx-auto', 'mb-4');
+      section12Lead.classList.add('w-full', 'v6-collapsible-section');
+      const dupGrid = document.getElementById('lead-changes-grid');
+      if (dupGrid) dupGrid.style.display = 'none';
+      mainCol.appendChild(section12Lead);
+    }
+
+    if (panel4Gates) {
+      panel4Gates.classList.remove('lg:col-span-6');
+      panel4Gates.classList.add('w-full', 'v6-collapsible-section', 'v6-section-hidden');
+      mainCol.appendChild(panel4Gates);
+    }
+
+    if (panel5AP) {
+      panel5AP.classList.remove('lg:col-span-6');
+      panel5AP.classList.add('w-full', 'v6-collapsible-section', 'v6-section-hidden');
+      mainCol.appendChild(panel5AP);
+    }
+
+    if (oldBottomSection && oldBottomSection.children.length === 0) {
+      oldBottomSection.remove();
+    }
+
+    splitShell.appendChild(sidebarCol);
+    splitShell.appendChild(mainCol);
+
+    if (topHeader && topHeader.nextSibling) {
+      ecgSimView.insertBefore(splitShell, topHeader.nextSibling);
+    } else {
+      ecgSimView.appendChild(splitShell);
+    }
+
+    // Keep the user's signature footer at the very bottom of #ecg-simulator-view!
+    if (footerEl) {
+      footerEl.classList.remove('max-w-[1650px]');
+      footerEl.classList.add('max-w-[1720px]');
+      ecgSimView.appendChild(footerEl);
+    }
+  }
+
+  // ===========================================================================
+  // 3. IN-MODEL FLOATING ICON CONTROLS WITH EXPLICIT SYMBOLS (`+`, `−`, `↺`),
+  //    SCROLLABLE POPOVERS FOR THE EXISTING 6 OPTIONS, AND Z-INDEX 9500
+  // ===========================================================================
+  let active3DPopover = null;
+
+  window.toggle3DMenuPopover = function (which) {
+    const layersPop = document.getElementById('v6-popover-3d-layers');
+    const labelsPop = document.getElementById('v6-popover-3d-labels');
+    const btnEye = document.getElementById('v6-btn-3d-eye');
+    const btnTags = document.getElementById('v6-btn-3d-tags');
+    if (!layersPop || !labelsPop) return;
+
+    active3DPopover = (active3DPopover === which) ? null : which;
+    const showLayers = (active3DPopover === 'layers');
+    const showLabels = (active3DPopover === 'labels');
+
+    layersPop.classList.toggle('v6-popover-visible', showLayers);
+    layersPop.classList.toggle('v6-popover-hidden', !showLayers);
+    labelsPop.classList.toggle('v6-popover-visible', showLabels);
+    labelsPop.classList.toggle('v6-popover-hidden', !showLabels);
+
+    if (btnEye) btnEye.classList.toggle('v6-menu-open', showLayers);
+    if (btnTags) btnTags.classList.toggle('v6-menu-open', showLabels);
+  };
+
+  function setupInModelFloatingControls() {
+    const c3d = document.getElementById('heart3d-container');
+    if (!c3d || document.getElementById('heart3d-floating-dock')) return;
+
+    const layerBtnIds = [
+      'btn-3d-conduction',
+      'btn-3d-coronary',
+      'btn-3d-veins',
+      'btn-3d-xray',
+      'btn-3d-electrodes',
+      'btn-3d-vectors'
+    ];
+    const labelBtnIds = [
+      'btn-3d-labels-all',
+      'btn-3d-labels-chambers',
+      'btn-3d-labels-vessels',
+      'btn-3d-labels-subArteries',
+      'btn-3d-labels-veinsOnly',
+      'btn-3d-labels-conduction'
+    ];
+
+    const oldZoom = c3d.querySelector('[data-3d-control]');
+    if (oldZoom) oldZoom.remove();
+
+    const fsBtn = document.getElementById('btn-3d-fullscreen');
+
+    const dock = document.createElement('div');
+    dock.id = 'heart3d-floating-dock';
+    dock.innerHTML = `
+      <button type="button" id="v6-btn-3d-eye" class="v6-3d-icon-btn" onclick="window.toggle3DMenuPopover('layers')" title="Show/Hide 3D Heart Layers">
+        <span>👁️</span>
+        <span id="v6-lbl-3d-eye">Layers (6)</span>
+        <span class="text-[10px] opacity-75">▼</span>
+      </button>
+      <button type="button" id="v6-btn-3d-tags" class="v6-3d-icon-btn" onclick="window.toggle3DMenuPopover('labels')" title="Show/Hide 3D Anatomical Names">
+        <span>🏷️</span>
+        <span id="v6-lbl-3d-tags">Names (6)</span>
+        <span class="text-[10px] opacity-75">▼</span>
+      </button>
+      <button type="button" id="v6-btn-zoom-in" class="v6-3d-icon-btn" onclick="zoom3D(-0.8)" title="Zoom In (+)">
+        <span class="text-base font-black text-sky-700 leading-none">+</span>
+        <span id="v6-lbl-zoom-in" class="text-[11px]">Zoom In</span>
+      </button>
+      <button type="button" id="v6-btn-zoom-out" class="v6-3d-icon-btn" onclick="zoom3D(0.8)" title="Zoom Out (-)">
+        <span class="text-base font-black text-sky-700 leading-none">−</span>
+        <span id="v6-lbl-zoom-out" class="text-[11px]">Zoom Out</span>
+      </button>
+      <button type="button" id="v6-btn-zoom-reset" class="v6-3d-icon-btn" onclick="reset3DView()" title="Reset 3D View">
+        <span class="text-sm font-black text-emerald-700 leading-none">↺</span>
+        <span id="v6-lbl-zoom-reset" class="text-[11px]">Reset</span>
+      </button>
+    `;
+    if (fsBtn) {
+      fsBtn.className = 'v6-3d-icon-btn';
+      dock.appendChild(fsBtn);
+    }
+
+    const popLayers = document.createElement('div');
+    popLayers.id = 'v6-popover-3d-layers';
+    popLayers.className = 'v6-3d-popover v6-popover-hidden';
+    const popLayersHeader = document.createElement('div');
+    popLayersHeader.className = 'flex items-center justify-between pb-1.5 mb-2 border-b border-slate-200 text-xs font-black text-slate-800';
+    popLayersHeader.innerHTML = `<span id="v6-pop-layers-title">👁️ 3D Heart Layers (6)</span>`;
+    popLayers.appendChild(popLayersHeader);
+
+    layerBtnIds.forEach(id => {
+      const b = document.getElementById(id);
+      if (b) popLayers.appendChild(b);
+    });
+
+    const popLabels = document.createElement('div');
+    popLabels.id = 'v6-popover-3d-labels';
+    popLabels.className = 'v6-3d-popover v6-popover-hidden';
+    const popLabelsHeader = document.createElement('div');
+    popLabelsHeader.className = 'flex items-center justify-between pb-1.5 mb-2 border-b border-slate-200 text-xs font-black text-slate-800';
+    popLabelsHeader.innerHTML = `<span id="v6-pop-labels-title">🏷️ Anatomical Names (6)</span>`;
+    popLabels.appendChild(popLabelsHeader);
+
+    labelBtnIds.forEach(id => {
+      const b = document.getElementById(id);
+      if (b) popLabels.appendChild(b);
+    });
+
+    [dock, popLayers, popLabels].forEach(el => {
+      el.addEventListener('wheel', e => e.stopPropagation(), { passive: false });
+      el.addEventListener('pointerdown', e => e.stopPropagation());
+    });
+
+    c3d.appendChild(dock);
+    c3d.appendChild(popLayers);
+    c3d.appendChild(popLabels);
+
+    c3d.addEventListener('pointerdown', function (e) {
+      if (!active3DPopover) return;
+      if (e.target.closest('#heart3d-floating-dock') || e.target.closest('.v6-3d-popover')) return;
+      window.toggle3DMenuPopover(active3DPopover);
+    });
+  }
+
+  // ===========================================================================
+  // 4. COLLAPSIBLE BOTTOM DRAWERS (`12lead` OPEN BY DEFAULT; `gates` & `ap`
+  //    HIDDEN BY DEFAULT)
+  // ===========================================================================
+  const v6DrawerState = {
+    '12lead': true,
+    'gates': false,
+    'ap': false
+  };
+
+  function syncV6DrawersUI() {
+    const isAr = (typeof currentLang !== 'undefined' && currentLang === 'ar');
+    const sec12 = document.getElementById('v6-section-12lead');
+    const secGates = document.getElementById('v6-section-gates');
+    const secAP = document.getElementById('v6-section-ap');
+
+    if (sec12) sec12.classList.toggle('v6-section-hidden', !v6DrawerState['12lead']);
+    if (secGates) secGates.classList.toggle('v6-section-hidden', !v6DrawerState['gates']);
+    if (secAP) secAP.classList.toggle('v6-section-hidden', !v6DrawerState['ap']);
+
+    const drawerLabels = {
+      '12lead': isAr ? '3. شاشة الـ 12 اتجاهاً الكامل وخريطة الشرايين (12-Lead ECG)' : '3. Synchronized 12-Lead ECG & Territory Map',
+      'gates': isAr ? '4. حركة بوابات غشاء الخلية والأيونات (Ion Gates)' : '4. Animated Cell Membrane Ion Gates',
+      'ap': isAr ? '5. جهد الفعل الخلوي والساركومير (Action Potential)' : '5. Action Potential & Sarcomere'
+    };
+
+    ['12lead', 'gates', 'ap'].forEach(k => {
+      const btn = document.getElementById('btn-v6-drawer-' + k);
+      const lbl = document.getElementById('lbl-v6-drawer-' + k);
+      const pill = document.getElementById('pill-v6-drawer-' + k);
+      const isOpen = !!v6DrawerState[k];
+      if (btn) btn.classList.toggle('v6-drawer-active', isOpen);
+      if (lbl) lbl.textContent = drawerLabels[k];
+      if (pill) {
+        pill.textContent = isOpen
+          ? (isAr ? 'ظاهر ▼' : 'Shown ▼')
+          : (isAr ? 'مختفي ◀' : 'Hidden ▶');
+      }
+    });
+
+    const heading = document.getElementById('v6-drawers-heading');
+    if (heading) {
+      heading.innerHTML = `<i class="fa-solid fa-sliders text-sky-600"></i> <span>${
+        isAr
+          ? 'الأقسام التفصيلية السفلية (اضغط على أي كبسة لإظهار أو إخفاء القسم):'
+          : 'Detailed Clinical & Cellular Sections (Click any button below to show or hide):'
+      }</span>`;
+    }
+    const showAllTxt = document.getElementById('v6-show-all-drawers-txt');
+    const allOpen = v6DrawerState['12lead'] && v6DrawerState['gates'] && v6DrawerState['ap'];
+    if (showAllTxt) {
+      showAllTxt.textContent = allOpen
+        ? (isAr ? 'الوضع الافتراضي (إبقاء 12-Lead فقط)' : 'Default View (Keep 12-Lead Only)')
+        : (isAr ? 'إظهار جميع الأقسام معاً' : 'Show All Sections');
+    }
+
+    requestAnimationFrame(() => {
+      if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
+      if (typeof drawAll2D === 'function') drawAll2D();
+    });
+  }
+
+  window.toggleV6Drawer = function (which) {
+    v6DrawerState[which] = !v6DrawerState[which];
+    syncV6DrawersUI();
+  };
+
+  window.toggleAllV6Drawers = function () {
+    const allOpen = v6DrawerState['12lead'] && v6DrawerState['gates'] && v6DrawerState['ap'];
+    v6DrawerState['12lead'] = true;
+    v6DrawerState['gates'] = !allOpen;
+    v6DrawerState['ap'] = !allOpen;
+    syncV6DrawersUI();
+  };
+
+  // ===========================================================================
+  // 5. SIDEBAR SCENARIO CARDS RENDERER (EXISTING LIST ITEMS)
+  // ===========================================================================
+  const V6_CAT_BADGE = {
+    normal_elec: { ar: 'طبيعي/شوارد', en: 'Normal & Ions', bg: '#d1fae5', col: '#065f46', bdr: '#6ee7b7' },
+    mi_struct:   { ar: 'جلطات/تضخم', en: 'STEMI & Struct', bg: '#ffe4e6', col: '#9f1239', bdr: '#fda4af' },
+    avblocks:    { ar: 'حصار/حزم',   en: 'AV & BBB',       bg: '#fef3c7', col: '#92400e', bdr: '#fcd34d' },
+    acls:        { ar: 'طوارئ ACLS', en: 'ACLS Rhythm',    bg: '#e0f2fe', col: '#075985', bdr: '#7dd3fc' }
+  };
+
+  const prevRenderScenarioBtnsV5 = window.renderScenarioButtons;
+  window.renderScenarioButtons = function () {
+    if (typeof prevRenderScenarioBtnsV5 === 'function') {
+      prevRenderScenarioBtnsV5();
+    }
+    const container = document.getElementById('scenario-list-container');
+    if (!container || typeof SCENARIOS === 'undefined') return;
+
+    const isAr = (typeof currentLang !== 'undefined' && currentLang === 'ar');
+    const totalKeys = Object.keys(SCENARIOS);
+
+    container.innerHTML = '';
+    container.className = 'flex flex-col gap-2';
+
+    totalKeys.forEach((key, idx) => {
+      const sc = SCENARIOS[key];
+      if (!sc) return;
+      if (currentCategory !== 'all' && sc.cat !== currentCategory) return;
+      const arName = (sc.ar && sc.ar.name) ? sc.ar.name : key;
+      const enName = (sc.en && sc.en.name) ? sc.en.name : key;
+
+      const isSel = (currentScenario === key);
+      const badge = V6_CAT_BADGE[sc.cat] || V6_CAT_BADGE.normal_elec;
+      const hrTxt = sc.hr === 0 ? '0 bpm' : `${sc.hr} bpm`;
+
+      const card = document.createElement('button');
+      card.type = 'button';
+      card.className = 'clinix-v6-scenario-card' + (isSel ? ' active-v6-card' : '');
+      card.innerHTML = `
+        <div class="v6-card-top">
+          <div class="v6-card-badges">
+            <span class="v6-cat-pill" style="background:${badge.bg};color:${badge.col};border:1px solid ${badge.bdr}">
+              ${isAr ? badge.ar : badge.en} #${idx + 1}
+            </span>
+            <span class="v6-hr-pill">${hrTxt}</span>
+          </div>
+          <span class="v6-radio-dot"></span>
+        </div>
+        <div class="v6-card-title">${isAr ? arName : enName}</div>
+      `;
+      card.onclick = () => window.setScenario(key);
+      container.appendChild(card);
+    });
+  };
+
+  // ===========================================================================
+  // 6. TRUE 1:1 SQUARE MILLIMETER GRID IN BOTH SINGLE-BEAT & MULTI-BEAT MODES
+  //    + EXPLANATORY CALIPERS ON EVERY SINGLE BEAT ACROSS ALL 35 SCENARIOS
+  // ===========================================================================
+  function getBeatCalipersFor800msCycle(sc, beatIdx, isAr) {
+    if (sc === 'avb1') {
+      return {
+        pStart: 40, pPeak: 75, qrsStart: 320, rPeak: 344, qrsEnd: 376, tPeak: 565, qtEnd: 635,
+        prLabel: isAr ? 'PR مطولة (0.28s)' : 'PR (0.28s)',
+        qrsLabel: 'QRS (0.08s)',
+        qtLabel: 'QT (0.36s)'
+      };
+    }
+    if (sc === 'avb2_1') {
+      const step = ((beatIdx % 3) + 3) % 3;
+      if (step === 2) {
+        return { pStart: 70, pPeak: 105, blocked: true, blockedLabel: isAr ? '✕ P محجوبة (سقوط QRS)' : '✕ Blocked P (Dropped QRS)' };
+      }
+      const delay = step * 95;
+      const qStart = 220 + delay;
+      const prVal = ((qStart - 70) / 1000).toFixed(2);
+      return {
+        pStart: 70, pPeak: 105, qrsStart: qStart, rPeak: 245 + delay, qrsEnd: 278 + delay, tPeak: 495 + delay, qtEnd: 560 + delay,
+        prLabel: isAr ? `PR (${prVal}s${step === 1 ? ' ↑ استطالة' : ''})` : `PR (${prVal}s${step === 1 ? ' ↑' : ''})`,
+        qrsLabel: 'QRS (0.08s)',
+        qtLabel: 'QT (0.34s)'
+      };
+    }
+    if (sc === 'avb2_2' || sc === 'avb_highgrade') {
+      const conducted = (sc === 'avb2_2') ? (beatIdx % 3 !== 2) : (beatIdx % 3 === 0);
+      if (!conducted) {
+        return { pStart: 80, pPeak: 115, blocked: true, blockedLabel: isAr ? '✕ سقوط QRS مفاجئ' : '✕ Dropped QRS' };
+      }
+      return {
+        pStart: 80, pPeak: 115, qrsStart: 225, rPeak: 245, qrsEnd: 280, tPeak: 510, qtEnd: 570,
+        prLabel: isAr ? 'PR ثابتة (0.15s)' : 'Fixed PR (0.15s)',
+        qrsLabel: 'QRS (0.08s)',
+        qtLabel: 'QT (0.35s)'
+      };
+    }
+    if (sc === 'lbbb' || sc === 'rbbb') {
+      return {
+        pStart: 80, pPeak: 115, qrsStart: 215, rPeak: 275, qrsEnd: 350, tPeak: 515, qtEnd: 580,
+        prLabel: 'PR (0.16s)',
+        qrsLabel: isAr ? `QRS عريض (${sc === 'lbbb' ? '0.14s' : 'rsR\' 0.13s'})` : `Wide QRS (${sc === 'lbbb' ? '0.14s' : 'rsR\' 0.13s'})`,
+        qtLabel: 'QT (0.37s)'
+      };
+    }
+    if (sc === 'hyperk') {
+      return {
+        pStart: 60, pPeak: 95, qrsStart: 215, rPeak: 245, qrsEnd: 305, tPeak: 445, qtEnd: 510,
+        prLabel: isAr ? 'PR مطولة (0.20s)' : 'PR (0.20s)',
+        qrsLabel: isAr ? 'QRS عريض (0.11s)' : 'QRS (0.11s)',
+        qtLabel: isAr ? 'QT قصيرة (0.30s)' : 'Short QT (0.30s)'
+      };
+    }
+    if (sc === 'hypok') {
+      return {
+        pStart: 80, pPeak: 115, qrsStart: 220, rPeak: 245, qrsEnd: 280, tPeak: 500, qtEnd: 700,
+        prLabel: 'PR (0.16s)',
+        qrsLabel: 'QRS (0.08s)',
+        qtLabel: isAr ? 'فترة QU مطولة (0.48s)' : 'Prolonged QU (0.48s)'
+      };
+    }
+    if (sc === 'hypona') {
+      return {
+        pStart: 70, pPeak: 105, qrsStart: 215, rPeak: 250, qrsEnd: 320, tPeak: 515, qtEnd: 580,
+        prLabel: 'PR (0.17s)',
+        qrsLabel: isAr ? 'QRS متسع (0.11s)' : 'QRS (0.11s)',
+        qtLabel: 'QT (0.37s)'
+      };
+    }
+    if (sc === 'hyperna') {
+      return {
+        pStart: 90, pPeak: 120, qrsStart: 225, rPeak: 245, qrsEnd: 272, tPeak: 470, qtEnd: 525,
+        prLabel: 'PR (0.15s)',
+        qrsLabel: isAr ? 'QRS ضيق (0.07s)' : 'Narrow QRS (0.07s)',
+        qtLabel: isAr ? 'QT قصيرة (0.30s)' : 'QT (0.30s)'
+      };
+    }
+    return {
+      pStart: 80, pPeak: 115, qrsStart: 220, rPeak: 244, qrsEnd: 278, tPeak: 495, qtEnd: 565,
+      prLabel: 'PR (0.16s)',
+      qrsLabel: 'QRS (0.08s)',
+      qtLabel: 'QT (0.36s)'
+    };
+  }
+
+  window.drawECGPanel = function () {
+    ecgCtx.direction = 'ltr';
+    ecgCtx.textAlign = 'left';
+    const w = ecgCanvas.width / (window.devicePixelRatio || 1);
+    const h = ecgCanvas.height / (window.devicePixelRatio || 1);
+    ecgCtx.clearRect(0, 0, w, h);
+
+    const leftPad = 52;
+    const rightPad = 14;
+    const availW = Math.max(140, w - leftPad - rightPad);
+
+    // Enforce 100% TRUE 1:1 GEOMETRIC SQUARES (`smallSqX === smallSqY` and `largeSqX === largeSqY`)
+    const smallSqY = stripMode ? Math.max(5.5, h / 26) : Math.max(7.2, h / 21);
+    const smallSqX = smallSqY;
+    const largeSqY = smallSqY * 5;
+    const largeSqX = smallSqX * 5;
+    const baselineY = h * 0.63;
+    const mVHeight = smallSqY * 10;
+
+    // 0. Draw Continuous 1:1 Square Millimeter ECG Paper across the ENTIRE canvas
+    ecgCtx.fillStyle = '#fff9f9';
+    ecgCtx.fillRect(0, 0, w, h);
+
+    ecgCtx.lineWidth = 0.65;
+    ecgCtx.strokeStyle = 'rgba(244, 63, 94, 0.27)';
+    ecgCtx.beginPath();
+    for (let x = leftPad; x <= w; x += smallSqX) { ecgCtx.moveTo(x, 0); ecgCtx.lineTo(x, h); }
+    for (let x = leftPad - smallSqX; x >= 0; x -= smallSqX) { ecgCtx.moveTo(x, 0); ecgCtx.lineTo(x, h); }
+    for (let y = baselineY; y >= 0; y -= smallSqY) { ecgCtx.moveTo(0, y); ecgCtx.lineTo(w, y); }
+    for (let y = baselineY + smallSqY; y <= h; y += smallSqY) { ecgCtx.moveTo(0, y); ecgCtx.lineTo(w, y); }
+    ecgCtx.stroke();
+
+    ecgCtx.lineWidth = 1.35;
+    ecgCtx.strokeStyle = 'rgba(225, 29, 72, 0.56)';
+    ecgCtx.beginPath();
+    for (let x = leftPad; x <= w; x += largeSqX) { ecgCtx.moveTo(x, 0); ecgCtx.lineTo(x, h); }
+    for (let x = leftPad - largeSqX; x >= 0; x -= largeSqX) { ecgCtx.moveTo(x, 0); ecgCtx.lineTo(x, h); }
+    for (let y = baselineY; y >= 0; y -= largeSqY) { ecgCtx.moveTo(0, y); ecgCtx.lineTo(w, y); }
+    for (let y = baselineY + largeSqY; y <= h; y += largeSqY) { ecgCtx.moveTo(0, y); ecgCtx.lineTo(w, y); }
+    ecgCtx.stroke();
+
+    // Use an EXACT integer multiple of 800ms in stripMode (`2400ms` = 3 cycles or `3200ms` = 4 cycles) so `scanTime` NEVER jumps or desynchronizes!
+    const pxPerMs = stripMode ? (smallSqX / 40) : ((smallSqX * 1.40) / 40);
+    const maxCyclesFit = Math.max(3, Math.min(4, Math.floor(availW / (800 * pxPerMs))));
+    const numCycles = stripMode ? maxCyclesFit : 1;
+    window.__clinixNumCycles = stripMode ? numCycles : 3;
+    const totalMsSpan = numCycles * 800;
+    const traceWidthPx = totalMsSpan * pxPerMs;
+    const startX = stripMode ? leftPad : Math.max(leftPad, leftPad + (availW - traceWidthPx) * 0.5);
+    const singleBeatCycleOff = (!stripMode && ['avb2_1', 'avb2_2', 'avb_highgrade', 'avb3'].includes(currentScenario))
+      ? ((continuousCycleCount % 3) * 800)
+      : 0;
+    const scanTime = stripMode ? (((continuousCycleCount % numCycles) * 800) + currentTime) : currentTime;
+
+    if (!stripMode && startX > leftPad + 8) {
+      ecgCtx.fillStyle = 'rgba(15, 23, 42, 0.035)';
+      ecgCtx.fillRect(leftPad, 0, startX - leftPad, h);
+      ecgCtx.fillRect(startX + traceWidthPx, 0, w - (startX + traceWidthPx), h);
+      ecgCtx.strokeStyle = 'rgba(2, 132, 199, 0.45)';
+      ecgCtx.lineWidth = 1.5;
+      ecgCtx.strokeRect(startX, 2, traceWidthPx, h - 20);
+    }
+
+    // Active Phase Highlight Column
+    const phaseBounds = [
+      [70, 155, 'rgba(245, 158, 11, 0.09)'],
+      [155, 215, 'rgba(249, 115, 22, 0.09)'],
+      [215, 285, 'rgba(14, 165, 233, 0.09)'],
+      [285, 445, 'rgba(16, 185, 129, 0.09)'],
+      [445, 575, 'rgba(168, 85, 247, 0.09)'],
+      [575, 800, 'rgba(100, 116, 139, 0.06)']
+    ];
+    const activePIdx = getPhaseIndex(currentTime);
+    const bnd = phaseBounds[activePIdx];
+    if (bnd) {
+      ecgCtx.fillStyle = bnd[2];
+      const phaseCycleOffset = stripMode ? Math.floor(scanTime / 800) * 800 : 0;
+      const hx = startX + (phaseCycleOffset + bnd[0]) * pxPerMs;
+      const hw = (bnd[1] - bnd[0]) * pxPerMs;
+      if (hx + hw <= w - rightPad + 4) {
+        ecgCtx.fillRect(hx, 4, hw, h - 22);
+      }
+    }
+
+    // Time labels along bottom
+    ecgCtx.fillStyle = '#9f1239';
+    ecgCtx.font = 'bold 9.5px monospace';
+    const stepSecMs = stripMode ? 400 : 200;
+    for (let ms = 0; ms <= totalMsSpan; ms += stepSecMs) {
+      const lx = startX + ms * pxPerMs;
+      if (lx <= w - 18) {
+        ecgCtx.fillText((ms / 1000).toFixed(stripMode ? 1 : 2) + 's', lx - 10, h - 4);
+      }
+    }
+
+    // Standard 1mV Calibration Pulse & Voltage Axis
+    ecgCtx.strokeStyle = '#111827';
+    ecgCtx.lineWidth = 2.0;
+    ecgCtx.beginPath();
+    ecgCtx.moveTo(6, baselineY); ecgCtx.lineTo(12, baselineY);
+    ecgCtx.lineTo(12, baselineY - mVHeight); ecgCtx.lineTo(24, baselineY - mVHeight);
+    ecgCtx.lineTo(24, baselineY); ecgCtx.lineTo(30, baselineY);
+    ecgCtx.stroke();
+    ecgCtx.fillStyle = '#111827';
+    ecgCtx.font = 'bold 9px monospace';
+    ecgCtx.fillText('1mV', 6, baselineY - mVHeight - 4);
+
+    ecgCtx.save();
+    const voltageAxisX = leftPad - 4;
+    ecgCtx.strokeStyle = '#be123c';
+    ecgCtx.lineWidth = 1.1;
+    ecgCtx.beginPath();
+    ecgCtx.moveTo(voltageAxisX, baselineY - mVHeight * 1.1);
+    ecgCtx.lineTo(voltageAxisX, baselineY + mVHeight * 1.1);
+    ecgCtx.stroke();
+    ecgCtx.fillStyle = '#881337';
+    ecgCtx.font = 'bold 9px monospace';
+    ecgCtx.textAlign = 'right';
+    ecgCtx.textBaseline = 'middle';
+    [1, 0.5, 0, -0.5, -1].forEach(mv => {
+      const tickY = baselineY - mv * mVHeight;
+      ecgCtx.beginPath();
+      ecgCtx.moveTo(voltageAxisX - 3, tickY);
+      ecgCtx.lineTo(voltageAxisX, tickY);
+      ecgCtx.stroke();
+      ecgCtx.fillText((mv > 0 ? '+' : '') + mv.toFixed(1), voltageAxisX - 5, tickY);
+    });
+    ecgCtx.restore();
+
+    // Optional Standard Reference Trace Overlay
+    const stepMs = stripMode ? 2.0 : 1.25;
+    if (window.__v7ShowStandardRefECG) {
+      ecgCtx.save();
+      ecgCtx.setLineDash([5, 4]);
+      ecgCtx.strokeStyle = 'rgba(5, 150, 105, 0.78)';
+      ecgCtx.lineWidth = 2.0;
+      ecgCtx.beginPath();
+      for (let t = 0; t <= totalMsSpan; t += stepMs) {
+        const x = startX + t * pxPerMs;
+        const v = window.computeLeadVoltage(t, 'normal', selectedLeadName);
+        const y = baselineY - v * mVHeight;
+        if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+      }
+      ecgCtx.stroke();
+      ecgCtx.restore();
+    }
+
+    // Full Ghost Trace + Active High-Contrast Orange/Amber Trace
+    ecgCtx.save();
+    ecgCtx.beginPath();
+    ecgCtx.strokeStyle = 'rgba(234, 88, 12, 0.25)';
+    ecgCtx.lineWidth = 1.85;
+    for (let t = 0; t <= totalMsSpan; t += stepMs) {
+      const x = startX + t * pxPerMs;
+      const v = window.computeLeadVoltage(t + singleBeatCycleOff, currentScenario, selectedLeadName);
+      const y = baselineY - v * mVHeight;
+      if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+    }
+    ecgCtx.stroke();
+
+    ecgCtx.beginPath();
+    ecgCtx.strokeStyle = '#d97706';
+    ecgCtx.lineWidth = 2.85;
+    ecgCtx.lineJoin = 'round';
+    ecgCtx.lineCap = 'round';
+    for (let t = 0; t <= Math.min(totalMsSpan, scanTime); t += stepMs) {
+      const x = startX + t * pxPerMs;
+      const v = window.computeLeadVoltage(t + singleBeatCycleOff, currentScenario, selectedLeadName);
+      const y = baselineY - v * mVHeight;
+      if (t === 0) ecgCtx.moveTo(x, y); else ecgCtx.lineTo(x, y);
+    }
+    ecgCtx.stroke();
+    ecgCtx.restore();
+
+    // EXPLANATORY CALIPERS & WAVE TAGS ON EVERY SINGLE BEAT
+    const caliperToggle = document.getElementById('toggle-calipers');
+    if (caliperToggle && caliperToggle.checked && currentScenario !== 'asystole' && currentScenario !== 'vfib') {
+      const isAr = (currentLang === 'ar');
+      const drawTag = (ms, labelTxt, bgCol, dy) => {
+        if (ms < 0 || ms > totalMsSpan) return;
+        const tx = startX + ms * pxPerMs;
+        if (tx < leftPad + 6 || tx > w - rightPad - 6) return;
+        const tv = window.computeLeadVoltage(ms, currentScenario, selectedLeadName);
+        const ty = Math.max(15, Math.min(h - 24, baselineY - tv * mVHeight + dy));
+        ecgCtx.save();
+        ecgCtx.font = '900 9.5px Cairo, Inter, monospace';
+        const tw = ecgCtx.measureText(labelTxt).width + 8;
+        ecgCtx.fillStyle = bgCol;
+        ecgCtx.beginPath();
+        ecgCtx.roundRect(tx - tw / 2, ty - 8, tw, 16, 4);
+        ecgCtx.fill();
+        ecgCtx.fillStyle = '#ffffff';
+        ecgCtx.textAlign = 'center';
+        ecgCtx.textBaseline = 'middle';
+        ecgCtx.fillText(labelTxt, tx, ty);
+        ecgCtx.restore();
+      };
+
+      const drawSafeBracket = (ms1, ms2, yPos, labelTxt, col) => {
+        if (ms1 < 0 || ms2 > totalMsSpan + 10) return;
+        const x1 = startX + ms1 * pxPerMs;
+        const x2 = startX + Math.min(totalMsSpan, ms2) * pxPerMs;
+        if (x2 - x1 < 8 || x1 < leftPad || x2 > w - rightPad + 4) return;
+        drawBracket(ecgCtx, x1, x2, yPos, labelTxt, col);
+      };
+
+      if (currentScenario === 'svt') {
+        const period = 266.67;
+        for (let b = 0; b * period + 75 <= totalMsSpan; b++) {
+          const base = b * period;
+          drawSafeBracket(base + 58, base + 92, 34, 'QRS (0.07s)', '#0369a1');
+          drawTag(base + 75, 'R (SVT)', '#0284c7', -16);
+          drawTag(base + 96, "P'", '#b45309', 16);
+          drawTag(base + 178, 'T', '#7c3aed', -14);
+          if ((b + 1) * period + 75 <= totalMsSpan) {
+            drawSafeBracket(base + 75, (b + 1) * period + 75, 18, 'R-R (0.27s)', '#0284c7');
+          }
+        }
+      } else if (currentScenario === 'aflutter') {
+        for (let f = 90; f <= totalMsSpan - 30; f += 200) {
+          if (Math.abs((f % 600) - 200) > 45) {
+            drawTag(f, 'F (300/m)', '#b45309', 18);
+          }
+        }
+        for (let q = 200; q <= totalMsSpan; q += 600) {
+          drawSafeBracket(q - 15, q + 20, 34, 'QRS (0.08s)', '#0369a1');
+          drawTag(q, 'QRS (3:1)', '#0284c7', -18);
+          if (q + 600 <= totalMsSpan) {
+            drawSafeBracket(q, q + 600, 18, isAr ? 'توصيل 3:1 (0.60s)' : '3:1 R-R (0.60s)', '#0284c7');
+          }
+        }
+      } else if (currentScenario === 'sinus_tachy') {
+        const period = 400;
+        for (let b = 0; b * period + 165 <= totalMsSpan; b++) {
+          const base = b * period;
+          drawSafeBracket(base + 45, base + 140, 18, 'PR (0.13s)', '#c2410c');
+          drawSafeBracket(base + 140, base + 185, 34, 'QRS (0.08s)', '#0369a1');
+          if (base + 330 <= totalMsSpan) {
+            drawSafeBracket(base + 140, base + 330, h - 22, 'QT (0.31s)', '#6d28d9');
+          }
+          drawTag(base + 65, 'P', '#b45309', -14);
+          drawTag(base + 158, 'R', '#0284c7', -16);
+          if (base + 292 <= totalMsSpan) drawTag(base + 292, 'T', '#7c3aed', -14);
+        }
+      } else if (currentScenario === 'sinus_brady' || currentScenario === 'junctional' || currentScenario === 'ivr') {
+        const period = currentScenario === 'sinus_brady' ? 1400 : (currentScenario === 'junctional' ? 1250 : 1600);
+        for (let b = 0; b * period + 245 <= totalMsSpan; b++) {
+          const base = b * period;
+          if (currentScenario === 'sinus_brady') {
+            drawSafeBracket(base + 80, base + 220, 18, 'PR (0.16s)', '#c2410c');
+            drawSafeBracket(base + 220, base + 278, 34, 'QRS (0.08s)', '#0369a1');
+            drawSafeBracket(base + 220, Math.min(totalMsSpan, base + 560), h - 22, 'QT (0.42s)', '#6d28d9');
+            drawTag(base + 115, 'P', '#b45309', -16);
+            drawTag(base + 244, 'R', '#0284c7', -16);
+            if (base + 495 <= totalMsSpan) drawTag(base + 495, 'T', '#7c3aed', -16);
+          } else if (currentScenario === 'junctional') {
+            drawSafeBracket(base + 180, base + 224, 18, isAr ? 'PR قصيرة' : 'Short PR', '#c2410c');
+            drawSafeBracket(base + 224, base + 275, 34, 'QRS (0.08s)', '#0369a1');
+            drawSafeBracket(base + 224, Math.min(totalMsSpan, base + 550), h - 22, 'QT (0.39s)', '#6d28d9');
+            drawTag(base + 195, isAr ? 'P رجعية' : 'Retro P', '#b45309', 18);
+            drawTag(base + 244, 'R', '#0284c7', -16);
+            if (base + 495 <= totalMsSpan) drawTag(base + 495, 'T', '#7c3aed', -16);
+          } else {
+            drawSafeBracket(base + 215, base + 365, 28, isAr ? 'QRS عريض (0.16s)' : 'Wide QRS (0.16s)', '#be123c');
+            drawSafeBracket(base + 215, Math.min(totalMsSpan, base + 610), h - 22, 'QT (0.44s)', '#6d28d9');
+            drawTag(base + 265, 'IVR (No P)', '#be123c', -18);
+            if (base + 545 <= totalMsSpan) drawTag(base + 545, isAr ? 'T معاكسة' : 'Discordant T', '#7c3aed', 18);
+          }
+        }
+      } else if (currentScenario === 'tamponade') {
+        const period = 533.33;
+        for (let b = 0; b * period + 174 <= totalMsSpan; b++) {
+          const base = b * period;
+          const isTall = (b % 2 === 0);
+          drawSafeBracket(base + 60, base + 158, 18, 'PR (0.15s)', '#c2410c');
+          drawSafeBracket(base + 158, base + 196, 34, isTall ? 'QRS (Tall)' : 'QRS (Small)', '#0369a1');
+          drawTag(base + 75, 'P', '#b45309', -14);
+          drawTag(base + 174, isTall ? 'R (Alt ↑)' : 'R (Alt ↓)', isTall ? '#0284c7' : '#be123c', -16);
+          if (base + 335 <= totalMsSpan) drawTag(base + 335, 'T', '#7c3aed', -14);
+        }
+      } else if (currentScenario === 'vt') {
+        const period = 320;
+        for (let b = 0; b * period + 100 <= totalMsSpan; b++) {
+          const base = b * period;
+          drawSafeBracket(base + 55, base + 195, 22, isAr ? 'QRS عريض (>0.14s)' : 'Wide QRS (>0.14s)', '#be123c');
+          drawTag(base + 100, 'VT', '#be123c', -16);
+          if (base + 235 <= totalMsSpan) drawTag(base + 235, 'T', '#7c3aed', 16);
+        }
+      } else if (currentScenario === 'afib') {
+        const period = 1600;
+        const offsets = [155, 590, 885, 1235];
+        const allBeats = [];
+        for (let c = 0; c * period <= totalMsSpan; c++) {
+          offsets.forEach(o => {
+            const bt = c * period + o;
+            if (bt <= totalMsSpan) allBeats.push(bt);
+          });
+        }
+        allBeats.forEach((bt, idx) => {
+          drawSafeBracket(bt - 14, bt + 24, 34, 'QRS', '#0369a1');
+          drawTag(bt, 'R (AFib)', '#0284c7', -16);
+          if (bt + 145 <= totalMsSpan) drawTag(bt + 145, 'T', '#7c3aed', -14);
+          if (idx > 0) {
+            const prev = allBeats[idx - 1];
+            drawSafeBracket(prev, bt, 18, `R-R (${((bt - prev) / 1000).toFixed(2)}s)`, '#0369a1');
+          }
+        });
+      } else if (currentScenario === 'wpw_afib') {
+        const period = 1600;
+        const beats = [
+          { t: 130, w: 26 },
+          { t: 390, w: 19 },
+          { t: 690, w: 32 },
+          { t: 950, w: 24 },
+          { t: 1290, w: 30 }
+        ];
+        const allB = [];
+        for (let c = 0; c * period <= totalMsSpan; c++) {
+          beats.forEach(b => {
+            const bt = c * period + b.t;
+            if (bt <= totalMsSpan) allB.push({ bt, w: b.w });
+          });
+        }
+        allB.forEach((item, idx) => {
+          drawSafeBracket(item.bt - item.w, item.bt + item.w * 1.2, 34, 'Wide QRS+Δ', '#be123c');
+          drawTag(item.bt - 18, 'Delta (Δ)', '#be123c', -16);
+          drawTag(item.bt, 'R', '#0284c7', -16);
+          if (idx > 0) {
+            const prev = allB[idx - 1].bt;
+            drawSafeBracket(prev, item.bt, 18, `R-R (${((item.bt - prev) / 1000).toFixed(2)}s)`, '#0369a1');
+          }
+        });
+      } else if (currentScenario === 'mat') {
+        const period = 1600;
+        const beats = [
+          { qrsT: 210, pr: 115 },
+          { qrsT: 560, pr: 155 },
+          { qrsT: 980, pr: 95 },
+          { qrsT: 1310, pr: 140 }
+        ];
+        let bCount = 0;
+        for (let c = 0; c * period <= totalMsSpan; c++) {
+          beats.forEach(b => {
+            const qt = c * period + b.qrsT;
+            const pt = qt - b.pr;
+            if (qt <= totalMsSpan) {
+              bCount++;
+              drawSafeBracket(pt - 10, qt - 10, 18, `PR${(bCount % 3) + 1}`, '#c2410c');
+              drawSafeBracket(qt - 12, qt + 24, 34, 'QRS', '#0369a1');
+              drawTag(pt, `P'${(bCount % 3) + 1}`, '#b45309', -15);
+              drawTag(qt, 'R', '#0284c7', -16);
+              if (qt + 135 <= totalMsSpan) drawTag(qt + 135, 'T', '#7c3aed', -14);
+            }
+          });
+        }
+      } else if (currentScenario === 'pvc_ront') {
+        for (let base = 0; base < totalMsSpan; base += 1600) {
+          if (base + 228 <= totalMsSpan) {
+            drawSafeBracket(base + 85, base + 208, 18, 'PR (0.16s)', '#c2410c');
+            drawSafeBracket(base + 208, base + 252, 34, 'QRS', '#0369a1');
+            drawTag(base + 105, 'P', '#b45309', -15);
+            drawTag(base + 228, 'Sinus R', '#0284c7', -16);
+          }
+          if (base + 472 <= totalMsSpan) {
+            drawSafeBracket(base + 445, base + 560, 24, 'Wide PVC (>0.14s)', '#be123c');
+            drawTag(base + 472, isAr ? 'ظاهرة R-on-T!' : 'R-on-T PVC!', '#be123c', -18);
+          }
+          if (base + 1082 <= totalMsSpan) {
+            drawSafeBracket(base + 940, base + 1062, 18, 'PR (0.16s)', '#c2410c');
+            drawSafeBracket(base + 1062, base + 1106, 34, 'QRS', '#0369a1');
+            drawTag(base + 960, 'P', '#b45309', -15);
+            drawTag(base + 1082, 'Sinus R', '#0284c7', -16);
+            drawTag(base + 1295, 'T', '#7c3aed', -15);
+          }
+          if (base + 1365 <= totalMsSpan) {
+            drawSafeBracket(base + 1335, base + 1450, 24, 'Wide PVC', '#be123c');
+            drawTag(base + 1365, 'PVC', '#be123c', 18);
+          }
+        }
+      } else if (currentScenario === 'tdp') {
+        for (let b = 125; b <= totalMsSpan; b += 250) {
+          drawTag(b, 'TdP', '#be123c', (Math.floor(b / 250) % 2 === 0) ? -16 : 16);
+          if (b + 250 <= totalMsSpan) {
+            drawSafeBracket(b - 60, b + 60, 22, 'Polymorphic QRS', '#be123c');
+          }
+        }
+      } else if (currentScenario === 'sinewave') {
+        for (let c = 0; c < numCycles; c++) {
+          const cOff = c * 800;
+          drawSafeBracket(cOff + 40, cOff + 760, 22, isAr ? 'موجة الجيب (دمج QRS+T)' : 'Sine-Wave (Merged QRS+T)', '#be123c');
+          drawTag(cOff + 200, isAr ? 'قمة موجة الجيب' : 'Sine Peak', '#be123c', -16);
+          drawTag(cOff + 600, isAr ? 'قاع موجة الجيب' : 'Sine Trough', '#7c3aed', 16);
+        }
+      } else {
+        for (let c = 0; c < numCycles; c++) {
+          const cOff = c * 800;
+          const cal = getBeatCalipersFor800msCycle(currentScenario, c, isAr);
+          drawTag(cOff + cal.pPeak, 'P', '#b45309', -16);
+          if (cal.blocked) {
+            drawTag(cOff + 250, cal.blockedLabel, '#e11d48', -10);
+            continue;
+          }
+          if (currentScenario === 'avb3' && c % 2 === 1) {
+            drawTag(cOff + 260, isAr ? 'انفصال AV (بدون QRS)' : 'AV Dissociation', '#e11d48', -10);
+            continue;
+          }
+          drawSafeBracket(cOff + cal.pStart, cOff + cal.qrsStart, 18, cal.prLabel, '#c2410c');
+          drawSafeBracket(cOff + cal.qrsStart, cOff + cal.qrsEnd, 34, cal.qrsLabel, '#0369a1');
+          drawSafeBracket(cOff + cal.qrsStart, cOff + cal.qtEnd, h - 22, cal.qtLabel, '#6d28d9');
+          drawTag(cOff + cal.rPeak, 'R', '#0284c7', -16);
+          drawTag(cOff + cal.tPeak, currentScenario === 'hyperk' ? (isAr ? 'T مؤنفة' : 'Peaked T') : 'T', currentScenario === 'hyperk' ? '#be123c' : '#7c3aed', -16);
+          if (currentScenario === 'hypok' && cOff + 640 <= totalMsSpan) {
+            drawTag(cOff + 640, isAr ? 'موجة U' : 'U Wave', '#be123c', -18);
+          }
+          if (['stemi_ant', 'stemi_ant_pure', 'stemi_inf', 'stemi_inf_lcx', 'stemi_lat'].includes(currentScenario) && window.isSelectedLeadIschemic(currentScenario, selectedLeadName)) {
+            drawTag(cOff + 365, 'STE ↑', '#e11d48', -16);
+          }
+        }
+      }
+    }
+
+    // Playhead Scanning Cursor
+    const curX = startX + Math.min(totalMsSpan, scanTime) * pxPerMs;
+    const curV = window.computeLeadVoltage(scanTime + singleBeatCycleOff, currentScenario, selectedLeadName);
+    const curY = baselineY - curV * mVHeight;
+    ecgCtx.strokeStyle = 'rgba(225, 29, 72, 0.70)';
+    ecgCtx.lineWidth = 1.5;
+    ecgCtx.setLineDash([4, 4]);
+    ecgCtx.beginPath(); ecgCtx.moveTo(curX, 0); ecgCtx.lineTo(curX, h - 18); ecgCtx.stroke();
+    ecgCtx.setLineDash([]);
+    ecgCtx.fillStyle = '#e11d48';
+    ecgCtx.beginPath(); ecgCtx.arc(curX, curY, 5, 0, Math.PI * 2); ecgCtx.fill();
+    ecgCtx.strokeStyle = '#ffffff'; ecgCtx.lineWidth = 2; ecgCtx.stroke();
+
+    if (typeof window.updateLeadVectorInspectorBanner === 'function') {
+      window.updateLeadVectorInspectorBanner();
+    }
+    drawStickyMiniMonitorV7();
+  };
+
+  function drawStickyMiniMonitorV7() {
+    const miniWrap = document.getElementById('sticky-mini-monitor-wrapper');
+    const miniEcgC = document.getElementById('sticky-mini-ecg-canvas');
+    if (!miniWrap || !miniEcgC) return;
+    if (miniWrap.classList.contains('v6-sticky-hidden-at-top') && !document.body.classList.contains('clinix-heart-fullscreen-mode')) {
+      return;
+    }
+
+    const pill = document.getElementById('sticky-mini-lead-pill');
+    if (pill && SCENARIOS[currentScenario]) {
+      pill.textContent = `${selectedLeadName} • ${SCENARIOS[currentScenario].hr} bpm`;
+    }
+
+    const dpr = window.devicePixelRatio || 1;
+    const r = miniEcgC.parentElement ? miniEcgC.parentElement.getBoundingClientRect() : { width: 0, height: 0 };
+    if (r.width > 10 && r.height > 10) {
+      if (Math.abs(miniEcgC.width - r.width * dpr) > 3 || Math.abs(miniEcgC.height - r.height * dpr) > 3) {
+        miniEcgC.width = Math.round(r.width * dpr);
+        miniEcgC.height = Math.round(r.height * dpr);
+      }
+      const ctx = miniEcgC.getContext('2d');
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      const w = r.width, h = r.height;
+
+      const smallSqY = Math.max(4.5, h / 12);
+      const smallSqX = smallSqY;
+      const largeSq = smallSqY * 5;
+      const baseY = h * 0.64;
+      const scaleMV = smallSqY * 4.5;
+
+      const pxPerMs = smallSqX / 40;
+      const numCyclesFit = Math.max(2, Math.floor((w / pxPerMs) / 800));
+      const spanMs = numCyclesFit * 800;
+      const scanMs = ((continuousCycleCount % numCyclesFit) * 800 + currentTime) % spanMs;
+
+      ctx.fillStyle = '#fff9f9';
+      ctx.fillRect(0, 0, w, h);
+
+      ctx.lineWidth = 0.55;
+      ctx.strokeStyle = 'rgba(244, 63, 94, 0.24)';
+      ctx.beginPath();
+      for (let x = 0; x <= w; x += smallSqX) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+      for (let y = 0; y <= h; y += smallSqY) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+      ctx.stroke();
+
+      ctx.lineWidth = 1.15;
+      ctx.strokeStyle = 'rgba(225, 29, 72, 0.50)';
+      ctx.beginPath();
+      for (let x = 0; x <= w; x += largeSq) { ctx.moveTo(x, 0); ctx.lineTo(x, h); }
+      for (let y = 0; y <= h; y += largeSq) { ctx.moveTo(0, y); ctx.lineTo(w, y); }
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(234, 88, 12, 0.25)';
+      ctx.lineWidth = 1.4;
+      for (let ms = 0; ms <= spanMs; ms += 3) {
+        const x = ms * pxPerMs;
+        const v = window.computeLeadVoltage(ms, currentScenario, selectedLeadName);
+        const y = Math.max(2, Math.min(h - 2, baseY - v * scaleMV));
+        if (ms === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.strokeStyle = '#d97706';
+      ctx.lineWidth = 2.15;
+      for (let ms = 0; ms <= scanMs; ms += 3) {
+        const x = ms * pxPerMs;
+        const v = window.computeLeadVoltage(ms, currentScenario, selectedLeadName);
+        const y = Math.max(2, Math.min(h - 2, baseY - v * scaleMV));
+        if (ms === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      }
+      ctx.stroke();
+
+      const cx = scanMs * pxPerMs;
+      const cv = window.computeLeadVoltage(scanMs, currentScenario, selectedLeadName);
+      const cy = Math.max(3, Math.min(h - 3, baseY - cv * scaleMV));
+      ctx.strokeStyle = '#e11d48';
+      ctx.lineWidth = 1.4;
+      ctx.beginPath(); ctx.moveTo(cx, 0); ctx.lineTo(cx, h); ctx.stroke();
+      ctx.fillStyle = '#e11d48';
+      ctx.beginPath(); ctx.arc(cx, cy, 3.8, 0, Math.PI * 2); ctx.fill();
+    }
+  }
+
+  // ===========================================================================
+  // 7. 12-LEAD ECG PANEL: 1:1 SQUARE PAPER + IN-CELL 2-LINE CLINICAL
+  //    INTERPRETATION (`getLeadChangeText`) + KEPT SUMMARY/VECTOR INSPECTOR
+  // ===========================================================================
+  function wrapCanvasTextLines(ctx, text, maxWidth, maxLines) {
+    if (!text) return [];
+    const words = String(text).split(/\s+/);
+    const lines = [];
+    let currentLine = '';
+
+    for (let i = 0; i < words.length; i++) {
+      const word = words[i];
+      const testLine = currentLine ? (currentLine + ' ' + word) : word;
+      if (ctx.measureText(testLine).width > maxWidth && currentLine) {
+        lines.push(currentLine);
+        currentLine = word;
+        if (lines.length === maxLines - 1) {
+          const rest = words.slice(i).join(' ');
+          let finalLine = rest;
+          while (ctx.measureText(finalLine).width > maxWidth && finalLine.length > 4) {
+            finalLine = finalLine.slice(0, -2);
+          }
+          if (finalLine.length < rest.length) finalLine += '…';
+          lines.push(finalLine);
+          return lines;
+        }
+      } else {
+        currentLine = testLine;
+      }
+    }
+    if (currentLine) lines.push(currentLine);
+    return lines.slice(0, maxLines);
+  }
+
+  window.draw12LeadPanel = function () {
+    twelveCtx.direction = 'ltr';
+    twelveCtx.textAlign = 'left';
+    const w = twelveCanvas.width / (window.devicePixelRatio || 1);
+    const h = twelveCanvas.height / (window.devicePixelRatio || 1);
+    const isAr = (currentLang === 'ar');
+    const langKey = isAr ? 'ar' : 'en';
+
+    const cols = w < 520 ? 2 : (w < 850 ? 3 : 4);
+    const rows = Math.ceil(LEADS_12.length / cols);
+    const cellW = w / cols;
+    const cellH = h / rows;
+
+    const sq = Math.max(4.5, Math.min(6.5, cellH / 26));
+    const lSq = sq * 5;
+    twelveCtx.fillStyle = '#fff9f9';
+    twelveCtx.fillRect(0, 0, w, h);
+
+    twelveCtx.lineWidth = 0.55;
+    twelveCtx.strokeStyle = 'rgba(244, 63, 94, 0.24)';
+    twelveCtx.beginPath();
+    for (let x = 0; x <= w; x += sq) { twelveCtx.moveTo(x, 0); twelveCtx.lineTo(x, h); }
+    for (let y = 0; y <= h; y += sq) { twelveCtx.moveTo(0, y); twelveCtx.lineTo(w, y); }
+    twelveCtx.stroke();
+
+    twelveCtx.lineWidth = 1.15;
+    twelveCtx.strokeStyle = 'rgba(225, 29, 72, 0.48)';
+    twelveCtx.beginPath();
+    for (let x = 0; x <= w; x += lSq) { twelveCtx.moveTo(x, 0); twelveCtx.lineTo(x, h); }
+    for (let y = 0; y <= h; y += lSq) { twelveCtx.moveTo(0, y); twelveCtx.lineTo(w, y); }
+    twelveCtx.stroke();
+
+    const leadStripSpan = 2400;
+    const leadCursorTime = ((continuousCycleCount % 3) * 800) + currentTime;
+
+    LEADS_12.forEach((lead, idx) => {
+      const c = idx % cols;
+      const r = Math.floor(idx / cols);
+      const x0 = c * cellW;
+      const y0 = r * cellH;
+      const footerH = 34;
+      const waveAreaH = cellH - footerH;
+      const baseY = y0 + waveAreaH * 0.62;
+      const scaleMV = waveAreaH * (currentScenario === 'lvh' ? 0.17 : 0.23);
+
+      const leadStatus = (currentScenario === 'normal') ? 'none' : getLeadImpactStatus(currentScenario, lead.id);
+      const isSel = (selectedLeadName === lead.id);
+
+      if (leadStatus === 'primary') {
+        twelveCtx.fillStyle = 'rgba(225, 29, 72, 0.09)';
+        twelveCtx.fillRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+        twelveCtx.strokeStyle = '#e11d48';
+        twelveCtx.lineWidth = isSel ? 3.5 : 2.6;
+        twelveCtx.strokeRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+      } else if (leadStatus === 'secondary') {
+        twelveCtx.fillStyle = 'rgba(234, 179, 8, 0.12)';
+        twelveCtx.fillRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+        twelveCtx.strokeStyle = '#eab308';
+        twelveCtx.lineWidth = isSel ? 3.5 : 2.6;
+        twelveCtx.strokeRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+      } else {
+        if (isSel) {
+          twelveCtx.fillStyle = 'rgba(2, 132, 199, 0.08)';
+          twelveCtx.fillRect(x0 + 2, y0 + 2, cellW - 4, cellH - 4);
+        }
+        twelveCtx.strokeStyle = isSel ? '#0284c7' : 'rgba(225, 29, 72, 0.30)';
+        twelveCtx.lineWidth = isSel ? 2.6 : 1.0;
+        twelveCtx.strokeRect(x0 + 1.5, y0 + 1.5, cellW - 3, cellH - 3);
+      }
+
+      twelveCtx.fillStyle = leadStatus === 'primary' ? '#be123c' : (leadStatus === 'secondary' ? '#a16207' : (isSel ? '#0369a1' : '#111827'));
+      twelveCtx.font = '900 12px Inter, monospace';
+      twelveCtx.fillText(lead.id, x0 + 7, y0 + 15);
+
+      const badgeTxt = leadStatus === 'primary'
+        ? (isAr ? '● متأثر رئيسي' : '● Primary Affected')
+        : (leadStatus === 'secondary' ? (isAr ? '◐ مرآتي / محتمل' : '◐ Reciprocal / Sec') : (isSel ? (isAr ? '★ معروض' : '★ Selected') : ''));
+
+      if (badgeTxt) {
+        twelveCtx.save();
+        twelveCtx.font = '800 9px Cairo, Inter, sans-serif';
+        const bw = twelveCtx.measureText(badgeTxt).width + 10;
+        twelveCtx.fillStyle = leadStatus === 'primary' ? '#e11d48' : (leadStatus === 'secondary' ? '#eab308' : '#0284c7');
+        twelveCtx.beginPath();
+        twelveCtx.roundRect(x0 + cellW - bw - 6, y0 + 4, bw, 14, 4);
+        twelveCtx.fill();
+        twelveCtx.fillStyle = leadStatus === 'secondary' ? '#0f172a' : '#ffffff';
+        twelveCtx.textAlign = 'center';
+        twelveCtx.textBaseline = 'middle';
+        twelveCtx.fillText(badgeTxt, x0 + cellW - 6 - bw / 2, y0 + 11);
+        twelveCtx.restore();
+      }
+
+      twelveCtx.beginPath();
+      twelveCtx.strokeStyle = leadStatus === 'primary' ? '#be123c' : (leadStatus === 'secondary' ? '#b45309' : '#0f172a');
+      twelveCtx.lineWidth = (leadStatus !== 'none' || isSel) ? 2.15 : 1.75;
+      twelveCtx.lineJoin = 'round';
+
+      const padX = 6;
+      const plotCW = cellW - padX * 2;
+      for (let ms = 0; ms <= leadStripSpan; ms += 6) {
+        const px = x0 + padX + (ms / leadStripSpan) * plotCW;
+        const v = window.computeLeadVoltage(ms, currentScenario, lead.id);
+        const py = Math.max(y0 + 19, Math.min(y0 + waveAreaH - 3, baseY - v * scaleMV));
+        if (ms === 0) twelveCtx.moveTo(px, py); else twelveCtx.lineTo(px, py);
+      }
+      twelveCtx.stroke();
+
+      const curPx = x0 + padX + (leadCursorTime / leadStripSpan) * plotCW;
+      const curV = window.computeLeadVoltage(leadCursorTime, currentScenario, lead.id);
+      const curPy = Math.max(y0 + 19, Math.min(y0 + waveAreaH - 3, baseY - curV * scaleMV));
+      twelveCtx.fillStyle = leadStatus === 'secondary' ? '#eab308' : '#e11d48';
+      twelveCtx.beginPath();
+      twelveCtx.arc(curPx, curPy, 3.2, 0, Math.PI * 2);
+      twelveCtx.fill();
+
+      const rawInterp = (typeof getLeadChangeText === 'function' ? getLeadChangeText(currentScenario, lead.id, langKey) : '') || '';
+      const stripY = y0 + cellH - footerH - 1;
+      twelveCtx.save();
+      twelveCtx.fillStyle = leadStatus === 'primary'
+        ? 'rgba(255, 241, 242, 0.96)'
+        : (leadStatus === 'secondary' ? 'rgba(254, 252, 232, 0.96)' : 'rgba(248, 250, 252, 0.95)');
+      twelveCtx.fillRect(x0 + 3, stripY, cellW - 6, footerH - 2);
+
+      twelveCtx.fillStyle = leadStatus === 'primary' ? '#e11d48' : (leadStatus === 'secondary' ? '#eab308' : '#64748b');
+      if (isAr) {
+        twelveCtx.fillRect(x0 + cellW - 6, stripY, 3.5, footerH - 2);
+      } else {
+        twelveCtx.fillRect(x0 + 3, stripY, 3.5, footerH - 2);
+      }
+
+      twelveCtx.font = '700 9.5px Cairo, Inter, sans-serif';
+      twelveCtx.fillStyle = leadStatus === 'primary' ? '#881337' : (leadStatus === 'secondary' ? '#713f12' : '#1e293b');
+      twelveCtx.textBaseline = 'top';
+      const maxTextW = cellW - 18;
+      const wrappedLines = wrapCanvasTextLines(twelveCtx, rawInterp, maxTextW, 2);
+
+      wrappedLines.forEach((ln, lIdx) => {
+        const ly = stripY + 4 + lIdx * 13.5;
+        if (isAr) {
+          twelveCtx.direction = 'rtl';
+          twelveCtx.textAlign = 'right';
+          twelveCtx.fillText(ln, x0 + cellW - 10, ly);
+        } else {
+          twelveCtx.direction = 'ltr';
+          twelveCtx.textAlign = 'left';
+          twelveCtx.fillText(ln, x0 + 10, ly);
+        }
+      });
+      twelveCtx.restore();
+    });
+  };
+
+  // ===========================================================================
+  // 8. STICKY MINI MONITOR SCROLL VISIBILITY RULE
+  // ===========================================================================
+  function updateStickyMiniBarScrollVisibility() {
+    const miniWrap = document.getElementById('sticky-mini-monitor-wrapper');
+    if (!miniWrap) return;
+    if (document.body.classList.contains('clinix-heart-fullscreen-mode')) {
+      miniWrap.classList.remove('v6-sticky-hidden-at-top');
+      miniWrap.classList.add('scrolled-past-main-ecg');
+      drawStickyMiniMonitorV7();
+      return;
+    }
+    const heartCard = document.getElementById('panel-2-heart-card');
+    const ecgCard = document.getElementById('panel-1-ecg-card');
+    if (!heartCard || !ecgCard) return;
+
+    const hRect = heartCard.getBoundingClientRect();
+    const eRect = ecgCard.getBoundingClientRect();
+    const bothOutOfView = (hRect.bottom < 90) && (eRect.bottom < 90);
+    miniWrap.classList.toggle('v6-sticky-hidden-at-top', !bothOutOfView);
+    miniWrap.classList.toggle('scrolled-past-main-ecg', bothOutOfView);
+    if (bothOutOfView) drawStickyMiniMonitorV7();
+  }
+
+  window.addEventListener('scroll', updateStickyMiniBarScrollVisibility, { passive: true });
+  window.addEventListener('resize', updateStickyMiniBarScrollVisibility, { passive: true });
+
+  // ===========================================================================
+  // 9. BILINGUAL LABELS SYNC + DEFAULT LANGUAGE = ENGLISH (`en`)
+  // ===========================================================================
+  function syncV7LocalizedText() {
+    const isAr = (typeof currentLang !== 'undefined' && currentLang === 'ar');
+    const lblEye = document.getElementById('v6-lbl-3d-eye');
+    const lblTags = document.getElementById('v6-lbl-3d-tags');
+    const lblZIn = document.getElementById('v6-lbl-zoom-in');
+    const lblZOut = document.getElementById('v6-lbl-zoom-out');
+    const lblZRes = document.getElementById('v6-lbl-zoom-reset');
+    const popLTitle = document.getElementById('v6-pop-layers-title');
+    const popNTitle = document.getElementById('v6-pop-labels-title');
+
+    if (lblEye) lblEye.textContent = isAr ? 'الطبقات (6)' : 'Layers (6)';
+    if (lblTags) lblTags.textContent = isAr ? 'الأسماء (6)' : 'Names (6)';
+    if (lblZIn) lblZIn.textContent = isAr ? 'تكبير' : 'Zoom In';
+    if (lblZOut) lblZOut.textContent = isAr ? 'تصغير' : 'Zoom Out';
+    if (lblZRes) lblZRes.textContent = isAr ? 'إعادة ضبط' : 'Reset';
+    if (popLTitle) {
+      popLTitle.textContent = isAr ? '👁️ طبقات المجسم ثلاثي الأبعاد (6)' : '👁️ 3D Heart Layers (6)';
+    }
+    if (popNTitle) {
+      popNTitle.textContent = isAr ? '🏷️ الأسماء التشريحية (6)' : '🏷️ Anatomical Names (6)';
+    }
+    // Translate the 3 coronary territory chips inside #v6-section-12lead
+    const sec12 = document.getElementById('v6-section-12lead');
+    if (sec12) {
+      const chipsAr = ['الأمامي والحاجز (LAD): V1-V4', 'السفلي (RCA): II, III, aVF', 'الجانبي (LCx): I, aVL, V5, V6'];
+      const chipsEn = ['Anterior & Septal (LAD): V1-V4', 'Inferior (RCA): II, III, aVF', 'Lateral (LCx): I, aVL, V5, V6'];
+      sec12.querySelectorAll('.hidden.sm\\:flex > span').forEach((sp, i) => {
+        if (chipsEn[i]) sp.textContent = isAr ? chipsAr[i] : chipsEn[i];
+      });
+    }
+    // Translate 3D label buttons inside #v6-popover-3d-labels
+    const chBtn = document.getElementById('ui-3d-label-chambers');
+    const vsBtn = document.getElementById('ui-3d-label-vessels');
+    const sbBtn = document.getElementById('ui-3d-label-subArteries');
+    const vnBtn = document.getElementById('ui-3d-label-veinsOnly');
+    const cnBtn = document.getElementById('ui-3d-label-conduction');
+    if (chBtn) chBtn.textContent = isAr ? 'حجرات القلب' : 'Heart Chambers';
+    if (vsBtn) vsBtn.textContent = isAr ? 'الشرايين الرئيسية' : 'Main Arteries';
+    if (sbBtn) sbBtn.textContent = isAr ? 'الفروع الشريانية' : 'Artery Branches';
+    if (vnBtn) vnBtn.textContent = isAr ? 'الأوردة' : 'Cardiac Veins';
+    if (cnBtn) cnBtn.textContent = isAr ? 'نظام التوصيل الكهربائي' : 'Electrical Conduction';
+
+    // Ensure Dynamic ECG Metrics & Vector Banner are refreshed in current language
+    if (typeof window.updateDynamicECGMetrics === 'function') window.updateDynamicECGMetrics();
+    if (typeof window.updateLeadVectorInspectorBanner === 'function') window.updateLeadVectorInspectorBanner();
+    syncV6DrawersUI();
+  }
+
+  const prevToggleLangV5 = window.toggleLanguage;
+  window.toggleLanguage = function () {
+    const res = prevToggleLangV5.apply(this, arguments);
+    syncV7LocalizedText();
+    window.renderScenarioButtons();
+    return res;
+  };
+
+  function initCliniXV8Perfected() {
+    buildV7TwoColumnLayout();
+    setupInModelFloatingControls();
+
+    window.toggleClinixTheme();
+    layers3D.studioBg = true;
+    const c3d = document.getElementById('heart3d-container');
+    if (c3d) c3d.classList.add('studio-light-bg');
+
+    if (typeof currentLang !== 'undefined' && currentLang !== 'en') {
+      window.toggleLanguage();
+    } else {
+      syncV7LocalizedText();
+      window.renderScenarioButtons();
+    }
+
+    updateStickyMiniBarScrollVisibility();
+
+    setTimeout(() => {
+      if (typeof resizeAllCanvases === 'function') resizeAllCanvases();
+      if (typeof drawAll2D === 'function') drawAll2D();
+      if (typeof renderThreeJSHeart === 'function') renderThreeJSHeart();
+      updateStickyMiniBarScrollVisibility();
+    }, 120);
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => setTimeout(initCliniXV8Perfected, 90), { once: true });
+  } else {
+    setTimeout(initCliniXV8Perfected, 90);
+  }
 })();
 </script>
 
